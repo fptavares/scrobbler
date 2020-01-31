@@ -3,6 +3,8 @@ import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'playlist.dart';
+
 class AlbumButton extends StatelessWidget {
   final CollectionAlbum album;
 
@@ -26,31 +28,19 @@ class AlbumButton extends StatelessWidget {
       child: Consumer<Playlist>(
         child: Image.network(album.thumbURL),
         builder: (context, playlist, image) {
-          final inPlaylistCount = playlist.getCountForAlbum(album);
+          final item = playlist.getPlaylistItem(album);
 
           return GestureDetector(
             onTap: () => playlist.addAlbum(album),
             child: Stack(
               children: [
                 image,
-                if (inPlaylistCount > 0)
+                if (item != null && item.count > 0)
                   Align(
                     alignment: Alignment(0.95, -0.95),
                     child: GestureDetector(
                       onTap: () => playlist.removeAlbum(album),
-                      child: ClipOval(
-                        child: Container(
-                          color: Theme.of(context).accentColor,//Color(0xFFCF5C36),
-                          height: 32.0, // height of the button
-                          width: 32.0, // width of the button
-                          child: Center(
-                            child: Text(
-                              inPlaylistCount.toString(),
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: PlaylistCountIndicator(item: item),
                     ),
                   ),
               ],

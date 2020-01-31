@@ -33,7 +33,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
     return Form(
       key: _formKey,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
         child: Consumer2<DiscogsSettings, LastfmSettings>(
           builder: (_, discogs, lastfm, __) => Column(
             children: <Widget>[
@@ -63,6 +63,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   }
                   return null;
                 },
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: 'Username',
                 ),

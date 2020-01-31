@@ -4,24 +4,28 @@ import 'package:flutter/foundation.dart';
 import 'discogs.dart';
 
 class Playlist with ChangeNotifier {
-  final Map<int, int> _countById = Map<int, int>();
+  final Map<int, PlaylistItem> _itemById = Map<int, PlaylistItem>();
   bool _isScrobbling = false;
 
-  int get numberOfItems => _countById.length;
+  int get numberOfItems => _itemById.length;
 
-  bool get isEmpty => _countById.isEmpty;
+  bool get isEmpty => _itemById.isEmpty;
 
   bool get isNotEmpty => !isEmpty;
 
   bool get isScrobbling => _isScrobbling;
 
-  List<int> getReleaseIds() {
-    return _countById.keys.toList();
+  List<PlaylistItem> getPlaylistItems() {
+    return _itemById.values.toList();
   }
 
-  Future<List<AlbumDetails>> getAlbums() async {
-    List<AlbumDetails> albums = await Future.wait<AlbumDetails>(_countById.keys.map(Collection.getAlbumDetails));
-    return albums.expand((album) => List.filled(_countById[album.releaseId], album)).toList();
+  List<int> getReleaseIds() {
+    return _itemById.keys.toList();
+  }
+
+  Future<List<AlbumDetails>> getAlbumsDetails() async {
+    List<AlbumDetails> albums = await Future.wait<AlbumDetails>(_itemById.keys.map(Collection.getAlbumDetails));
+    return albums.expand((album) => List.filled(_itemById[album.releaseId].count, album)).toList();
   }
 
   Stream<int> scrobble(Scrobbler scrobbler) async* {
@@ -31,10 +35,10 @@ class Playlist with ChangeNotifier {
     _isScrobbling = true;
     notifyListeners();
     try {
-      await for (var accepted in scrobbler.scrobbleAlbums(await getAlbums())) {
+      await for (var accepted in scrobbler.scrobbleAlbums(await getAlbumsDetails())) {
         yield accepted;
       }
-      _countById.clear();
+      clearAlbums();
     } finally {
       _isScrobbling = false;
       notifyListeners();
@@ -42,25 +46,34 @@ class Playlist with ChangeNotifier {
   }
 
   void addAlbum(CollectionAlbum album) {
-    _countById.update(
-        album.releaseId, (current) => current + 1, ifAbsent: () => 1);
+    _itemById.update(
+        album.releaseId, (current) => current..increase(), ifAbsent: () => PlaylistItem(album));
     notifyListeners();
-    //album.notifyListeners();
   }
 
   void removeAlbum(CollectionAlbum album) {
-    _countById.remove(album.releaseId);
+    _itemById.remove(album.releaseId);
     notifyListeners();
-    //album.notifyListeners();
   }
 
   void clearAlbums() {
-    _countById.clear();
+    _itemById.clear();
     notifyListeners();
-    //collection.notifyListeners();
   }
 
-  int getCountForAlbum(CollectionAlbum album) {
-    return _isScrobbling ? 0 : _countById[album.releaseId] ?? 0;
+  PlaylistItem getPlaylistItem(CollectionAlbum album) {
+    return _isScrobbling ? null : _itemById[album.releaseId];
   }
+}
+
+class PlaylistItem extends ValueNotifier<int> {
+  CollectionAlbum album;
+
+  PlaylistItem(this.album) : super(1);
+
+  int get count => value;
+
+  increase() { value++; }
+
+  decrease() { if (value > 0) value--; }
 }

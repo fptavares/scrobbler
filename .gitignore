@@ -40,3 +40,4 @@ lib/generated_plugin_registrant.dart
 /lib/secrets.dart
 /ios/
 /android/
+/gen/
