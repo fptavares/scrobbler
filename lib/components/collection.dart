@@ -23,7 +23,7 @@ class CollectionGrid extends StatelessWidget {
               ),
             );
           }
-          if (collection.isEmpty) {
+          if (collection.isEmpty && collection.isNotLoading) {
             return SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,

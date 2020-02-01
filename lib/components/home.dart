@@ -2,6 +2,7 @@ import 'package:drs_app/components/accounts.dart';
 import 'package:drs_app/components/scrobble.dart';
 import 'package:drs_app/model/discogs.dart';
 import 'package:drs_app/model/playlist.dart';
+import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -101,13 +102,22 @@ class HomeAppBar extends StatelessWidget {
                 : null,
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.search),
-          tooltip: 'Search',
-          onPressed: () => showSearch(context: context, delegate: AlbumSearch()),
+        Consumer<DiscogsSettings>(
+          builder: (context, settings, _) => IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: () => (settings.username != null)
+                ? openSearch(context)
+                : null,
+          ),
         ),
       ],
     );
+  }
+
+  Future<CollectionAlbum> openSearch(BuildContext context, ) {
+    Provider.of<Collection>(context, listen: false).loadAllAlbums();
+    showSearch(context: context, delegate: AlbumSearch());
   }
 }
 

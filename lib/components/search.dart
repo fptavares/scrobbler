@@ -32,7 +32,6 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
   @override
   Widget buildResults(BuildContext context) {
     final collection = Provider.of<Collection>(context);
-    final playlist = Provider.of<Playlist>(context);
 
     final List<CollectionAlbum> albums = collection.search(query);
 
@@ -44,30 +43,51 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
       );
     }
 
-    return ListView.builder(
-      itemCount: albums.length,
-      itemBuilder: (BuildContext context, int index) {
-        final album = albums[index];
-        final item = playlist.getPlaylistItem(album);
+    if (query.isNotEmpty && collection.isNotFullyLoaded) {
+      //collection.loadAllAlbums();
+    }
 
-        return ListTile(
-          key: ValueKey(album.id),
-          leading: Image.network(album.thumbURL),
-          title: Text(
-            album.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        ValueListenableProvider<bool>.value(
+          value: collection.loadingNotifier,
+          child: Consumer<bool>(
+            builder: (_, isLoading, __) =>
+                (isLoading) ? LinearProgressIndicator() : Container(),
           ),
-          subtitle: Text(album.artist),
-          trailing: (item != null && item.count > 0)
-              ? GestureDetector(
-                  onTap: () => playlist.removeAlbum(album),
-                  child: PlaylistCountIndicator(item: item),
-                )
-              : null,
-          onTap: () => playlist.addAlbum(album),
-        );
-      },
+        ),
+        Consumer<Playlist>(
+          builder: (_, playlist, __) => Flexible(
+            child: ListView.builder(
+              itemCount: albums.length,
+              itemBuilder: (BuildContext context, int index) {
+                final album = albums[index];
+                final item = playlist.getPlaylistItem(album);
+
+                return ListTile(
+                  key: ValueKey(album.id),
+                  leading: Image.network(album.thumbURL),
+                  title: Text(
+                    album.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(album.artist),
+                  trailing: (item != null && item.count > 0)
+                      ? GestureDetector(
+                          onTap: () => playlist.removeAlbum(album),
+                          child: PlaylistCountIndicator(item: item),
+                        )
+                      : null,
+                  onTap: () => playlist.addAlbum(album),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
