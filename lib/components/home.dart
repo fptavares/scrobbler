@@ -78,17 +78,18 @@ class HomeAppBar extends StatelessWidget {
           StretchMode.fadeTitle,
         ],
         centerTitle: true,
-        title: const Text('.record scrobbler.'),
-        background: Row(
+        title: const Text('Record Scrobbler'),
+        background: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const Spacer(),
             SvgPicture.asset(
               'assets/logo.svg',
               semanticsLabel: 'Logo',
               color: Theme.of(context).accentColor,
             ),
-            //Image(image: AssetImage('assets/logo_white.png')),
-            const Spacer(),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -106,16 +107,17 @@ class HomeAppBar extends StatelessWidget {
           builder: (context, settings, _) => IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Search',
-            onPressed: () => (settings.username != null)
-                ? openSearch(context)
-                : null,
+            onPressed: () =>
+                (settings.username != null) ? openSearch(context) : null,
           ),
         ),
       ],
     );
   }
 
-  Future<CollectionAlbum> openSearch(BuildContext context, ) {
+  Future<CollectionAlbum> openSearch(
+    BuildContext context,
+  ) {
     Provider.of<Collection>(context, listen: false).loadAllAlbums();
     showSearch(context: context, delegate: AlbumSearch());
   }
