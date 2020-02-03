@@ -1,3 +1,4 @@
+import 'package:drs_app/components/accounts.dart';
 import 'package:drs_app/components/home.dart';
 import 'package:drs_app/components/playlist.dart';
 import 'package:drs_app/model/discogs.dart';
@@ -8,8 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'components/onboarding.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(MyApp(await SharedPreferences.getInstance()));
 }
 
@@ -41,17 +45,30 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Record Scrobbler',
         theme: ThemeData(
-          primarySwatch: Colors.amber,//blueGrey,
+          primarySwatch: Colors.amber, //blueGrey,
           //brightness: Brightness.dark,
           primaryColor: const Color(0xFF312F2D),
           //accentColor: const Color(0xFFFFC66D),
           //buttonColor: Colors.white,
         ),
-        home: HomePage(),
-        routes: <String, WidgetBuilder> {
+        home: StartPage(),
+        routes: <String, WidgetBuilder>{
           '/playlist': (context) => PlaylistPage(),
         },
       ),
+    );
+  }
+}
+
+class StartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = Provider.of<DiscogsSettings>(context);
+
+    return Scaffold(
+      body: (settings.username != null || settings.skipped)
+          ? HomePage()
+          : OnboardingPage(),
     );
   }
 }

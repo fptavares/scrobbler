@@ -135,12 +135,7 @@ class HomeDrawer extends StatelessWidget {
           backgroundColor: Theme.of(context).primaryColor,
         ),
         backgroundColor: Colors.transparent,
-        body: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            AccountsForm(),
-          ],
-        ),
+        body: AccountsForm(),
       ),
     );
   }

@@ -30,101 +30,156 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
-    return Form(
-      key: _formKey,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
-        child: Consumer2<DiscogsSettings, LastfmSettings>(
-          builder: (_, discogs, lastfm, __) => Column(
+    return FullHeightForm(
+      formKey: _formKey,
+      child: Consumer2<DiscogsSettings, LastfmSettings>(
+        builder: (_, discogs, lastfm, __) => IntrinsicHeight(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               // Add TextFormFields and RaisedButton here.
-              Image(image: AssetImage('assets/discogs_logo.png')),
-              TextFormField(
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter your Discogs username';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: 'Username',
+              Expanded(
+                flex: 4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Image(image: AssetImage('assets/discogs_logo.png')),
+                    TextFormField(
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter your Discogs username';
+                        }
+                        return null;
+                      },
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                      ),
+                      initialValue: discogs.username,
+                      onSaved: (value) => _discogsUsername = value,
+                    ),
+                    SizedBox(height: 50),
+                  ],
                 ),
-                initialValue: discogs.username,
-                onSaved: (value) => _discogsUsername = value,
               ),
-              SizedBox(height: 50),
-              Image(image: AssetImage('assets/lastfm_logo.png')),
-              TextFormField(
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter your Last.fm username';
-                  }
-                  return null;
-                },
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Username',
+              Expanded(
+                flex: 4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Image(image: AssetImage('assets/lastfm_logo.png')),
+                    TextFormField(
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter your Last.fm username';
+                        }
+                        return null;
+                      },
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                      ),
+                      initialValue: lastfm.username,
+                      onSaved: (value) => _lastfmUsername = value,
+                    ),
+                    TextFormField(
+                      // The validator receives the text that the user has entered.
+                      obscureText: true,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter your Last.fm password';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                      ),
+                      initialValue: _lastfmPassword,
+                      onSaved: (value) => _lastfmPassword = value,
+                    ),
+                    if (_isSaving) LinearProgressIndicator(),
+                    SizedBox(height: 20),
+                  ],
                 ),
-                initialValue: lastfm.username,
-                onSaved: (value) => _lastfmUsername = value,
               ),
-              TextFormField(
-                // The validator receives the text that the user has entered.
-                obscureText: true,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter your Last.fm password';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: 'Password',
+              //if (!_isSaving)
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: FlatButton(
+                    color: Colors.amberAccent,
+                    child: Text(
+                      'Save accounts',
+                      /*style: Theme.of(context).textTheme.title*/
+                    ),
+                    onPressed: (_isSaving)
+                        ? null
+                        : () async {
+                            final form = _formKey.currentState;
+                            // Validate returns true if the form is valid, otherwise false.
+                            if (form.validate()) {
+                              setState(() => _isSaving = true);
+
+                              form.save();
+
+                              discogs.username = _discogsUsername;
+                              lastfm.username = _lastfmUsername;
+
+                              final scrobbler =
+                                  Provider.of<Scrobbler>(context, listen: false);
+
+                              try {
+                                final String sessionKey =
+                                    await scrobbler.initializeSession(
+                                        _lastfmUsername, _lastfmPassword);
+                                lastfm.sessionKey = sessionKey;
+
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Text('Saved new account information.')));
+                              } catch (e) {
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor: Colors.red,
+                                ));
+                              } finally {
+                                setState(() => _isSaving = false);
+                              }
+                            }
+                          },
+                  ),
                 ),
-                initialValue: _lastfmPassword,
-                onSaved: (value) => _lastfmPassword = value,
               ),
-              if (_isSaving)
-                LinearProgressIndicator(),
-              SizedBox(height: 20),
-              if (!_isSaving)
-                OutlineButton(
-                  onPressed: () async {
-                    final form = _formKey.currentState;
-                    // Validate returns true if the form is valid, otherwise false.
-                    if (form.validate()) {
-                      setState(() => _isSaving = true);
-
-                      form.save();
-
-                      discogs.username = _discogsUsername;
-                      lastfm.username = _lastfmUsername;
-
-                      final scrobbler =
-                          Provider.of<Scrobbler>(context, listen: false);
-
-                      try {
-                        final String sessionKey =
-                            await scrobbler.initializeSession(
-                                _lastfmUsername, _lastfmPassword);
-                        lastfm.sessionKey = sessionKey;
-
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                            content: Text('Saved new account information.')));
-                      } catch (e) {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text(e.toString()),
-                          backgroundColor: Colors.red,
-                        ));
-                      } finally {
-                        setState(() => _isSaving = false);
-                      }
-                    }
-                  },
-                  child: Text('Save'),
-                ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FullHeightForm extends StatelessWidget {
+  final Widget child;
+  final Key formKey;
+
+  const FullHeightForm({Key key, this.child, this.formKey}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: formKey,
+      child: Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: LayoutBuilder(
+          builder: (_, viewportConstraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: viewportConstraints.maxHeight,
+              ),
+              child: child,
+            ),
           ),
         ),
       ),

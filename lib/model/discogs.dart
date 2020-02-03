@@ -267,10 +267,10 @@ class Collection with ChangeNotifier {
   }
 
   List<CollectionAlbum> search(String query) {
-    final lowerCaseQuery = query.toLowerCase();
+    final queries = query.toLowerCase().split(RegExp(r"\s+"));
 
     return _albumList
-        .where((album) => album.searchString.contains(lowerCaseQuery))
+        .where((album) => queries.every((q) => album.searchString.contains(q)))
         .toList();
   }
 
