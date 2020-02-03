@@ -1,4 +1,3 @@
-import 'package:drs_app/components/accounts.dart';
 import 'package:drs_app/components/home.dart';
 import 'package:drs_app/components/playlist.dart';
 import 'package:drs_app/model/discogs.dart';

@@ -115,9 +115,7 @@ class HomeAppBar extends StatelessWidget {
     );
   }
 
-  Future<CollectionAlbum> openSearch(
-    BuildContext context,
-  ) {
+  void openSearch(BuildContext context) {
     Provider.of<Collection>(context, listen: false).loadAllAlbums();
     showSearch(context: context, delegate: AlbumSearch());
   }
