@@ -39,38 +39,43 @@ class PlaylistList extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = playlist.getPlaylistItems();
 
-    if (playlist.isEmpty) {
-      return EmptyState(
-        imagePath: 'assets/empty_playlist.png',
-        headline: 'The sound of silence',
-        subhead: 'There is nothing in your playlist at the moment',
-      );
-    }
-
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (BuildContext context, int index) {
-        final item = items[index];
-        return Dismissible(
-          key: ValueKey(item.album.releaseId),
-          direction: DismissDirection.endToStart,
-          onDismissed: (_) => playlist.removeAlbum(item.album),
-          background: Container(
-            color: Colors.red,
-            child: Icon(Icons.delete),
-          ),
-          child: ListTile(
-            leading: Image.network(item.album.thumbURL),
-            title: Text(item.album.title, maxLines: 2, overflow: TextOverflow.ellipsis,),
-            subtitle: Text(item.album.artist),
-            trailing: GestureDetector(
-              onTap: item.decrease,
-              child: PlaylistCountIndicator(item: item),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 100),
+      child: (playlist.isEmpty)
+          ? EmptyState(
+              imagePath: 'assets/empty_playlist.png',
+              headline: 'The sound of silence',
+              subhead: 'There is nothing in your playlist at the moment',
+            )
+          : ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                final item = items[index];
+                return Dismissible(
+                  key: ValueKey(item.album.releaseId),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) => playlist.removeAlbum(item.album),
+                  background: Container(
+                    color: Colors.red,
+                    child: Icon(Icons.delete),
+                  ),
+                  child: ListTile(
+                    leading: Image.network(item.album.thumbURL),
+                    title: Text(
+                      item.album.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(item.album.artist),
+                    trailing: GestureDetector(
+                      onTap: item.decrease,
+                      child: PlaylistCountIndicator(item: item),
+                    ),
+                    onTap: item.increase,
+                  ),
+                );
+              },
             ),
-            onTap: item.increase,
-          ),
-        );
-      },
     );
   }
 }

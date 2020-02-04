@@ -35,59 +35,58 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
 
     final List<CollectionAlbum> albums = collection.search(query);
 
-    if (albums.isEmpty) {
-      return EmptyState(
-        imagePath: 'assets/empty_search.png',
-        headline: 'Nothing here',
-        subhead: 'We couldn\'t find any matches',
-      );
-    }
-
-    if (query.isNotEmpty && collection.isNotFullyLoaded) {
-      //collection.loadAllAlbums();
-    }
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        ValueListenableProvider<bool>.value(
-          value: collection.loadingNotifier,
-          child: Consumer<bool>(
-            builder: (_, isLoading, __) =>
-                (isLoading) ? LinearProgressIndicator() : Container(),
-          ),
-        ),
-        Consumer<Playlist>(
-          builder: (_, playlist, __) => Flexible(
-            child: ListView.builder(
-              itemCount: albums.length,
-              itemBuilder: (BuildContext context, int index) {
-                final album = albums[index];
-                final item = playlist.getPlaylistItem(album);
-
-                return ListTile(
-                  key: ValueKey(album.id),
-                  leading: Image.network(album.thumbURL),
-                  title: Text(
-                    album.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 50),
+      child: (albums.isEmpty)
+          ? EmptyState(
+              key: ValueKey(1),
+              imagePath: 'assets/empty_search.png',
+              headline: 'Nothing here',
+              subhead: 'We couldn\'t find any matches',
+            )
+          : Column(
+              key: ValueKey(2),
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ValueListenableProvider<bool>.value(
+                  value: collection.loadingNotifier,
+                  child: Consumer<bool>(
+                    builder: (_, isLoading, __) =>
+                        (isLoading) ? LinearProgressIndicator() : Container(),
                   ),
-                  subtitle: Text(album.artist),
-                  trailing: (item != null && item.count > 0)
-                      ? GestureDetector(
-                          onTap: () => playlist.removeAlbum(album),
-                          child: PlaylistCountIndicator(item: item),
-                        )
-                      : null,
-                  onTap: () => playlist.addAlbum(album),
-                );
-              },
+                ),
+                Consumer<Playlist>(
+                  builder: (_, playlist, __) => Flexible(
+                    child: ListView.builder(
+                      itemCount: albums.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final album = albums[index];
+                        final item = playlist.getPlaylistItem(album);
+
+                        return ListTile(
+                          key: ValueKey(album.id),
+                          leading: Image.network(album.thumbURL),
+                          title: Text(
+                            album.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(album.artist),
+                          trailing: (item != null && item.count > 0)
+                              ? GestureDetector(
+                                  onTap: () => playlist.removeAlbum(album),
+                                  child: PlaylistCountIndicator(item: item),
+                                )
+                              : null,
+                          onTap: () => playlist.addAlbum(album),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-      ],
     );
   }
 
