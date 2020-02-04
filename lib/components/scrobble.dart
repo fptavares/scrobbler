@@ -1,3 +1,4 @@
+import 'package:drs_app/model/discogs.dart';
 import 'package:drs_app/model/lastfm.dart';
 import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     Scrobbler scrobbler = Provider.of<Scrobbler>(context);
     Playlist playlist = Provider.of<Playlist>(context);
+    Collection collection = Provider.of<Collection>(context);
 
     if (playlist.isEmpty) {
       return Container();
@@ -22,7 +24,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
           ? null
           : () async {
         try {
-          await for (var accepted in playlist.scrobble(scrobbler)) {
+          await for (var accepted in playlist.scrobble(scrobbler, collection)) {
             Scaffold.of(context).showSnackBar(SnackBar(
               content: Text('Scrobbled $accepted tracks successfuly.'),
               backgroundColor: Colors.green,

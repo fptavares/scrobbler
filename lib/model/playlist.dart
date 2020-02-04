@@ -23,19 +23,26 @@ class Playlist with ChangeNotifier {
     return _itemById.keys.toList();
   }
 
-  Future<List<AlbumDetails>> getAlbumsDetails() async {
-    List<AlbumDetails> albums = await Future.wait<AlbumDetails>(_itemById.keys.map(Collection.getAlbumDetails));
-    return albums.expand((album) => List.filled(_itemById[album.releaseId].count, album)).toList();
+  Future<List<AlbumDetails>> _getAlbumsDetails(Collection collection) async {
+    List<AlbumDetails> albums = await Future.wait<AlbumDetails>(
+        _itemById.keys.map(collection.getAlbumDetails));
+    return albums
+        .expand((album) => List.filled(_itemById[album.releaseId].count, album))
+        .toList();
   }
 
-  Stream<int> scrobble(Scrobbler scrobbler) async* {
+  Stream<int> scrobble(Scrobbler scrobbler, Collection collection) async* {
+    if (scrobbler.isNotAuthenticated) {
+      throw 'Oops! You need to login to Last.fm first with your username and password.';
+    }
     if (_isScrobbling) {
       throw 'Cannot scrobble again until the previous request is complete.';
     }
     _isScrobbling = true;
     notifyListeners();
     try {
-      await for (var accepted in scrobbler.scrobbleAlbums(await getAlbumsDetails())) {
+      await for (var accepted
+          in scrobbler.scrobbleAlbums(await _getAlbumsDetails(collection))) {
         yield accepted;
       }
       clearAlbums();
@@ -46,8 +53,8 @@ class Playlist with ChangeNotifier {
   }
 
   void addAlbum(CollectionAlbum album) {
-    _itemById.update(
-        album.releaseId, (current) => current..increase(), ifAbsent: () => PlaylistItem(album));
+    _itemById.update(album.releaseId, (current) => current..increase(),
+        ifAbsent: () => PlaylistItem(album));
     notifyListeners();
   }
 
@@ -73,7 +80,11 @@ class PlaylistItem extends ValueNotifier<int> {
 
   int get count => value;
 
-  increase() { value++; }
+  increase() {
+    value++;
+  }
 
-  decrease() { if (value > 0) value--; }
+  decrease() {
+    if (value > 0) value--;
+  }
 }
