@@ -112,6 +112,10 @@ class Collection with ChangeNotifier {
   int _totalItems;
   int _totalPages;
 
+  final String userAgent;
+
+  Collection(this.userAgent);
+
   Loading get loadingNotifier => _loading;
 
   bool get isLoading => _loading.value;
@@ -121,6 +125,8 @@ class Collection with ChangeNotifier {
   bool get _isLoading => _loading.value;
 
   bool get isEmpty => _albumList.isEmpty;
+
+  bool get isNotEmpty => !isEmpty;
 
   bool get isUserEmpty => _username == null;
 
@@ -135,6 +141,11 @@ class Collection with ChangeNotifier {
   int get totalPages => _totalPages;
 
   List<CollectionAlbum> get albums => _albumList;
+
+  Map<String, String> get _headers => {
+    'Authorization': 'Discogs key=$_consumerKey, secret=$_consumerSecret',
+    'User-Agent': userAgent,
+  };
 
   void _clearAlbums() {
     _albumList.clear();
@@ -190,7 +201,8 @@ class Collection with ChangeNotifier {
       return;
     }
     if (_username == null) {
-      throw ('Cannot load albums because the username is empty.');
+      print('Cannot load albums because the username is empty.');
+      return;
     }
 
     _isLoading = true;
@@ -262,7 +274,7 @@ class Collection with ChangeNotifier {
           .toList();
     } else {
       // If that response was not OK, throw an error.
-      throw Exception('Failed to load collection (${response.statusCode})!');
+      throw 'The Discogs service is currently offline (${response.statusCode}). Please try again later.';
     }
   }
 
@@ -274,7 +286,7 @@ class Collection with ChangeNotifier {
         .toList();
   }
 
-  static Future<AlbumDetails> getAlbumDetails(int releaseId) async {
+  Future<AlbumDetails> getAlbumDetails(int releaseId) async {
     try {
       http.Response response = await http.get(
         'https://api.discogs.com/releases/$releaseId',
@@ -299,9 +311,6 @@ class Collection with ChangeNotifier {
   static const int pageSize = 50;
   static const String _consumerKey = DISCOGS_consumerKey;
   static const String _consumerSecret = DISCOGS_consumerSecret;
-  static const Map<String, String> _headers = {
-    'Authorization': 'Discogs key=$_consumerKey, secret=$_consumerSecret'
-  };
 }
 
 class Loading extends ValueNotifier<bool> {

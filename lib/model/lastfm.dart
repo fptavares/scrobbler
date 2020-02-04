@@ -10,6 +10,12 @@ import 'package:crypto/crypto.dart';
 class Scrobbler {
   String _sessionKey;
 
+  final String userAgent;
+
+  Scrobbler(this.userAgent);
+
+  bool get isNotAuthenticated => (_sessionKey == null);
+
   set sessionKey(String value) {
     _sessionKey = value;
     print('Updated session key to: $value');
@@ -49,14 +55,18 @@ class Scrobbler {
   }
 
   Stream<int> scrobbleAlbums(List<AlbumDetails> albums) async* {
-    ScrobbleQueue queue = createScrobbleQueue(albums);
+    if (_sessionKey == null) {
+      throw 'Oops! You need to login to Last.fm first with your username and password.';
+    }
+
+    ScrobbleQueue queue = _createScrobbleQueue(albums);
     for (var scrobbles in queue.batches) {
       yield await _postScrobbles(scrobbles);
     }
     //return accepted.reduce((v, e) => v + e);
   }
 
-  ScrobbleQueue createScrobbleQueue(List<AlbumDetails> albums) {
+  ScrobbleQueue _createScrobbleQueue(List<AlbumDetails> albums) {
     ScrobbleQueue queue = ScrobbleQueue();
 
     albums.reversed.forEach((album) {
@@ -113,20 +123,21 @@ class Scrobbler {
     }
   }
 
-  static const String _apiKey = LASTFM_apiKey;
-  static const String _sharedSecret = LASTFM_sharedSecret;
-
-  static Future<http.Response> _postRequest(Map<String, String> params) async {
+  Future<http.Response> _postRequest(Map<String, String> params) async {
     http.Response response = await http.post(
-      'https://ws.audioscrobbler.com/2.0/',
-      body: {
-        ...params,
-        'api_sig': _createAPISignature(params),
-        'format': 'json',
-      },
+        'https://ws.audioscrobbler.com/2.0/',
+        body: {
+          ...params,
+          'api_sig': _createAPISignature(params),
+          'format': 'json',
+        },
+        headers: { 'User-Agent': userAgent }
     );
     return response;
   }
+
+  static const String _apiKey = LASTFM_apiKey;
+  static const String _sharedSecret = LASTFM_sharedSecret;
 
   static String _createAPISignature(Map<String, String> params) {
     String sortedParams = '';

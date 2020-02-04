@@ -5,6 +5,7 @@ import 'package:drs_app/model/lastfm.dart';
 import 'package:drs_app/model/playlist.dart';
 import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,13 +14,23 @@ import 'components/onboarding.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MyApp(await SharedPreferences.getInstance()));
+  String userAgent = 'RecordScrobbler';
+  try {
+    userAgent = await FlutterUserAgent.getPropertyAsync('userAgent');
+    print('Set user agent to: $userAgent');
+  } catch(e, stacktrace) {
+    print('Failed to get User Agent: $e');
+    print(stacktrace);
+  }
+
+  runApp(MyApp(await SharedPreferences.getInstance(), userAgent));
 }
 
 class MyApp extends StatelessWidget {
   final SharedPreferences prefs;
+  final String userAgent;
 
-  MyApp(this.prefs);
+  MyApp(this.prefs, this.userAgent);
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +39,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DiscogsSettings(prefs)),
         ChangeNotifierProvider(create: (_) => LastfmSettings(prefs)),
         ChangeNotifierProxyProvider<DiscogsSettings, Collection>(
-          create: (_) => Collection(),
+          create: (_) => Collection(userAgent),
           update: (_, settings, collection) =>
               collection..updateUsername(settings.username),
         ),
         ProxyProvider<LastfmSettings, Scrobbler>(
           lazy: false,
-          create: (_) => Scrobbler(),
+          create: (_) => Scrobbler(userAgent),
           update: (_, settings, scrobbler) =>
               scrobbler..sessionKey = settings.sessionKey,
         ),
