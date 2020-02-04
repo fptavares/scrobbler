@@ -15,9 +15,11 @@ class DiscogsSettings with ChangeNotifier {
     notifyListeners();
   }
 
-  set username(value) {
-    prefs.setString(_discogsUsernameKey, value);
-    notifyListeners();
+  set username(newUsername) {
+    if (newUsername != username) {
+      prefs.setString(_discogsUsernameKey, newUsername);
+      notifyListeners();
+    }
   }
 
   static const String _skippedKey = 'skipped';
@@ -33,9 +35,15 @@ class LastfmSettings with ChangeNotifier {
 
   LastfmSettings(this.prefs);
 
-  set username(value) {
-    prefs.setString(_lastfmUsernameKey, value);
-    notifyListeners();
+  /// Setting a new username also clears the current session key,
+  /// so a new session key must only be assigned
+  /// after assigning the new username.
+  set username(newUsername) {
+    if (newUsername != username) {
+      prefs.setString(_lastfmUsernameKey, newUsername);
+      prefs.remove(_sessionKeyKey);
+      notifyListeners();
+    }
   }
 
   set sessionKey(value) {
