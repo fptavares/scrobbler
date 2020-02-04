@@ -76,9 +76,12 @@ class StartPage extends StatelessWidget {
     final settings = Provider.of<DiscogsSettings>(context);
 
     return Scaffold(
-      body: (settings.username != null || settings.skipped)
-          ? HomePage()
-          : OnboardingPage(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 1000),
+        child: (settings.username != null || settings.skipped)
+            ? HomePage()
+            : OnboardingPage(),
+      ),
     );
   }
 }
