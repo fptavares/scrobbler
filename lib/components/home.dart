@@ -2,7 +2,6 @@ import 'package:drs_app/components/accounts.dart';
 import 'package:drs_app/components/scrobble.dart';
 import 'package:drs_app/model/discogs.dart';
 import 'package:drs_app/model/playlist.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -47,7 +46,13 @@ class HomePage extends StatelessWidget {
                       builder: (context, isLoading, _) => Container(
                         height: 160,
                         child: (isLoading)
-                            ? Center(child: CircularProgressIndicator())
+                            ? Center(
+                                child: SizedBox(
+                                  height: 60,
+                                  width: 60,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
                             : Container(),
                       ),
                     ),
@@ -103,21 +108,20 @@ class HomeAppBar extends StatelessWidget {
                 : null,
           ),
         ),
-        Consumer<DiscogsSettings>(
-          builder: (context, settings, _) => IconButton(
+        Consumer<Collection>(
+          builder: (context, collection, _) => IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Search',
-            onPressed: () =>
-                (settings.username != null) ? openSearch(context) : null,
+            onPressed: (collection.isNotEmpty)
+                ? () {
+                    collection.loadAllAlbums();
+                    showSearch(context: context, delegate: AlbumSearch());
+                  }
+                : null,
           ),
         ),
       ],
     );
-  }
-
-  void openSearch(BuildContext context) {
-    Provider.of<Collection>(context, listen: false).loadAllAlbums();
-    showSearch(context: context, delegate: AlbumSearch());
   }
 }
 
