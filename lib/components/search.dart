@@ -1,15 +1,15 @@
-import 'package:drs_app/components/emtpy.dart';
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../model/discogs.dart';
+import '../model/playlist.dart';
+import 'emtpy.dart';
 import 'playlist.dart';
 
 class AlbumSearch extends SearchDelegate<CollectionAlbum> {
   @override
   List<Widget> buildActions(BuildContext context) {
-    return [
+    return <Widget>[
       IconButton(
         icon: Icon(Icons.clear),
         onPressed: () {
@@ -33,39 +33,40 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
   Widget buildResults(BuildContext context) {
     final collection = Provider.of<Collection>(context);
 
-    final List<CollectionAlbum> albums = collection.search(query);
+    final albums = collection.search(query);
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 50),
       child: (albums.isEmpty)
-          ? EmptyState(
-              key: ValueKey(1),
+          ? const EmptyState(
+              key: ValueKey<int>(1),
               imagePath: 'assets/empty_search.png',
               headline: 'Nothing here',
               subhead: 'We couldn\'t find any matches',
             )
           : Column(
-              key: ValueKey(2),
+              key: const ValueKey<int>(2),
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ValueListenableProvider<bool>.value(
                   value: collection.loadingNotifier,
                   child: Consumer<bool>(
-                    builder: (_, isLoading, __) =>
-                        (isLoading) ? LinearProgressIndicator() : Container(),
+                    builder: (_, isLoading, __) => isLoading
+                        ? const LinearProgressIndicator()
+                        : Container(),
                   ),
                 ),
                 Consumer<Playlist>(
                   builder: (_, playlist, __) => Flexible(
                     child: ListView.builder(
                       itemCount: albums.length,
-                      itemBuilder: (BuildContext context, int index) {
+                      itemBuilder: (context, index) {
                         final album = albums[index];
                         final item = playlist.getPlaylistItem(album);
 
                         return ListTile(
-                          key: ValueKey(album.id),
+                          key: ValueKey<int>(album.id),
                           leading: Image.network(album.thumbURL),
                           title: Text(
                             album.title,

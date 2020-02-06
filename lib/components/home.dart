@@ -1,16 +1,20 @@
-import 'package:drs_app/components/accounts.dart';
-import 'package:drs_app/components/scrobble.dart';
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../model/discogs.dart';
+import '../model/playlist.dart';
+import 'accounts.dart';
 import 'collection.dart';
+import 'error.dart';
+import 'scrobble.dart';
 import 'search.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({Key key}) : super(key: key);
+
+  final Logger log = Logger('HomePage');
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +23,11 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       drawer: const HomeDrawer(),
       body: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
+        onNotification: (scrollInfo) {
           if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
             if (collection.isNotLoading) {
-              collection.loadMoreAlbums();
+              handleFutureError(collection.loadMoreAlbums(), context, log,
+                  error: 'Failed to load collection!');
             }
           }
           return true;
@@ -31,8 +36,14 @@ class HomePage extends StatelessWidget {
           value: collection.loadingNotifier,
           child: Center(
             child: RefreshIndicator(
-              onRefresh: () =>
-                  (collection.isNotLoading) ? collection.reload() : null,
+              onRefresh: () {
+                if (collection.isLoading) {
+                  return null;
+                }
+
+                return handleFutureError(collection.reload(), context, log,
+                    error: 'Failed to reload collection!');
+              },
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 //AlwaysScrollableScrollPhysics
@@ -43,10 +54,10 @@ class HomePage extends StatelessWidget {
                     hasScrollBody: false,
                     fillOverscroll: true,
                     child: Consumer<bool>(
-                      builder: (context, isLoading, _) => Container(
+                      builder: (_, isLoading, __) => Container(
                         height: 160,
-                        child: (isLoading)
-                            ? Center(
+                        child: isLoading
+                            ? const Center(
                                 child: SizedBox(
                                   height: 60,
                                   width: 60,
@@ -69,6 +80,8 @@ class HomePage extends StatelessWidget {
 }
 
 class HomeAppBar extends StatelessWidget {
+  final Logger log = Logger('HomeAppBar');
+
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
@@ -77,7 +90,7 @@ class HomeAppBar extends StatelessWidget {
       forceElevated: true,
       expandedHeight: 150.0,
       flexibleSpace: FlexibleSpaceBar(
-        stretchModes: <StretchMode>[
+        stretchModes: const <StretchMode>[
           StretchMode.zoomBackground,
           //StretchMode.blurBackground,
           StretchMode.fadeTitle,
@@ -94,7 +107,7 @@ class HomeAppBar extends StatelessWidget {
               semanticsLabel: 'Logo',
               color: Theme.of(context).accentColor,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -114,7 +127,8 @@ class HomeAppBar extends StatelessWidget {
             tooltip: 'Search',
             onPressed: (collection.isNotEmpty)
                 ? () {
-                    collection.loadAllAlbums();
+                    handleFutureError(collection.loadAllAlbums(), context, log,
+                        error: 'Failed to load the full collection!');
                     showSearch(context: context, delegate: AlbumSearch());
                   }
                 : null,
@@ -133,7 +147,7 @@ class HomeDrawer extends StatelessWidget {
     return Drawer(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Account Settings'),
+          title: const Text('Account Settings'),
           backgroundColor: Theme.of(context).primaryColor,
         ),
         backgroundColor: Colors.transparent,

@@ -1,50 +1,50 @@
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/lastfm.dart';
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
+import '../model/discogs.dart';
+import '../model/lastfm.dart';
+import '../model/playlist.dart';
+import 'error.dart';
+
 class ScrobbleFloatingButton extends StatelessWidget {
-  const ScrobbleFloatingButton({
+  ScrobbleFloatingButton({
     Key key,
   }) : super(key: key);
 
+  final Logger log = Logger('ScrobbleFloatingButton');
+
   @override
   Widget build(BuildContext context) {
-    Scrobbler scrobbler = Provider.of<Scrobbler>(context);
-    Playlist playlist = Provider.of<Playlist>(context);
-    Collection collection = Provider.of<Collection>(context);
+    final playlist = Provider.of<Playlist>(context);
 
     if (playlist.isEmpty) {
       return Container();
     }
 
     return FloatingActionButton(
-      onPressed: (playlist.isScrobbling)
+      onPressed: playlist.isScrobbling
           ? null
-          : () async {
-        try {
-          await for (var accepted in playlist.scrobble(scrobbler, collection)) {
-            Scaffold.of(context).showSnackBar(SnackBar(
-              content: Text('Scrobbled $accepted tracks successfuly.'),
-              backgroundColor: Colors.green,
-            ));
-          }
-        } catch (e, stacktrace) {
-          print('Failed to scrobble to Last.fm: $e');
-          print(stacktrace);
-          Scaffold.of(context).showSnackBar(SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ));
-        }
-      },
+          : () => handleScrobble(context, playlist),
       tooltip: 'Scrobble',
       backgroundColor:
       (playlist.isScrobbling) ? Theme.of(context).primaryColor : null,
-      child: (playlist.isScrobbling)
-          ? CircularProgressIndicator()
+      child: playlist.isScrobbling
+          ? const CircularProgressIndicator()
           : Icon(Icons.play_arrow),
     );
+  }
+
+  Future<void> handleScrobble(BuildContext context, Playlist playlist) async {
+    final scrobbler = Provider.of<Scrobbler>(context, listen: false);
+    final collection = Provider.of<Collection>(context, listen: false);
+
+    try {
+      await for (int accepted in playlist.scrobble(scrobbler, collection)) {
+        displaySuccess(context, 'Scrobbled $accepted tracks successfuly.');
+      }
+    } on Exception catch (e, stackTrace) {
+      displayAndLogError(context, log, e, stackTrace);
+    }
   }
 }

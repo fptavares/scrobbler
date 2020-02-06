@@ -1,43 +1,53 @@
-import 'package:drs_app/components/home.dart';
-import 'package:drs_app/components/playlist.dart';
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/lastfm.dart';
-import 'package:drs_app/model/playlist.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_user_agent/flutter_user_agent.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'components/home.dart';
 import 'components/onboarding.dart';
+import 'components/playlist.dart';
+import 'model/discogs.dart';
+import 'model/lastfm.dart';
+import 'model/playlist.dart';
+import 'model/settings.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  String userAgent = 'RecordScrobbler';
+  Logger.root.level = Level.ALL; // defaults to Level.INFO
+  Logger.root.onRecord.listen((record) {
+    // ignore: avoid_print
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+
+  var userAgent = 'RecordScrobbler';
   try {
-    userAgent = await FlutterUserAgent.getPropertyAsync('userAgent');
-    print('Set user agent to: $userAgent');
-  } catch(e, stacktrace) {
-    print('Failed to get User Agent: $e');
-    print(stacktrace);
+    userAgent = await FlutterUserAgent.getPropertyAsync('userAgent') as String;
+    Logger.root.info('Set user agent to: $userAgent');
+  } on Exception catch (e, stacktrace) {
+    Logger.root.warning('Failed to get User Agent', e, stacktrace);
   }
 
   runApp(MyApp(await SharedPreferences.getInstance(), userAgent));
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp(this.prefs, this.userAgent);
+
   final SharedPreferences prefs;
   final String userAgent;
-
-  MyApp(this.prefs, this.userAgent);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => DiscogsSettings(prefs)),
-        ChangeNotifierProvider(create: (_) => LastfmSettings(prefs)),
+        ChangeNotifierProvider<DiscogsSettings>(
+          create: (_) => DiscogsSettings(prefs),
+        ),
+        ChangeNotifierProvider<LastfmSettings>(
+          create: (_) => LastfmSettings(prefs),
+        ),
         ChangeNotifierProxyProvider<DiscogsSettings, Collection>(
           create: (_) => Collection(userAgent),
           update: (_, settings, collection) =>
@@ -47,9 +57,9 @@ class MyApp extends StatelessWidget {
           lazy: false,
           create: (_) => Scrobbler(userAgent),
           update: (_, settings, scrobbler) =>
-              scrobbler..sessionKey = settings.sessionKey,
+              scrobbler..updateSessionKey(settings.sessionKey),
         ),
-        ChangeNotifierProvider(create: (_) => Playlist()),
+        ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
         //ChangeNotifierProvider(create: (_) => Scrobbler()),
       ],
       child: MaterialApp(
@@ -63,7 +73,7 @@ class MyApp extends StatelessWidget {
         ),
         home: StartPage(),
         routes: <String, WidgetBuilder>{
-          '/playlist': (context) => PlaylistPage(),
+          '/playlist': (_) => PlaylistPage(),
         },
       ),
     );

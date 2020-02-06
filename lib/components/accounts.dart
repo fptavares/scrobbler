@@ -1,8 +1,10 @@
-// Define a custom Form widget.
-import 'package:drs_app/model/lastfm.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+
+import '../model/lastfm.dart';
+import '../model/settings.dart';
+import 'error.dart';
 
 class AccountsForm extends StatefulWidget {
   @override
@@ -12,7 +14,9 @@ class AccountsForm extends StatefulWidget {
 }
 
 class AccountsMyCustomFormState extends State<AccountsForm> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final Logger log = Logger('AccountsForm');
 
   String _discogsUsername;
   String _lastfmUsername;
@@ -20,7 +24,8 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
 
   bool _isSaving = false;
 
-  final _lastfmUsernameController = TextEditingController();
+  final TextEditingController _lastfmUsernameController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -48,22 +53,19 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      Image(image: AssetImage('assets/discogs_logo.png')),
+                      const Image(image: AssetImage('assets/discogs_logo.png')),
                       TextFormField(
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Please enter your Discogs username';
-                          }
-                          return null;
-                        },
+                        validator: (value) => value.isEmpty
+                            ? 'Please enter your Discogs username'
+                            : null,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Username',
                         ),
                         initialValue: discogs.username,
                         onSaved: (value) => _discogsUsername = value,
                       ),
-                      SizedBox(height: 50),
+                      const SizedBox(height: 50),
                     ],
                   ),
                 ),
@@ -72,39 +74,31 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Image(image: AssetImage('assets/lastfm_logo.png')),
+                      const Image(image: AssetImage('assets/lastfm_logo.png')),
                       TextFormField(
                         controller: _lastfmUsernameController,
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Please enter your Last.fm username';
-                          }
-                          return null;
-                        },
+                        validator: (value) => value.isEmpty
+                            ? 'Please enter your Last.fm username'
+                            : null,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Username',
-                        ),
+                        decoration:
+                            const InputDecoration(labelText: 'Username'),
                         onSaved: (value) => _lastfmUsername = value,
                       ),
                       TextFormField(
                         obscureText: true,
-                        validator: (value) {
-                          if (value.isEmpty &&
-                              _lastfmUsernameController.text !=
-                                  lastfm.username) {
-                            return 'Please enter your Last.fm password';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                        ),
+                        validator: (value) => (value.isEmpty &&
+                                _lastfmUsernameController.text !=
+                                    lastfm.username)
+                            ? 'Please enter your Last.fm password'
+                            : null,
+                        decoration:
+                            const InputDecoration(labelText: 'Password'),
                         initialValue: _lastfmPassword,
                         onSaved: (value) => _lastfmPassword = value,
                       ),
-                      if (_isSaving) LinearProgressIndicator(),
-                      SizedBox(height: 20),
+                      if (_isSaving) const LinearProgressIndicator(),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -113,45 +107,9 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   child: Center(
                     child: FlatButton(
                       color: Colors.amberAccent,
-                      child: Text('Save accounts'),
-                      onPressed: (_isSaving)
-                          ? null
-                          : () async {
-                              final form = _formKey.currentState;
-                              // Validate returns true if the form is valid, otherwise false.
-                              if (form.validate()) {
-                                setState(() => _isSaving = true);
-
-                                form.save();
-
-                                discogs.username = _discogsUsername;
-                                lastfm.username = _lastfmUsername;
-
-                                final scrobbler = Provider.of<Scrobbler>(
-                                    context,
-                                    listen: false);
-
-                                try {
-                                  if (_lastfmPassword?.isNotEmpty ?? false) {
-                                    final String sessionKey =
-                                        await scrobbler.initializeSession(
-                                            _lastfmUsername, _lastfmPassword);
-                                    lastfm.sessionKey = sessionKey;
-                                  }
-
-                                  Scaffold.of(context).showSnackBar(SnackBar(
-                                      content: Text(
-                                          'Saved new account information.')));
-                                } catch (e) {
-                                  Scaffold.of(context).showSnackBar(SnackBar(
-                                    content: Text(e.toString()),
-                                    backgroundColor: Colors.red,
-                                  ));
-                                } finally {
-                                  setState(() => _isSaving = false);
-                                }
-                              }
-                            },
+                      child: const Text('Save accounts'),
+                      onPressed:
+                          _isSaving ? null : () => handleSave(discogs, lastfm),
                     ),
                   ),
                 ),
@@ -162,13 +120,43 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
       ),
     );
   }
+
+  Future<void> handleSave(
+      DiscogsSettings discogs, LastfmSettings lastfm) async {
+    final form = _formKey.currentState;
+    // Validate returns true if the form is valid, otherwise false.
+    if (form.validate()) {
+      setState(() => _isSaving = true);
+
+      form.save();
+
+      discogs.username = _discogsUsername;
+      lastfm.username = _lastfmUsername;
+
+      final scrobbler = Provider.of<Scrobbler>(context, listen: false);
+
+      try {
+        if (_lastfmPassword?.isNotEmpty ?? false) {
+          final sessionKey = await scrobbler.initializeSession(
+              _lastfmUsername, _lastfmPassword);
+          lastfm.sessionKey = sessionKey;
+        }
+
+        displaySuccess(context, 'Saved new account information.');
+      } on Exception catch (e, stackTrace) {
+        displayAndLogError(context, log, e, stackTrace);
+      } finally {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
 }
 
 class FullHeightForm extends StatelessWidget {
+  const FullHeightForm({Key key, this.child, this.formKey}) : super(key: key);
+
   final Widget child;
   final Key formKey;
-
-  const FullHeightForm({Key key, this.child, this.formKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

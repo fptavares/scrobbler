@@ -1,10 +1,11 @@
-import 'package:drs_app/model/lastfm.dart';
 import 'package:flutter/foundation.dart';
 
+import '../components/error.dart';
 import 'discogs.dart';
+import 'lastfm.dart';
 
-class Playlist with ChangeNotifier {
-  final Map<int, PlaylistItem> _itemById = Map<int, PlaylistItem>();
+class Playlist extends ChangeNotifier {
+  final Map<int, PlaylistItem> _itemById = <int, PlaylistItem>{};
   bool _isScrobbling = false;
 
   int get numberOfItems => _itemById.length;
@@ -24,24 +25,27 @@ class Playlist with ChangeNotifier {
   }
 
   Future<List<AlbumDetails>> _getAlbumsDetails(Collection collection) async {
-    List<AlbumDetails> albums = await Future.wait<AlbumDetails>(
+    final albums = await Future.wait<AlbumDetails>(
         _itemById.keys.map(collection.getAlbumDetails));
     return albums
-        .expand((album) => List.filled(_itemById[album.releaseId].count, album))
+        .expand((album) =>
+            List<AlbumDetails>.filled(_itemById[album.releaseId].count, album))
         .toList();
   }
 
   Stream<int> scrobble(Scrobbler scrobbler, Collection collection) async* {
     if (scrobbler.isNotAuthenticated) {
-      throw 'Oops! You need to login to Last.fm first with your username and password.';
+      throw UIException(
+          'Oops! You need to login to Last.fm first with your username and password.');
     }
     if (_isScrobbling) {
-      throw 'Cannot scrobble again until the previous request is complete.';
+      throw UIException(
+          'Cannot scrobble again until the previous request is complete.');
     }
     _isScrobbling = true;
     notifyListeners();
     try {
-      await for (var accepted
+      await for (final int accepted
           in scrobbler.scrobbleAlbums(await _getAlbumsDetails(collection))) {
         yield accepted;
       }
@@ -74,17 +78,19 @@ class Playlist with ChangeNotifier {
 }
 
 class PlaylistItem extends ValueNotifier<int> {
-  CollectionAlbum album;
-
   PlaylistItem(this.album) : super(1);
+
+  CollectionAlbum album;
 
   int get count => value;
 
-  increase() {
+  void increase() {
     value++;
   }
 
-  decrease() {
-    if (value > 0) value--;
+  void decrease() {
+    if (value > 0) {
+      value--;
+    }
   }
 }

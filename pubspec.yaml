@@ -29,14 +29,16 @@ dependencies:
   provider: ^4.0.2
   flutter_svg: ^0.16.1
   shared_preferences: ^0.5.6+1
-  flutter_user_agent:
+  flutter_user_agent: ^1.2.1
+  logging: ^0.11.4
 
 dev_dependencies:
-  test: 
+  test:
+  mockito:
   flutter_test:
     sdk: flutter
-
-  flutter_launcher_icons: "^0.7.3"
+  flutter_launcher_icons:
+  effective_dart:
 
 flutter_icons:
   android: true

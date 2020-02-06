@@ -1,28 +1,34 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:drs_app/secrets.dart';
-
-import 'discogs.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
+import 'package:logging/logging.dart';
+
+import '../components/error.dart';
+import '../secrets.dart';
+import 'discogs.dart';
 
 class Scrobbler {
-  String _sessionKey;
+  Scrobbler(this.userAgent);
+
+  final Logger log = Logger('Scrobbler');
 
   final String userAgent;
 
-  Scrobbler(this.userAgent);
+  http.Client httpClient = http.Client();
 
-  bool get isNotAuthenticated => (_sessionKey == null);
+  String _sessionKey;
 
-  set sessionKey(String value) {
+  bool get isNotAuthenticated => _sessionKey == null;
+
+  void updateSessionKey(String value) {
     _sessionKey = value;
-    print('Updated session key to: $value');
+    log.info('Updated session key to: $value');
   }
 
   Future<String> initializeSession(String username, String password) async {
-    print('Initializing Last.fm session for $username...');
+    log.info('Initializing Last.fm session for $username...');
     http.Response response;
     try {
       response = await _postRequest({
@@ -31,140 +37,143 @@ class Scrobbler {
         'password': password,
         'api_key': _apiKey,
       });
-    } catch (e, stacktrace) {
-      print('Failed to authenticate to Last.fm: $e');
-      print(stacktrace);
-      throw 'Failed to communicate to Last.fm. Please try again later.';
+    } on Exception catch (e) {
+      throw UIException(
+          'Failed to communicate to Last.fm. Please try again later.', e);
     }
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      final dynamic jsonResponse = json.decode(response.body);
 
-      _sessionKey = jsonResponse['session']['key'];
-      print('Received new Last.fm session key: $_sessionKey');
+      _sessionKey = jsonResponse['session']['key'] as String;
+      log.info('Received new Last.fm session key: $_sessionKey');
 
       return _sessionKey;
     } else {
-      print('Error response (${response.statusCode}): ${response.body}');
+      log.info('Error response (${response.statusCode}): ${response.body}');
       // If that response was not OK, throw an error.
-      int errorCode = json.decode(response.body)['error'];
-      throw (errorCode == 4)
+      final dynamic errorCode = json.decode(response.body)['error'];
+      throw UIException(errorCode == 4
           ? 'Last.fm authentication failed, please try again.'
-          : 'Failed to authenticate to Last.fm ($errorCode)!';
+          : 'Failed to authenticate to Last.fm ($errorCode)!');
     }
   }
 
   Stream<int> scrobbleAlbums(List<AlbumDetails> albums) async* {
     if (_sessionKey == null) {
-      throw 'Oops! You need to login to Last.fm first with your username and password.';
+      throw UIException(
+          'Oops! You need to login to Last.fm first with your username and password.');
     }
 
-    ScrobbleQueue queue = _createScrobbleQueue(albums);
-    for (var scrobbles in queue.batches) {
+    final queue = _createScrobbleQueue(albums);
+    for (final scrobbles in queue.batches) {
       yield await _postScrobbles(scrobbles);
     }
-    //return accepted.reduce((v, e) => v + e);
   }
 
   ScrobbleQueue _createScrobbleQueue(List<AlbumDetails> albums) {
-    ScrobbleQueue queue = ScrobbleQueue();
+    final queue = ScrobbleQueue();
 
-    albums.reversed.forEach((album) {
-      album.tracks.reversed.forEach((track) {
+    for (final album in albums.reversed) {
+      for (final track in album.tracks.reversed) {
         if (track.subTracks?.isNotEmpty ?? false) {
-          track.subTracks.reversed
-              .forEach((subTrack) => queue.add(subTrack, album));
+          for (final subTrack in track.subTracks.reversed) {
+            queue.add(subTrack, album);
+          }
         } else {
           queue.add(track, album);
         }
-      });
-    });
+      }
+    }
     return queue;
   }
 
   Future<int> _postScrobbles(List<Map<String, String>> scrobbles) async {
-    print('Posting ${scrobbles.length} tracks to Last.fm...');
+    log.info('Posting ${scrobbles.length} tracks to Last.fm...');
     http.Response response;
     try {
-      response = await _postRequest({
+      response = await _postRequest(<String, String>{
         'method': 'track.scrobble',
         'api_key': _apiKey,
         'sk': _sessionKey,
-        ...scrobbles.reduce((v, e) => {...v, ...e}),
+        ...scrobbles.reduce((v, e) => <String, String>{...v, ...e}),
       });
-    } catch (e, stacktrace) {
-      print('Failed to scrobble to Last.fm: $e');
-      print(stacktrace);
-      throw 'Failed to communicate to Last.fm. Please try again later.';
+    } on Exception catch (e) {
+      throw UIException(
+          'Failed to communicate to Last.fm. Please try again later.', e);
     }
 
     if (response.statusCode == 200) {
       try {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final jsonResponse = json.decode(response.body) as Map<String, dynamic>;
 
-        final accepted = jsonResponse['scrobbles']['@attr']['accepted'];
-        final ignored = jsonResponse['scrobbles']['@attr']['ignored'];
-        print('Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
+        final dynamic accepted = jsonResponse['scrobbles']['@attr']['accepted'];
+        final dynamic ignored = jsonResponse['scrobbles']['@attr']['ignored'];
+        log.fine(
+            'Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
 
-        return accepted;
-
-      } catch(e, stacktrace) {
-        print('Failed to scrobble to Last.fm: $e');
-        print(stacktrace);
-        throw 'Failed to communicate to Last.fm. Please try again later.';
+        return accepted as int;
+      } on FormatException catch (e, stackTrace) {
+        log.severe('Failed to parse the Last.fm response: ${response.body}', e,
+            stackTrace);
+        return scrobbles
+            .length; // assume full success in case accepted can't be parsed
       }
     } else {
-      print('Error response (${response.statusCode}): ${response.body}');
+      log.info(
+          'Error response from Last.fm (${response.statusCode}): ${response.body}');
       // If that response was not OK, throw an error.
-      int errorCode = json.decode(response.body)['error'];
-      throw ([4, 9, 14].contains(errorCode))
+      final errorCode = json.decode(response.body)['error'] as int;
+      throw UIException(<int>[4, 9, 14].contains(errorCode)
           ? 'Last.fm authentication failed, please try re-entering your password.'
-          : 'Failed to scrobble to Last.fm ($errorCode)!';
+          : 'Failed to scrobble to Last.fm ($errorCode)!');
     }
   }
 
   Future<http.Response> _postRequest(Map<String, String> params) async {
-    http.Response response = await http.post(
-        'https://ws.audioscrobbler.com/2.0/',
-        body: {
-          ...params,
-          'api_sig': _createAPISignature(params),
-          'format': 'json',
-        },
-        headers: { 'User-Agent': userAgent }
-    );
+    final response = await httpClient
+        .post('https://ws.audioscrobbler.com/2.0/', body: <String, String>{
+      ...params,
+      'api_sig': _createAPISignature(params),
+      'format': 'json',
+    }, headers: <String, String>{
+      'User-Agent': userAgent
+    });
     return response;
   }
 
-  static const String _apiKey = LASTFM_apiKey;
-  static const String _sharedSecret = LASTFM_sharedSecret;
+  static const String _apiKey = lastfmApiKey;
+  static const String _sharedSecret = lastfmSharedSecret;
 
   static String _createAPISignature(Map<String, String> params) {
-    String sortedParams = '';
-    SplayTreeMap.from(params).forEach((k, v) => sortedParams += '$k$v');
+    var sortedParams = '';
+    SplayTreeMap<String, String>.from(params)
+        .forEach((k, v) => sortedParams += '$k$v');
     return md5.convert(utf8.encode('$sortedParams$_sharedSecret')).toString();
   }
 }
 
 class ScrobbleQueue {
-  List<List<Map<String, String>>> batches = [[]];
-  int timestamp = (new DateTime.now().millisecondsSinceEpoch / 1000).floor();
+  List<List<Map<String, String>>> batches = <List<Map<String, String>>>[
+    <Map<String, String>>[]
+  ];
+  int timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
 
-  add(AlbumTrack track, AlbumDetails album) {
+  void add(AlbumTrack track, AlbumDetails album) {
     final splitDuration = (track.duration?.isNotEmpty ?? false)
-        ? track.duration?.split(':')?.map<int>((c) => int.parse(c))
-        : [1, 0];
+        ? track.duration?.split(':')?.map<int>(int.parse)
+        : <int>[1, 0];
     final durationInSeconds = splitDuration.reduce((v, e) => v * 60 + e);
 
     timestamp -= durationInSeconds;
 
-    int index = batches.last.length;
+    var index = batches.last.length;
     if (index == 50) {
-      batches.add([]);
+      batches.add(<Map<String, String>>[]);
       index = 0;
     }
 
-    batches.last.add({
+    batches.last.add(<String, String>{
       'artist[$index]': track.artist ?? album.artist ?? '(unknown)',
       'track[$index]': track.title,
       'album[$index]': album.title,

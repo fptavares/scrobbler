@@ -1,8 +1,9 @@
-import 'package:drs_app/components/accounts.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+
+import '../model/settings.dart';
+import 'accounts.dart';
 
 class OnboardingPage extends StatelessWidget {
   @override
@@ -12,24 +13,22 @@ class OnboardingPage extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white30,
-        //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        child: Text('Skip'),
+        child: const Text('Skip'),
         onPressed: () {
           final settings = Provider.of<DiscogsSettings>(context, listen: false);
           settings.skipped = true;
         },
       ),
-      //floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: PageView(
         controller: controller,
         children: <Widget>[
           Container(
             color: Theme.of(context).primaryColor,
-            padding: EdgeInsets.all(30),
+            padding: const EdgeInsets.all(30),
             child: WelcomePage(
               onPressed: () => controller.animateToPage(
                 1,
-                duration: Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 curve: Curves.easeOut,
               ),
             ),
@@ -52,7 +51,7 @@ class WelcomePage extends StatelessWidget {
 
   final void Function() onPressed;
 
-  final arrowDown = const Flexible(
+  Flexible get arrowDown => const Flexible(
       flex: 1,
       child: Icon(
         Icons.arrow_downward,
@@ -74,8 +73,8 @@ class WelcomePage extends StatelessWidget {
             children: <Widget>[
               const Flexible(
                 flex: 2,
-                child: const Image(
-                  image: const AssetImage('assets/discogs_logo_white.png'),
+                child: Image(
+                  image: AssetImage('assets/discogs_logo_white.png'),
                 ),
               ),
               arrowDown,
@@ -94,11 +93,11 @@ class WelcomePage extends StatelessWidget {
                         height: 150,
                       ),
                     ),
-                    Flexible(
+                    const Flexible(
                       flex: 2,
-                      child: const Text(
+                      child: Text(
                         'Record Scrobbler',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'OpenSans',
                           fontSize: 38,
                           color: Colors.amber,

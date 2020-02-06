@@ -1,7 +1,7 @@
-import 'package:drs_app/model/discogs.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../model/discogs.dart';
 import 'album.dart';
 import 'emtpy.dart';
 
@@ -13,7 +13,7 @@ class CollectionGrid extends StatelessWidget {
       sliver: Consumer<Collection>(
         builder: (context, collection, _) {
           if (collection.isUserEmpty) {
-            return SliverFillRemaining(
+            return const SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
               child: EmptyState(
@@ -24,25 +24,26 @@ class CollectionGrid extends StatelessWidget {
             );
           }
           if (collection.isEmpty && collection.isNotLoading) {
-            return SliverFillRemaining(
+            return const SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
               child: EmptyState(
                 imagePath: 'assets/empty_home.png',
                 headline: 'Nothing here',
-                subhead: 'It appears that the configured user collection is either empty, or not publically accessible.',
+                subhead: '''It appears that the configured user collection is
+                either empty, or not publically accessible.''',
               ),
             );
           }
 
           return SliverGrid(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 150,
               crossAxisSpacing: 0,
               mainAxisSpacing: 0,
             ),
             delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+              (context, index) {
                 return AlbumButton(collection.albums[index]);
               },
               childCount: collection.albums.length,

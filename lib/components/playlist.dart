@@ -1,7 +1,7 @@
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../model/playlist.dart';
 import 'emtpy.dart';
 import 'scrobble.dart';
 
@@ -42,17 +42,17 @@ class PlaylistList extends StatelessWidget {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
       child: (playlist.isEmpty)
-          ? EmptyState(
+          ? const EmptyState(
               imagePath: 'assets/empty_playlist.png',
               headline: 'The sound of silence',
               subhead: 'There is nothing in your playlist at the moment',
             )
           : ListView.builder(
               itemCount: items.length,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (context, index) {
                 final item = items[index];
                 return Dismissible(
-                  key: ValueKey(item.album.releaseId),
+                  key: ValueKey<int>(item.album.releaseId),
                   direction: DismissDirection.endToStart,
                   onDismissed: (_) => playlist.removeAlbum(item.album),
                   background: Container(
@@ -90,7 +90,7 @@ class PlaylistCountIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableProvider.value(
+    return ValueListenableProvider<int>.value(
       value: item,
       child: ClipOval(
         child: Container(

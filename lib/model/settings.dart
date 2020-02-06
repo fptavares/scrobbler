@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DiscogsSettings with ChangeNotifier {
-  final SharedPreferences prefs;
-
+class DiscogsSettings extends ChangeNotifier {
   DiscogsSettings(this.prefs);
+
+  final SharedPreferences prefs;
 
   bool get skipped => prefs.getBool(_skippedKey) ?? false;
 
@@ -15,7 +15,7 @@ class DiscogsSettings with ChangeNotifier {
     notifyListeners();
   }
 
-  set username(newUsername) {
+  set username(String newUsername) {
     if (newUsername != username) {
       prefs.setString(_discogsUsernameKey, newUsername);
       notifyListeners();
@@ -26,19 +26,19 @@ class DiscogsSettings with ChangeNotifier {
   static const String _discogsUsernameKey = 'discogsUsername';
 }
 
-class LastfmSettings with ChangeNotifier {
+class LastfmSettings extends ChangeNotifier {
+  LastfmSettings(this.prefs);
+
   final SharedPreferences prefs;
 
   String get username => prefs.getString(_lastfmUsernameKey);
 
   String get sessionKey => prefs.getString(_sessionKeyKey);
 
-  LastfmSettings(this.prefs);
-
   /// Setting a new username also clears the current session key,
   /// so a new session key must only be assigned
   /// after assigning the new username.
-  set username(newUsername) {
+  set username(String newUsername) {
     if (newUsername != username) {
       prefs.setString(_lastfmUsernameKey, newUsername);
       prefs.remove(_sessionKeyKey);
@@ -46,7 +46,7 @@ class LastfmSettings with ChangeNotifier {
     }
   }
 
-  set sessionKey(value) {
+  set sessionKey(String value) {
     prefs.setString(_sessionKeyKey, value);
     notifyListeners();
   }
