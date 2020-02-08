@@ -261,7 +261,7 @@ class Collection extends ChangeNotifier {
   Future<List<CollectionAlbum>> _loadCollectionPage(int page) async {
     log.info('Started loading albums (page $page) for $_username...');
     final response = await httpClient.get(
-      'https://api.xdiscogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
+      'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
       headers: _headers,
     );
 
