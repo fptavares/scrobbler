@@ -15,12 +15,18 @@ import 'model/settings.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // initialize logger
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print
     print('${record.level.name}: ${record.time}: ${record.message}');
+    if (record.level > Level.INFO && record.stackTrace != null) {
+      // ignore: avoid_print
+      print(record.stackTrace);
+    }
   });
 
+  // initialize user-agent
   var userAgent = 'RecordScrobbler';
   try {
     userAgent = await FlutterUserAgent.getPropertyAsync('userAgent') as String;
@@ -29,6 +35,7 @@ Future<void> main() async {
     Logger.root.warning('Failed to get User Agent', e, stacktrace);
   }
 
+  // run app
   runApp(MyApp(await SharedPreferences.getInstance(), userAgent));
 }
 
@@ -60,7 +67,6 @@ class MyApp extends StatelessWidget {
               scrobbler..updateSessionKey(settings.sessionKey),
         ),
         ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
-        //ChangeNotifierProvider(create: (_) => Scrobbler()),
       ],
       child: MaterialApp(
         title: 'Record Scrobbler',
