@@ -63,7 +63,7 @@ class AlbumDetails {
       releaseId: json['id'] as int,
       artist: _oneNameForArtists(json['artists'] as List<dynamic>),
       title: json['title'] as String,
-      tracks: (json['tracklist'] as List<Map<String, dynamic>>)
+      tracks: (json['tracklist'] as List<dynamic>)
           .map<AlbumTrack>((track) => AlbumTrack.fromJson(track))
           .toList(),
     );
@@ -122,11 +122,11 @@ class Collection extends ChangeNotifier {
 
   Loading get loadingNotifier => _loading;
 
-  bool get isLoading => _loading.value;
+  bool get isLoading => _loading.value == LoadingStatus.loading;
 
-  bool get isNotLoading => !_loading.value;
+  bool get isNotLoading => !isLoading;
 
-  bool get _isLoading => _loading.value;
+  bool get hasLoadingError => _loading.value == LoadingStatus.error;
 
   bool get isEmpty => _albumList.isEmpty;
 
@@ -138,7 +138,8 @@ class Collection extends ChangeNotifier {
 
   bool get isNotFullyLoaded => !isFullyLoaded;
 
-  set _isLoading(bool newValue) => _loading.value = newValue;
+  // ignore: avoid_setters_without_getters
+  set _loadingStatus(LoadingStatus newValue) => _loading.value = newValue;
 
   int get totalItems => _totalItems;
 
@@ -183,7 +184,7 @@ class Collection extends ChangeNotifier {
       log.warning('Cannot reload albums because the username is empty.');
       return;
     }
-    if (_isLoading) {
+    if (isLoading) {
       log.info('Cannot reload yet because the collection is still loading...');
       return;
     }
@@ -197,7 +198,7 @@ class Collection extends ChangeNotifier {
   }
 
   Future<void> loadMoreAlbums() async {
-    if (_isLoading) {
+    if (isLoading) {
       log.info(
           'Cannot load more yet because the collection is still loading...');
       return;
@@ -211,17 +212,20 @@ class Collection extends ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
+    _loadingStatus = LoadingStatus.loading;
     try {
       _addAlbums(await _loadCollectionPage(_nextPage));
       _nextPage++;
-    } finally {
-      _isLoading = false;
+
+      _loadingStatus = LoadingStatus.finished;
+    } on Exception {
+      _loadingStatus = LoadingStatus.error;
+      rethrow;
     }
   }
 
   Future<void> loadAllAlbums() async {
-    if (_isLoading) {
+    if (isLoading) {
       log.info(
           'Cannot load more yet because the collection is still loading...');
       return;
@@ -234,7 +238,7 @@ class Collection extends ChangeNotifier {
       throw UIException('Cannot load albums because the username is empty.');
     }
 
-    _isLoading = true;
+    _loadingStatus = LoadingStatus.loading;
     try {
       final pages = await Future.wait<List<CollectionAlbum>>(
         <Future<List<CollectionAlbum>>>[
@@ -248,15 +252,16 @@ class Collection extends ChangeNotifier {
 
       _nextPage = _totalPages + 1; // setting page index to the end
 
-    } finally {
-      _isLoading = false;
+      _loadingStatus = LoadingStatus.finished;
+    } on Exception {
+      _loadingStatus = LoadingStatus.error;
     }
   }
 
   Future<List<CollectionAlbum>> _loadCollectionPage(int page) async {
     log.info('Started loading albums (page $page) for $_username...');
     final response = await httpClient.get(
-      'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
+      'https://api.xdiscogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
       headers: _headers,
     );
 
@@ -315,8 +320,10 @@ class Collection extends ChangeNotifier {
   static const String _consumerSecret = discogsConsumerSecret;
 }
 
-class Loading extends ValueNotifier<bool> {
-  Loading() : super(false);
+enum LoadingStatus { neverLoaded, loading, finished, error }
+
+class Loading extends ValueNotifier<LoadingStatus> {
+  Loading() : super(LoadingStatus.neverLoaded);
 }
 
 String _oneNameForArtists(List<dynamic> artists) {

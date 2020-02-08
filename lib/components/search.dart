@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import '../model/discogs.dart';
 import '../model/playlist.dart';
 import 'emtpy.dart';
+import 'error.dart';
 import 'playlist.dart';
 
 class AlbumSearch extends SearchDelegate<CollectionAlbum> {
@@ -31,7 +33,34 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
 
   @override
   Widget buildResults(BuildContext context) {
+    return SearchResultsList(query: query,);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return buildResults(context);
+  }
+}
+
+class SearchResultsList extends StatelessWidget {
+  SearchResultsList({
+    Key key,
+    @required this.query,
+  }) : super(key: key);
+
+  final Logger log = Logger('AlbumSearch');
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
     final collection = Provider.of<Collection>(context);
+    // asynchronously load all albums
+    if (collection.isNotFullyLoaded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(
+          collection.loadAllAlbums(), context, log,
+          error: 'Failed to load the full collection!'));
+    }
 
     final albums = collection.search(query);
 
@@ -49,10 +78,10 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                ValueListenableProvider<bool>.value(
+                ValueListenableProvider<LoadingStatus>.value(
                   value: collection.loadingNotifier,
-                  child: Consumer<bool>(
-                    builder: (_, isLoading, __) => isLoading
+                  child: Consumer<LoadingStatus>(
+                    builder: (_, loading, __) => loading == LoadingStatus.loading
                         ? const LinearProgressIndicator()
                         : Container(),
                   ),
@@ -89,10 +118,5 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
               ],
             ),
     );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return buildResults(context);
   }
 }

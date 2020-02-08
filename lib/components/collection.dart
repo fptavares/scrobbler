@@ -24,15 +24,21 @@ class CollectionGrid extends StatelessWidget {
             );
           }
           if (collection.isEmpty && collection.isNotLoading) {
-            return const SliverFillRemaining(
+            return SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
-              child: EmptyState(
-                imagePath: 'assets/empty_home.png',
-                headline: 'Nothing here',
-                subhead: '''It appears that the configured user collection is
-                either empty, or not publically accessible.''',
-              ),
+              child: collection.hasLoadingError
+                  ? const EmptyState(
+                      imagePath: 'assets/empty_error.png',
+                      headline: 'Whoops!',
+                      subhead:
+                          'Could not connect to Discogs to get your collection. Please try again later.')
+                  : const EmptyState(
+                      imagePath: 'assets/empty_home.png',
+                      headline: 'Nothing here',
+                      subhead:
+                          'It appears that the configured user collection is either empty, or not publically accessible.',
+                    ),
             );
           }
 

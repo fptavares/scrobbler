@@ -13,7 +13,9 @@ void displayAndLogError(
     log.severe(errorMessage, e.exception, stackTrace);
   }
 
-  Scaffold.of(context).showSnackBar(SnackBar(
+  final scaffold = Scaffold.of(context);
+  scaffold.removeCurrentSnackBar();
+  scaffold.showSnackBar(SnackBar(
     content: Text(errorMessage),
     backgroundColor: Colors.red,
   ));

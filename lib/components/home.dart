@@ -32,18 +32,14 @@ class HomePage extends StatelessWidget {
           }
           return true;
         },
-        child: ValueListenableProvider<bool>.value(
+        child: ValueListenableProvider<LoadingStatus>.value(
           value: collection.loadingNotifier,
           child: Center(
             child: RefreshIndicator(
-              onRefresh: () {
-                if (collection.isLoading) {
-                  return null;
-                }
-
-                return handleFutureError(collection.reload(), context, log,
-                    error: 'Failed to reload collection!');
-              },
+              onRefresh: () => collection.isLoading
+                  ? null
+                  : handleFutureError(collection.reload(), context, log,
+                      error: 'Failed to reload collection!'),
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 //AlwaysScrollableScrollPhysics
@@ -53,10 +49,10 @@ class HomePage extends StatelessWidget {
                   SliverFillRemaining(
                     hasScrollBody: false,
                     fillOverscroll: true,
-                    child: Consumer<bool>(
-                      builder: (_, isLoading, __) => Container(
+                    child: Consumer<LoadingStatus>(
+                      builder: (_, loading, __) => Container(
                         height: 160,
-                        child: isLoading
+                        child: loading == LoadingStatus.loading
                             ? const Center(
                                 child: SizedBox(
                                   height: 60,
@@ -127,8 +123,6 @@ class HomeAppBar extends StatelessWidget {
             tooltip: 'Search',
             onPressed: (collection.isNotEmpty)
                 ? () {
-                    handleFutureError(collection.loadAllAlbums(), context, log,
-                        error: 'Failed to load the full collection!');
                     showSearch(context: context, delegate: AlbumSearch());
                   }
                 : null,
