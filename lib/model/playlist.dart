@@ -20,10 +20,6 @@ class Playlist extends ChangeNotifier {
     return _itemById.values.toList();
   }
 
-  List<int> getReleaseIds() {
-    return _itemById.keys.toList();
-  }
-
   Future<List<AlbumDetails>> _getAlbumsDetails(Collection collection) async {
     final albums = await Future.wait<AlbumDetails>(
         _itemById.keys.map(collection.getAlbumDetails));

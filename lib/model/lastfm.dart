@@ -116,8 +116,8 @@ class Scrobbler {
       } on FormatException catch (e, stackTrace) {
         log.severe('Failed to parse the Last.fm response: ${response.body}', e,
             stackTrace);
-        return scrobbles
-            .length; // assume full success in case accepted can't be parsed
+        // assume full success in case accepted can't be parsed
+        return scrobbles.length;
       }
     } else {
       log.info(
