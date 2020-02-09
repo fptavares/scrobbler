@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drs_app/model/discogs.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
@@ -100,6 +102,33 @@ void main() {
       results = collection.search('be');
       expect(results.length, equals(2));
       expect(results.map((album) => album.id), equals([428475133, 32925711]));
+    });
+
+    test('loads album details', () async {
+      collection.httpClient =
+          MockClient(expectAsync1<Future<Response>, Request>((request) async {
+        expect(request.method, equals('GET'));
+        expect(request.url.toString(),
+            equals('https://api.discogs.com/releases/249504'));
+        verifyCommonHeaders(request);
+
+        return Response(jsonForRelease, 200, headers: {
+          HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+        });
+      }, count: 1));
+
+      final album = await collection.getAlbumDetails(249504);
+      expect(album.releaseId, equals(249504));
+      expect(album.artist, equals('Rick Astley'));
+      expect(album.title, equals('Never Gonna Give You Up'));
+      expect(album.tracks.length, equals(2));
+      expect(album.tracks[0].position, equals('A'));
+      expect(album.tracks[0].title, equals('Never Gonna Give You Up'));
+      expect(album.tracks[0].duration, equals('3:32'));
+      expect(album.tracks[1].position, equals('B'));
+      expect(album.tracks[1].title,
+          equals('Never Gonna Give You Up (Instrumental)'));
+      expect(album.tracks[1].duration, equals('3:30'));
     });
   });
 }
