@@ -6,24 +6,26 @@ class DiscogsSettings extends ChangeNotifier {
 
   final SharedPreferences prefs;
 
-  bool get skipped => prefs.getBool(_skippedKey) ?? false;
+  bool get skipped => prefs.getBool(skippedKey) ?? false;
 
-  String get username => prefs.getString(_discogsUsernameKey);
+  String get username => prefs.getString(discogsUsernameKey);
 
   set skipped(bool skipped) {
-    prefs.setBool(_skippedKey, skipped);
+    prefs.setBool(skippedKey, skipped);
     notifyListeners();
   }
 
   set username(String newUsername) {
     if (newUsername != username) {
-      prefs.setString(_discogsUsernameKey, newUsername);
+      prefs.setString(discogsUsernameKey, newUsername);
       notifyListeners();
     }
   }
 
-  static const String _skippedKey = 'skipped';
-  static const String _discogsUsernameKey = 'discogsUsername';
+  @visibleForTesting
+  static const String skippedKey = 'skipped';
+  @visibleForTesting
+  static const String discogsUsernameKey = 'discogsUsername';
 }
 
 class LastfmSettings extends ChangeNotifier {
@@ -31,26 +33,28 @@ class LastfmSettings extends ChangeNotifier {
 
   final SharedPreferences prefs;
 
-  String get username => prefs.getString(_lastfmUsernameKey);
+  String get username => prefs.getString(lastfmUsernameKey);
 
-  String get sessionKey => prefs.getString(_sessionKeyKey);
+  String get sessionKey => prefs.getString(sessionKeyKey);
 
   /// Setting a new username also clears the current session key,
   /// so a new session key must only be assigned
   /// after assigning the new username.
   set username(String newUsername) {
     if (newUsername != username) {
-      prefs.setString(_lastfmUsernameKey, newUsername);
-      prefs.remove(_sessionKeyKey);
+      prefs.setString(lastfmUsernameKey, newUsername);
+      prefs.remove(sessionKeyKey);
       notifyListeners();
     }
   }
 
   set sessionKey(String value) {
-    prefs.setString(_sessionKeyKey, value);
+    prefs.setString(sessionKeyKey, value);
     notifyListeners();
   }
 
-  static const String _lastfmUsernameKey = 'lastfmUsername';
-  static const String _sessionKeyKey = 'sessionKey';
+  @visibleForTesting
+  static const String lastfmUsernameKey = 'lastfmUsername';
+  @visibleForTesting
+  static const String sessionKeyKey = 'lastfmSessionKey';
 }

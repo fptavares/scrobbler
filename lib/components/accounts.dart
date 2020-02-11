@@ -11,10 +11,23 @@ class AccountsForm extends StatefulWidget {
   AccountsMyCustomFormState createState() {
     return AccountsMyCustomFormState();
   }
+
+  static const discogsUsernameFieldKey = Key('discogs_username');
+  static const lastfmUsernameFieldKey = Key('lastfm_username');
+  static const lastfmPasswordFieldKey = Key('lastfm_password');
+
+  static const discogsInvalidUsernameMessage =
+      'Please enter your Discogs username';
+  static const lastfmInvalidUsernameMessage =
+      'Please enter your Last.fm username';
+  static const lastfmInvalidPasswordMessage =
+      'Please enter your Last.fm password';
+
+  static const saveSuccessMessage = 'Saved new account information.';
 }
 
 class AccountsMyCustomFormState extends State<AccountsForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   final Logger log = Logger('AccountsForm');
 
@@ -53,10 +66,14 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      const Image(image: AssetImage('assets/discogs_logo.png')),
+                      const Image(
+                        image: AssetImage('assets/discogs_logo.png'),
+                        semanticLabel: 'Discogs',
+                      ),
                       TextFormField(
+                        key: AccountsForm.discogsUsernameFieldKey,
                         validator: (value) => value.isEmpty
-                            ? 'Please enter your Discogs username'
+                            ? AccountsForm.discogsInvalidUsernameMessage
                             : null,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
@@ -74,11 +91,15 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      const Image(image: AssetImage('assets/lastfm_logo.png')),
+                      const Image(
+                        image: AssetImage('assets/lastfm_logo.png'),
+                        semanticLabel: 'Last.fm',
+                      ),
                       TextFormField(
+                        key: AccountsForm.lastfmUsernameFieldKey,
                         controller: _lastfmUsernameController,
                         validator: (value) => value.isEmpty
-                            ? 'Please enter your Last.fm username'
+                            ? AccountsForm.lastfmInvalidUsernameMessage
                             : null,
                         keyboardType: TextInputType.emailAddress,
                         decoration:
@@ -86,11 +107,12 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                         onSaved: (value) => _lastfmUsername = value,
                       ),
                       TextFormField(
+                        key: AccountsForm.lastfmPasswordFieldKey,
                         obscureText: true,
                         validator: (value) => (value.isEmpty &&
                                 _lastfmUsernameController.text !=
                                     lastfm.username)
-                            ? 'Please enter your Last.fm password'
+                            ? AccountsForm.lastfmInvalidPasswordMessage
                             : null,
                         decoration:
                             const InputDecoration(labelText: 'Password'),
@@ -108,8 +130,9 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                     child: FlatButton(
                       color: Colors.amberAccent,
                       child: const Text('Save accounts'),
-                      onPressed:
-                          _isSaving ? null : () => handleSave(discogs, lastfm),
+                      onPressed: _isSaving
+                          ? null
+                          : () async => await _handleSave(discogs, lastfm),
                     ),
                   ),
                 ),
@@ -121,7 +144,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
     );
   }
 
-  Future<void> handleSave(
+  Future<void> _handleSave(
       DiscogsSettings discogs, LastfmSettings lastfm) async {
     final form = _formKey.currentState;
     // Validate returns true if the form is valid, otherwise false.
@@ -133,16 +156,15 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
       discogs.username = _discogsUsername;
       lastfm.username = _lastfmUsername;
 
-      final scrobbler = Provider.of<Scrobbler>(context, listen: false);
-
       try {
         if (_lastfmPassword?.isNotEmpty ?? false) {
+          final scrobbler = Provider.of<Scrobbler>(context, listen: false);
           final sessionKey = await scrobbler.initializeSession(
               _lastfmUsername, _lastfmPassword);
           lastfm.sessionKey = sessionKey;
         }
 
-        displaySuccess(context, 'Saved new account information.');
+        displaySuccess(context, AccountsForm.saveSuccessMessage);
       } on Exception catch (e, stackTrace) {
         displayAndLogError(context, log, e, stackTrace);
       } finally {
