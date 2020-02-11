@@ -14,7 +14,7 @@ class CollectionAlbum {
       this.artist,
       this.title,
       this.year,
-      this.thumbURL,
+      this.thumbUrl,
       this.rating,
       this.dateAdded}) {
     searchString = '$artist $title'.toLowerCase();
@@ -28,7 +28,7 @@ class CollectionAlbum {
       artist: _oneNameForArtists(info['artists'] as List<dynamic>),
       title: info['title'] as String,
       year: info['year'] as int,
-      thumbURL: info['thumb'] as String,
+      thumbUrl: info['thumb'] as String,
       rating: json['rating'] as int,
       dateAdded: json['date_added'] as String,
     );
@@ -39,7 +39,7 @@ class CollectionAlbum {
   final String artist;
   final String title;
   final int year;
-  final String thumbURL;
+  final String thumbUrl;
   final int rating;
   final String dateAdded;
   String searchString;

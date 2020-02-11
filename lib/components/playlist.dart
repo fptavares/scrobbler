@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../model/playlist.dart';
+import 'album.dart';
 import 'emtpy.dart';
 import 'scrobble.dart';
 
@@ -60,7 +61,7 @@ class PlaylistList extends StatelessWidget {
                     child: Icon(Icons.delete),
                   ),
                   child: ListTile(
-                    leading: Image.network(item.album.thumbURL),
+                    leading: CachedAlbumImage(item.album),
                     title: Text(
                       item.album.title,
                       maxLines: 2,

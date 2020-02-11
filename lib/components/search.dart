@@ -1,3 +1,4 @@
+import 'package:drs_app/components/album.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return SearchResultsList(query: query,);
+    return SearchResultsList(query: query);
   }
 
   @override
@@ -56,7 +57,9 @@ class SearchResultsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final collection = Provider.of<Collection>(context);
     // asynchronously load all albums
-    if (collection.isNotFullyLoaded) {
+    if (query.isNotEmpty &&
+        collection.isNotFullyLoaded &&
+        collection.isNotLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(
           collection.loadAllAlbums(), context, log,
           error: 'Failed to load the full collection!'));
@@ -81,9 +84,10 @@ class SearchResultsList extends StatelessWidget {
                 ValueListenableProvider<LoadingStatus>.value(
                   value: collection.loadingNotifier,
                   child: Consumer<LoadingStatus>(
-                    builder: (_, loading, __) => loading == LoadingStatus.loading
-                        ? const LinearProgressIndicator()
-                        : Container(),
+                    builder: (_, loading, __) =>
+                        loading == LoadingStatus.loading
+                            ? const LinearProgressIndicator()
+                            : Container(),
                   ),
                 ),
                 Consumer<Playlist>(
@@ -96,7 +100,7 @@ class SearchResultsList extends StatelessWidget {
 
                         return ListTile(
                           key: ValueKey<int>(album.id),
-                          leading: Image.network(album.thumbURL),
+                          leading: CachedAlbumImage(album),
                           title: Text(
                             album.title,
                             maxLines: 2,
