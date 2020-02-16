@@ -122,8 +122,8 @@ class HomeAppBar extends StatelessWidget {
             icon: const Icon(Icons.search),
             tooltip: 'Search',
             onPressed: (collection.isNotEmpty)
-                ? () {
-                    showSearch(context: context, delegate: AlbumSearch());
+                ? () async {
+                    await showSearch(context: context, delegate: AlbumSearch());
                   }
                 : null,
           ),
