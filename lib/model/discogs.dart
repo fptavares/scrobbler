@@ -48,6 +48,19 @@ class CollectionAlbum {
   String toString() {
     return '$id: $title ($year) by $artist';
   }
+
+  CollectionAlbum copyWith({@required int id}) {
+    return CollectionAlbum(
+      id: id,
+      releaseId: releaseId,
+      artist: artist,
+      title: title,
+      year: year,
+      thumbUrl: thumbUrl,
+      rating: rating,
+      dateAdded: dateAdded,
+    );
+  }
 }
 
 class AlbumDetails {
@@ -90,7 +103,7 @@ class AlbumTrack {
       position: json['position'] as String,
       duration: json['duration'] as String,
       artist: _oneNameForArtists(json['artists'] as List<dynamic>),
-      subTracks: (json['sub_tracks'] as List<Map<String, dynamic>>)
+      subTracks: (json['sub_tracks'] as List<dynamic>)
           ?.map<AlbumTrack>((subTrack) => AlbumTrack.fromJson(subTrack))
           ?.toList(),
     );
@@ -180,13 +193,12 @@ class Collection extends ChangeNotifier {
   }
 
   Future<void> reload() async {
-    if (_username == null) {
-      log.warning('Cannot reload albums because the username is empty.');
-      return;
-    }
     if (isLoading) {
       log.info('Cannot reload yet because the collection is still loading...');
       return;
+    }
+    if (_username == null) {
+      throw UIException('Cannot load albums because the username is empty.');
     }
 
     log.fine('Reloading collection for $_username...');
@@ -208,8 +220,7 @@ class Collection extends ChangeNotifier {
       return;
     }
     if (_username == null) {
-      log.warning('Cannot load albums because the username is empty.');
-      return;
+      throw UIException('Cannot load albums because the username is empty.');
     }
 
     _loadingStatus = LoadingStatus.loading;
@@ -237,6 +248,10 @@ class Collection extends ChangeNotifier {
     if (_username == null) {
       throw UIException('Cannot load albums because the username is empty.');
     }
+    if (_totalPages == null) {
+      throw UIException(
+          'Cannot load all remaining albums before loading the first page.');
+    }
 
     _loadingStatus = LoadingStatus.loading;
     try {
@@ -255,15 +270,23 @@ class Collection extends ChangeNotifier {
       _loadingStatus = LoadingStatus.finished;
     } on Exception {
       _loadingStatus = LoadingStatus.error;
+      rethrow;
     }
   }
 
   Future<List<CollectionAlbum>> _loadCollectionPage(int page) async {
     log.info('Started loading albums (page $page) for $_username...');
-    final response = await httpClient.get(
-      'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
-      headers: _headers,
-    );
+
+    http.Response response;
+    try {
+      response = await httpClient.get(
+        'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
+        headers: _headers,
+      );
+    } on Exception catch (e, stackTrace) {
+      log.info('Connection to Discogs failed.', e, stackTrace);
+      throw UIException('Could not connect to the Discogs server: $e', e);
+    }
 
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
@@ -296,10 +319,16 @@ class Collection extends ChangeNotifier {
   }
 
   Future<AlbumDetails> getAlbumDetails(int releaseId) async {
-    final response = await httpClient.get(
-      'https://api.discogs.com/releases/$releaseId',
-      headers: _headers,
-    );
+    http.Response response;
+    try {
+      response = await httpClient.get(
+        'https://api.discogs.com/releases/$releaseId',
+        headers: _headers,
+      );
+    } on Exception catch (e, stackTrace) {
+      log.info('Connection to Discogs failed.', e, stackTrace);
+      throw UIException('Could not connect to the Discogs server: $e', e);
+    }
 
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.

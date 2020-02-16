@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
@@ -29,33 +30,35 @@ class Scrobbler {
 
   Future<String> initializeSession(String username, String password) async {
     log.info('Initializing Last.fm session for $username...');
-    http.Response response;
     try {
-      response = await _postRequest({
+      final response = await _postRequest({
         'method': 'auth.getMobileSession',
         'username': username,
         'password': password,
         'api_key': _apiKey,
       });
-    } on Exception catch (e) {
+
+      if (response.statusCode == 200) {
+        final dynamic jsonResponse = json.decode(response.body);
+
+        _sessionKey = jsonResponse['session']['key'] as String;
+        log.info('Received new Last.fm session key: $_sessionKey');
+
+        return _sessionKey;
+      } else {
+        log.info('Error response (${response.statusCode}): ${response.body}');
+        // If that response was not OK, throw an error.
+        final errorCode = json.decode(response.body)['error'];
+        throw UIException(errorCode == 4
+            ? 'Last.fm authentication failed, please try again.'
+            : 'Failed to authenticate to Last.fm ($errorCode)!');
+      }
+    } on SocketException catch (e) {
       throw UIException(
           'Failed to communicate to Last.fm. Please try again later.', e);
-    }
-
-    if (response.statusCode == 200) {
-      final dynamic jsonResponse = json.decode(response.body);
-
-      _sessionKey = jsonResponse['session']['key'] as String;
-      log.info('Received new Last.fm session key: $_sessionKey');
-
-      return _sessionKey;
-    } else {
-      log.info('Error response (${response.statusCode}): ${response.body}');
-      // If that response was not OK, throw an error.
-      final dynamic errorCode = json.decode(response.body)['error'];
-      throw UIException(errorCode == 4
-          ? 'Last.fm authentication failed, please try again.'
-          : 'Failed to authenticate to Last.fm ($errorCode)!');
+    } on FormatException catch (e) {
+      throw UIException(
+          'Failed to communicate to Last.fm. Please try again later.', e);
     }
   }
 
@@ -98,13 +101,8 @@ class Scrobbler {
         'sk': _sessionKey,
         ...scrobbles.reduce((v, e) => <String, String>{...v, ...e}),
       });
-    } on Exception catch (e) {
-      throw UIException(
-          'Failed to communicate to Last.fm. Please try again later.', e);
-    }
 
-    if (response.statusCode == 200) {
-      try {
+      if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body) as Map<String, dynamic>;
 
         final dynamic accepted = jsonResponse['scrobbles']['@attr']['accepted'];
@@ -113,20 +111,29 @@ class Scrobbler {
             'Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
 
         return accepted as int;
-      } on FormatException catch (e, stackTrace) {
-        log.severe('Failed to parse the Last.fm response: ${response.body}', e,
-            stackTrace);
+      } else {
+        log.info(
+            'Error response from Last.fm (${response.statusCode}): ${response.body}');
+        // If that response was not OK, throw an error.
+        final errorCode = json.decode(response.body)['error'];
+        throw UIException(<int>[4, 9, 14].contains(errorCode)
+            ? 'Last.fm authentication failed, please try re-entering your password.'
+            : 'Failed to scrobble to Last.fm ($errorCode)!');
+      }
+    } on SocketException catch (e) {
+      throw UIException(
+          'Failed to communicate to Last.fm. Please try again later.', e);
+    } on FormatException catch (e, stackTrace) {
+      log.severe('Failed to parse the Last.fm response: ${response.body}', e,
+          stackTrace);
+
+      if (response?.statusCode == 200) {
         // assume full success in case accepted can't be parsed
         return scrobbles.length;
+      } else {
+        throw UIException(
+            'Failed to communicate to Last.fm. Please try again later.', e);
       }
-    } else {
-      log.info(
-          'Error response from Last.fm (${response.statusCode}): ${response.body}');
-      // If that response was not OK, throw an error.
-      final errorCode = json.decode(response.body)['error'] as int;
-      throw UIException(<int>[4, 9, 14].contains(errorCode)
-          ? 'Last.fm authentication failed, please try re-entering your password.'
-          : 'Failed to scrobble to Last.fm ($errorCode)!');
     }
   }
 
