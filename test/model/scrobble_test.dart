@@ -1,8 +1,12 @@
-import 'package:drs_app/model/discogs.dart';
+import 'dart:io';
+
+import 'package:drs_app/components/error.dart';
 import 'package:drs_app/model/lastfm.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
+
+import '../test_albums.dart';
 
 String _createScrobbleResponse(int accepted, int ignored) =>
     '{"scrobbles":{"@attr":{"accepted":$accepted,"ignored":$ignored},"scrobble":[${List.generate(accepted, (_) => '{}').join(',')}]}}';
@@ -49,21 +53,7 @@ void main() {
       scrobbler.updateSessionKey('test-session-key');
 
       // generate list of albums to scrobble
-      final albums = List.generate(
-          20,
-          (index) => AlbumDetails(
-                releaseId: index,
-                artist: 'Radiohead',
-                title: 'OK Computer $index',
-                tracks: [
-                  AlbumTrack(title: 'Airbag', duration: '4:44'),
-                  AlbumTrack(title: 'Paranoid Android', position: 'A2'),
-                  AlbumTrack(title: 'Subterranean Homesick Alien', subTracks: [
-                    AlbumTrack(title: 'Exit Music (For A Film)'),
-                    AlbumTrack(title: 'Let Down'),
-                  ]),
-                ],
-              ));
+      final albums = List.generate(20, (index) => testAlbumDetails1);
 
       // override http client
       scrobbler.httpClient =
@@ -86,6 +76,36 @@ void main() {
       // scrobble
       final acceptedList = await scrobbler.scrobbleAlbums(albums).toList();
       expect(acceptedList, equals([49, 29]));
+    });
+
+    Future<void> verifyThrows(Future<dynamic> function()) async {
+      try {
+        await function();
+        fail('Exception not thrown on: $function');
+      } on Exception catch (e) {
+        expect(e, const TypeMatcher<UIException>());
+      }
+    }
+
+    test('throws UI exception on server error', () async {
+      scrobbler.httpClient = MockClient((_) async => Response('', 500));
+
+      await verifyThrows(() => scrobbler.initializeSession(username, password));
+
+      scrobbler.updateSessionKey(key);
+      await verifyThrows(
+          () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+    });
+
+    test('throws UI exception on server error', () async {
+      scrobbler.httpClient =
+          MockClient((_) async => throw const SocketException(''));
+
+      await verifyThrows(() => scrobbler.initializeSession(username, password));
+
+      scrobbler.updateSessionKey(key);
+      await verifyThrows(
+          () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
   });
 }

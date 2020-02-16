@@ -1,4 +1,5 @@
 import 'package:drs_app/components/accounts.dart';
+import 'package:drs_app/components/error.dart';
 import 'package:drs_app/model/lastfm.dart';
 import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final Map<String, dynamic> _kPrefsInitialValues = <String, dynamic>{
+final Map<String, dynamic> _prefsInitialValues = <String, dynamic>{
   DiscogsSettings.discogsUsernameKey: 'd-test-user',
   DiscogsSettings.skippedKey: null,
   LastfmSettings.lastfmUsernameKey: 'l-test-user',
@@ -17,13 +18,15 @@ final Map<String, dynamic> _kPrefsInitialValues = <String, dynamic>{
 void main() {
   SharedPreferences prefs;
   MockScrobbler scrobbler;
-  Widget widget;
 
   setUpAll(() async {
-    SharedPreferences.setMockInitialValues(_kPrefsInitialValues);
+    SharedPreferences.setMockInitialValues(_prefsInitialValues);
     prefs = await SharedPreferences.getInstance();
     scrobbler = MockScrobbler();
-    widget = MultiProvider(
+  });
+
+  Widget createAccountsWidget() {
+    return MultiProvider(
       providers: [
         ChangeNotifierProvider<DiscogsSettings>(
           create: (_) => DiscogsSettings(prefs),
@@ -41,10 +44,6 @@ void main() {
         ),
       ),
     );
-  });
-
-  Widget createAccountsWidget() {
-    return widget;
   }
 
   Future<void> submitForm(WidgetTester tester, String discogsUsername,
@@ -78,7 +77,7 @@ void main() {
   }
 
   void checkUnchanged(String key) {
-    checkPreference(key, _kPrefsInitialValues[key]);
+    checkPreference(key, _prefsInitialValues[key]);
   }
 
   void checkAllUnchanged() {
@@ -89,7 +88,12 @@ void main() {
 
   Future<void> editAndVerify(WidgetTester tester, String testDiscogsUsername, String testLastfmUsername, String testLastfmPassword, String testSessionKey) async {
     when(scrobbler.initializeSession(any, any))
-        .thenAnswer((_) async => testSessionKey);
+        .thenAnswer((_) async {
+          if (testSessionKey == null) {
+            throw UIException('initializeSession-fail-test');
+          }
+          return testSessionKey;
+        });
 
     await submitForm(
         tester, testDiscogsUsername, testLastfmUsername, testLastfmPassword);
@@ -140,13 +144,16 @@ void main() {
         find.text(AccountsForm.lastfmInvalidUsernameMessage), findsOneWidget);
     checkAllUnchanged();
 
-    //saves new usernames even if last.fm authentication fails
-
-    await editAndVerify(tester, 'new_discogs_username_1', 'new_lastfm_username_1', 'new_password_1', null);
-
     // saves the new account details'
 
     await editAndVerify(tester, 'new_discogs_username_2', 'new_lastfm_username_2', 'new_password_2', 'new_session_key_2');
+    expect(find.text(AccountsForm.saveSuccessMessage), findsOneWidget);
+
+    //saves new usernames even if last.fm authentication fails
+
+    await editAndVerify(tester, 'new_discogs_username_1', 'new_lastfm_username_1', 'new_password_1', null);
+    expect(find.text(AccountsForm.saveSuccessMessage), findsNothing);
+    expect(find.text('initializeSession-fail-test'), findsOneWidget);
   });
 }
 
