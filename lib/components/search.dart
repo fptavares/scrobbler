@@ -1,20 +1,22 @@
-import 'package:drs_app/components/album.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import '../model/discogs.dart';
 import '../model/playlist.dart';
+import 'album.dart';
 import 'emtpy.dart';
 import 'error.dart';
 import 'playlist.dart';
 
 class AlbumSearch extends SearchDelegate<CollectionAlbum> {
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       IconButton(
         icon: Icon(Icons.clear),
+        tooltip: 'Clear',
         onPressed: () {
           query = '';
         },
@@ -26,6 +28,7 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
   Widget buildLeading(BuildContext context) {
     return IconButton(
       icon: Icon(Icons.arrow_back),
+      tooltip: 'Back',
       onPressed: () {
         close(context, null);
       },
@@ -34,17 +37,22 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return SearchResultsList(query: query);
+    return _SearchResultsList(query: query);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     return buildResults(context);
   }
+
+  @visibleForTesting
+  static const emptyHeadlineMessage = 'Nothing here';
+  @visibleForTesting
+  static const emptySubheadMessage = 'We couldn\'t find any matches';
 }
 
-class SearchResultsList extends StatelessWidget {
-  SearchResultsList({
+class _SearchResultsList extends StatelessWidget {
+  _SearchResultsList({
     Key key,
     @required this.query,
   }) : super(key: key);
@@ -73,8 +81,8 @@ class SearchResultsList extends StatelessWidget {
           ? const EmptyState(
               key: ValueKey<int>(1),
               imagePath: 'assets/empty_search.png',
-              headline: 'Nothing here',
-              subhead: 'We couldn\'t find any matches',
+              headline: AlbumSearch.emptyHeadlineMessage,
+              subhead: AlbumSearch.emptySubheadMessage,
             )
           : Column(
               key: const ValueKey<int>(2),

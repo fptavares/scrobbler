@@ -156,20 +156,17 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
       discogs.username = _discogsUsername;
       lastfm.username = _lastfmUsername;
 
-      try {
-        if (_lastfmPassword?.isNotEmpty ?? false) {
-          final scrobbler = Provider.of<Scrobbler>(context, listen: false);
-          final sessionKey = await scrobbler.initializeSession(
-              _lastfmUsername, _lastfmPassword);
-          lastfm.sessionKey = sessionKey;
-        }
+      if (_lastfmPassword?.isNotEmpty ?? false) {
+        final scrobbler = Provider.of<Scrobbler>(context, listen: false);
 
-        displaySuccess(context, AccountsForm.saveSuccessMessage);
-      } on Exception catch (e, stackTrace) {
-        displayAndLogError(context, log, e, stackTrace);
-      } finally {
-        setState(() => _isSaving = false);
+        lastfm.sessionKey = await handleFutureError<String>(
+            scrobbler.initializeSession(_lastfmUsername, _lastfmPassword),
+            context,
+            log,
+            success: AccountsForm.saveSuccessMessage);
       }
+
+      setState(() => _isSaving = false);
     }
   }
 }
