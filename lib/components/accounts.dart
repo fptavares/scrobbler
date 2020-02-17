@@ -159,11 +159,13 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
       if (_lastfmPassword?.isNotEmpty ?? false) {
         final scrobbler = Provider.of<Scrobbler>(context, listen: false);
 
-        lastfm.sessionKey = await handleFutureError<String>(
+        lastfm.sessionKey = await handleFutureError(
             scrobbler.initializeSession(_lastfmUsername, _lastfmPassword),
             context,
             log,
             success: AccountsForm.saveSuccessMessage);
+      } else {
+        displaySuccess(context, AccountsForm.saveSuccessMessage);
       }
 
       setState(() => _isSaving = false);

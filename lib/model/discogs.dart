@@ -283,8 +283,7 @@ class Collection extends ChangeNotifier {
         'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
         headers: _headers,
       );
-    } on Exception catch (e, stackTrace) {
-      log.info('Connection to Discogs failed.', e, stackTrace);
+    } on Exception catch (e) {
       throw UIException('Could not connect to the Discogs server: $e', e);
     }
 
@@ -325,8 +324,7 @@ class Collection extends ChangeNotifier {
         'https://api.discogs.com/releases/$releaseId',
         headers: _headers,
       );
-    } on Exception catch (e, stackTrace) {
-      log.info('Connection to Discogs failed.', e, stackTrace);
+    } on Exception catch (e) {
       throw UIException('Could not connect to the Discogs server: $e', e);
     }
 

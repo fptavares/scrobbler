@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drs_app/components/scrobble.dart';
 import 'package:drs_app/model/discogs.dart';
 import 'package:drs_app/model/lastfm.dart';
@@ -73,6 +75,22 @@ void main() {
       await tester.pump();
 
       verify(playlist.scrobble(scrobbler, collection)).called(1);
+    });
+
+    testWidgets('display error if scrobbling fails', (tester) async {
+      when(playlist.isEmpty).thenReturn(false);
+
+      const exception = SocketException('no connection');
+      when(playlist.scrobble(any, any)).thenThrow(exception);
+
+      await tester.pumpWidget(createButton());
+
+      await tester.tap(find.byIcon(Icons.play_arrow));
+      await tester.pump();
+
+      verify(playlist.scrobble(scrobbler, collection)).called(1);
+
+      expect(find.text(exception.toString()), findsOneWidget);
     });
   });
 }

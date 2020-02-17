@@ -10,7 +10,7 @@ void displayAndLogError(
   if (e is! UIException) {
     log.severe(errorMessage, e, stackTrace);
   } else if (e is UIException && e.exception != null) {
-    log.severe(errorMessage, e.exception, stackTrace);
+    log.info(errorMessage, e.exception, stackTrace);
   }
 
   final scaffold = Scaffold.of(context);
@@ -54,5 +54,5 @@ class UIException implements Exception {
   final Object exception;
 
   @override
-  String toString() => message ?? 'Something went wrong.';
+  String toString() => message ?? exception?.toString() ?? 'UIException';
 }

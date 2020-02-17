@@ -1,5 +1,4 @@
 import 'package:drs_app/components/accounts.dart';
-import 'package:drs_app/components/error.dart';
 import 'package:drs_app/model/lastfm.dart';
 import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
@@ -86,25 +85,36 @@ void main() {
     checkUnchanged(LastfmSettings.sessionKeyKey);
   }
 
-  Future<void> editAndVerify(WidgetTester tester, String testDiscogsUsername, String testLastfmUsername, String testLastfmPassword, String testSessionKey) async {
-    when(scrobbler.initializeSession(any, any))
-        .thenAnswer((_) async {
-          if (testSessionKey == null) {
-            throw UIException('initializeSession-fail-test');
-          }
-          return testSessionKey;
-        });
+  Future<void> editAndVerify(
+      WidgetTester tester,
+      String testDiscogsUsername,
+      String testLastfmUsername,
+      String testLastfmPassword,
+      String testSessionKey,
+      {bool shouldInitializeSession = true}) async {
+    when(scrobbler.initializeSession(any, any)).thenAnswer((_) async {
+      if (testSessionKey == null) {
+        throw Exception('initializeSession-fail-test');
+      }
+      return testSessionKey;
+    });
 
     await submitForm(
         tester, testDiscogsUsername, testLastfmUsername, testLastfmPassword);
 
-    verify(scrobbler.initializeSession(testLastfmUsername, testLastfmPassword))
-        .called(1);
+    if (shouldInitializeSession) {
+      verify(scrobbler.initializeSession(
+              testLastfmUsername, testLastfmPassword))
+          .called(1);
+    } else {
+      verifyNever(scrobbler.initializeSession(any, any));
+    }
 
     checkPreferences(testDiscogsUsername, testLastfmUsername, testSessionKey);
   }
 
-  testWidgets('Accounts form renders, validates and saves settings', (tester) async {
+  testWidgets('Accounts form renders, validates and saves settings',
+      (tester) async {
     await tester.pumpWidget(createAccountsWidget());
 
     expect(find.byType(Form), findsOneWidget);
@@ -146,15 +156,55 @@ void main() {
 
     // saves the new account details'
 
-    await editAndVerify(tester, 'new_discogs_username_2', 'new_lastfm_username_2', 'new_password_2', 'new_session_key_2');
+    const errorMessage = 'Exception: initializeSession-fail-test';
+
+    await editAndVerify(tester, 'new_discogs_username_2',
+        'new_lastfm_username_2', 'new_password_2', 'new_session_key_2');
     expect(find.text(AccountsForm.saveSuccessMessage), findsOneWidget);
+    expect(find.text(errorMessage), findsNothing);
 
-    //saves new usernames even if last.fm authentication fails
+    await clearSnackbars(tester);
 
-    await editAndVerify(tester, 'new_discogs_username_1', 'new_lastfm_username_1', 'new_password_1', null);
+    // saves new discogs username even if the last.fm password is empty if last.fm username is unchanged
+
+    await editAndVerify(tester, 'new_discogs_username_3',
+        'new_lastfm_username_2', '', 'new_session_key_2',
+        shouldInitializeSession: false);
+    expect(find.text(AccountsForm.saveSuccessMessage), findsOneWidget);
+    expect(find.text(errorMessage), findsNothing);
+
+    await clearSnackbars(tester);
+
+    // saves new usernames even if last.fm authentication fails
+
+    await editAndVerify(tester, 'new_discogs_username_4',
+        'new_lastfm_username_4', 'new_password_4', null);
+    expect(find.text(errorMessage), findsOneWidget);
     expect(find.text(AccountsForm.saveSuccessMessage), findsNothing);
-    expect(find.text('initializeSession-fail-test'), findsOneWidget);
   });
+}
+
+Future clearSnackbars(WidgetTester tester) async {
+  // allow time for snackbar to leave the screen (5 seconds default duration)
+  // below thanks to: https://github.com/flutter/flutter/blob/ec9813a5005f4c3e75a5a9f42ce53ae280959085/packages/flutter/test/material/snack_bar_test.dart#L42-L53
+  await tester.pump(); // schedule animation
+  await tester.pump(); // begin animation
+  await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; five second timer starts here
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 1.50s
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 2.25s
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 3.00s
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 3.75s
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 4.50s
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 5.25s
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750)); // 6.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+  await tester.pump(); // begin animation
 }
 
 // Mock classes
