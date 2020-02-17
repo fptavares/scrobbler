@@ -42,3 +42,4 @@ lib/generated_plugin_registrant.dart
 /android/
 /gen/
 /coverage/
+analysis.txt
