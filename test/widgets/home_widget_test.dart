@@ -1,14 +1,14 @@
-import 'package:drs_app/components/accounts.dart';
-import 'package:drs_app/components/album.dart';
-import 'package:drs_app/components/home.dart';
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/playlist.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/accounts.dart';
+import 'package:scrobbler/components/album.dart';
+import 'package:scrobbler/components/home.dart';
+import 'package:scrobbler/model/discogs.dart';
+import 'package:scrobbler/model/playlist.dart';
+import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../test_albums.dart';

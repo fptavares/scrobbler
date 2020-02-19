@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:drs_app/components/error.dart';
-import 'package:drs_app/model/discogs.dart';
+import 'package:scrobbler/components/error.dart';
+import 'package:scrobbler/model/discogs.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';

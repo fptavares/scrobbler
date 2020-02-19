@@ -1,9 +1,9 @@
-import 'package:drs_app/components/emtpy.dart';
-import 'package:drs_app/components/playlist.dart';
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/emtpy.dart';
+import 'package:scrobbler/components/playlist.dart';
+import 'package:scrobbler/model/playlist.dart';
 
 import '../test_albums.dart';
 

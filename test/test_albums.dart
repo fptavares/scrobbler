@@ -1,4 +1,4 @@
-import 'package:drs_app/model/discogs.dart';
+import 'package:scrobbler/model/discogs.dart';
 
 final CollectionAlbum testAlbum1 = CollectionAlbum(
   id: 123,

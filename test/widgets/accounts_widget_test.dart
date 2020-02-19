@@ -1,10 +1,10 @@
-import 'package:drs_app/components/accounts.dart';
-import 'package:drs_app/model/lastfm.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/accounts.dart';
+import 'package:scrobbler/model/lastfm.dart';
+import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final Map<String, dynamic> _prefsInitialValues = <String, dynamic>{

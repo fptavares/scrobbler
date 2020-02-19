@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:drs_app/components/album.dart';
-import 'package:drs_app/components/playlist.dart';
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/album.dart';
+import 'package:scrobbler/components/playlist.dart';
+import 'package:scrobbler/model/playlist.dart';
 
 import '../test_albums.dart';
 import 'mock_image_http.dart';

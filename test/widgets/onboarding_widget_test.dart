@@ -1,10 +1,10 @@
-import 'package:drs_app/components/accounts.dart';
-import 'package:drs_app/components/onboarding.dart';
-import 'package:drs_app/model/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/accounts.dart';
+import 'package:scrobbler/components/onboarding.dart';
+import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

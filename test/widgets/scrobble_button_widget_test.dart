@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:drs_app/components/scrobble.dart';
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/lastfm.dart';
-import 'package:drs_app/model/playlist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/scrobble.dart';
+import 'package:scrobbler/model/discogs.dart';
+import 'package:scrobbler/model/lastfm.dart';
+import 'package:scrobbler/model/playlist.dart';
 
 
 void main() {

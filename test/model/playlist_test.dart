@@ -1,6 +1,6 @@
-import 'package:drs_app/model/discogs.dart';
-import 'package:drs_app/model/lastfm.dart';
-import 'package:drs_app/model/playlist.dart';
+import 'package:scrobbler/model/discogs.dart';
+import 'package:scrobbler/model/lastfm.dart';
+import 'package:scrobbler/model/playlist.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
