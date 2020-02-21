@@ -83,7 +83,7 @@ void main() {
         await function();
         fail('Exception not thrown on: $function');
       } on Exception catch (e) {
-        expect(e, const TypeMatcher<UIException>());
+        expect(e, isA<UIException>());
       }
     }
 
@@ -106,6 +106,23 @@ void main() {
       scrobbler.updateSessionKey(key);
       await verifyThrows(
           () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+    });
+
+    test('throws UI exception if album list is empty', () async {
+      scrobbler.httpClient =
+          MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
+
+      scrobbler.updateSessionKey(key);
+      await verifyThrows(
+              () async => await scrobbler.scrobbleAlbums([]).toList());
+    });
+
+    test('throws UI exception if session key is empty', () async {
+      scrobbler.httpClient =
+          MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
+
+      await verifyThrows(
+              () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
   });
 }

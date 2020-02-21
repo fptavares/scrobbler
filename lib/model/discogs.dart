@@ -300,6 +300,9 @@ class Collection extends ChangeNotifier {
           .map((dynamic release) =>
               CollectionAlbum.fromJson(release as Map<String, dynamic>))
           .toList();
+    } else if (response.statusCode == 404) {
+      throw UIException(
+          'Discogs couldn\'t find your collection! Please make that the username you provided is correct.');
     } else {
       log.info(
           'Discogs responded with an error loading collection page (${response.statusCode}): ${response.body}');

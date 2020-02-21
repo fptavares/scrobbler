@@ -9,7 +9,6 @@ import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
 
-
 void main() {
   group('Scrobble button', () {
     MockScrobbler scrobbler;
@@ -66,8 +65,9 @@ void main() {
       when(playlist.isEmpty).thenReturn(false);
 
       final scrobbleResults = [10, 5];
-      
-      when(playlist.scrobble(any, any)).thenAnswer((_) => Stream.fromIterable(scrobbleResults));
+
+      when(playlist.scrobble(any, any))
+          .thenAnswer((_) => Stream.fromIterable(scrobbleResults));
 
       await tester.pumpWidget(createButton());
 
@@ -75,6 +75,23 @@ void main() {
       await tester.pump();
 
       verify(playlist.scrobble(scrobbler, collection)).called(1);
+    });
+
+    testWidgets('doesn\'t allow tap if playlist is already scrobbling',
+        (tester) async {
+      when(playlist.isEmpty).thenReturn(false);
+      when(playlist.isScrobbling).thenReturn(true);
+
+      await tester.pumpWidget(createButton());
+
+      expect(find.byIcon(Icons.play_arrow), findsNothing);
+      expect(tester.widget<FloatingActionButton>(find.byType(FloatingActionButton)).onPressed, isNull);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+
+      verifyNever(playlist.scrobble(scrobbler, collection));
     });
 
     testWidgets('display error if scrobbling fails', (tester) async {
@@ -97,5 +114,7 @@ void main() {
 
 // Mock classes
 class MockCollection extends Mock implements Collection {}
+
 class MockScrobbler extends Mock implements Scrobbler {}
+
 class MockPlaylist extends Mock implements Playlist {}

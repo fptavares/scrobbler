@@ -67,6 +67,10 @@ class Scrobbler {
       throw UIException(
           'Oops! You need to login to Last.fm first with your username and password.');
     }
+    if (albums.isEmpty) {
+      throw UIException(
+          'Your playlist is empty! Try to add some albums to it first.');
+    }
 
     final queue = _createScrobbleQueue(albums);
     for (final scrobbles in queue.batches) {
