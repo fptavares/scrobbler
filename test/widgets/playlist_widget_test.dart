@@ -20,6 +20,31 @@ void main() {
       );
     }
 
+    Widget createHomeWithPlaylist() {
+      return ChangeNotifierProvider<Playlist>.value(
+        value: playlist,
+        child: MaterialApp(
+          home: Scaffold(
+              appBar: AppBar(
+                actions: <Widget>[
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.playlist_play),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => PlaylistPage()),
+                        );
+                      },
+                    ),
+                  )
+                ],
+              ),
+              body: Container()),
+        ),
+      );
+    }
+
     setUp(() {
       playlist = Playlist();
       playlist.addAlbum(testAlbum1);
@@ -133,6 +158,34 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
       expect(find.text(PlaylistPage.emptyHeadlineMessage), findsOneWidget);
       expect(find.text(PlaylistPage.emptySubheadMessage), findsOneWidget);
+    });
+
+    testWidgets('clears "zeroed" albums from playlist on back', (tester) async {
+      await tester.pumpWidget(createHomeWithPlaylist());
+
+      await tester.tap(find.byIcon(Icons.playlist_play));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+
+      expect(playlist.numberOfItems, equals(2));
+
+      final firstItemCount = find.byType(PlaylistCountIndicator).first;
+      Finder firstItemCountWith(int count) =>
+          find.descendant(of: firstItemCount, matching: find.text('$count'));
+
+      expect(firstItemCountWith(1), findsOneWidget);
+
+      await tester.tap(firstItemCount);
+      await tester.pump();
+
+      expect(firstItemCountWith(0), findsOneWidget);
+
+      expect(playlist.numberOfItems, equals(2));
+
+      await tester.pageBack();
+      await tester.pump();
+
+      expect(playlist.numberOfItems, equals(1));
     });
   });
 }

@@ -71,6 +71,10 @@ class Playlist extends ChangeNotifier {
   PlaylistItem getPlaylistItem(CollectionAlbum album) {
     return _isScrobbling ? null : _itemById[album.releaseId];
   }
+
+  void clearZeroCountAlbums() {
+    _itemById.removeWhere((_, item) => item.count == 0);
+  }
 }
 
 class PlaylistItem extends ValueNotifier<int> {

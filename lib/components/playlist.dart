@@ -11,28 +11,34 @@ class PlaylistPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final playlist = Provider.of<Playlist>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Playlist'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.clear_all),
-            tooltip: 'Remove all',
-            onPressed: (playlist.isNotEmpty) ? playlist.clearAlbums : null,
-          ),
-        ],
+    return WillPopScope(
+      onWillPop: () {
+        playlist.clearZeroCountAlbums();
+        return Future.value(true);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Playlist'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.clear_all),
+              tooltip: 'Remove all',
+              onPressed: (playlist.isNotEmpty) ? playlist.clearAlbums : null,
+            ),
+          ],
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 100),
+          child: (playlist.isEmpty)
+              ? const EmptyState(
+                  imagePath: 'assets/empty_playlist.png',
+                  headline: PlaylistPage.emptyHeadlineMessage,
+                  subhead: PlaylistPage.emptySubheadMessage,
+                )
+              : _PlaylistList(playlist: playlist),
+        ),
+        floatingActionButton: ScrobbleFloatingButton(),
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 100),
-        child: (playlist.isEmpty)
-            ? const EmptyState(
-                imagePath: 'assets/empty_playlist.png',
-                headline: PlaylistPage.emptyHeadlineMessage,
-                subhead: PlaylistPage.emptySubheadMessage,
-              )
-            : _PlaylistList(playlist: playlist),
-      ),
-      floatingActionButton: ScrobbleFloatingButton(),
     );
   }
 
