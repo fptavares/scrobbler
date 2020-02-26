@@ -4,5 +4,6 @@ container:
 test_task:
   pub_cache:
     folder: ~/.pub-cache
+  install_dependencies_script: flutter pub get
   generate_secrets_script: make secrets
   test_script: make test
