@@ -2,8 +2,11 @@ container:
   image: cirrusci/flutter:latest
 
 test_task:
+  environment:
+    CODECOV_TOKEN: ENCRYPTED[fd031740ff3ab7b9da5819c6bc67681e8fb1916c9b35dd28df7f660dc0d84752f2caceefaf17f6598b7126772f9943cb]
   pub_cache:
     folder: ~/.pub-cache
   install_dependencies_script: flutter pub get
   generate_secrets_script: make secrets
   test_script: make test
+  coverage_script: bash <(curl -s https://codecov.io/bash) -f coverage/lcov.info
