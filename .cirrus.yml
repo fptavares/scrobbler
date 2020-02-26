@@ -1,0 +1,8 @@
+container:
+  image: cirrusci/flutter:latest
+
+test_task:
+  pub_cache:
+    folder: ~/.pub-cache
+  generate_secrets_script: make secrets
+  test_script: make test
