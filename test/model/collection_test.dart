@@ -5,6 +5,7 @@ import 'package:scrobbler/model/discogs.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
+import 'package:scrobbler/secrets.dart';
 import 'package:test/test.dart';
 
 import 'collection_test_data.dart';
@@ -23,8 +24,10 @@ void main() {
 
     void verifyCommonHeaders(Request request) {
       expect(request.headers['User-Agent'], equals(userAgent));
-      expect(request.headers['Authorization'],
-          matches(r'Discogs key=\w+, secret=\w+'));
+      expect(
+          request.headers['Authorization'],
+          equals(
+              'Discogs key=$discogsConsumerKey, secret=$discogsConsumerSecret'));
     }
 
     Client createPageMockClient({int expectedHits}) {
@@ -315,7 +318,8 @@ void main() {
       verifyNever(collection.httpClient.get(anything));
     });
 
-    test('doesn\'t try to load collection if it\' already fully loaded', () async {
+    test('doesn\'t try to load collection if it\' already fully loaded',
+        () async {
       collection.httpClient = createPageMockClient(expectedHits: 3);
 
       await collection.updateUsername(username);
