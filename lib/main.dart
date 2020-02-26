@@ -15,16 +15,19 @@ import 'model/settings.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // initialize logger
-  Logger.root.level = Level.ALL; // defaults to Level.INFO
-  Logger.root.onRecord.listen((record) {
-    // ignore: avoid_print
-    print('${record.level.name}: ${record.time}: ${record.message}');
-    if (record.level > Level.INFO && record.stackTrace != null) {
+  const isProduction = bool.fromEnvironment('dart.vm.product');
+  if (!isProduction) {
+    // initialize logger
+    Logger.root.level = Level.ALL; // defaults to Level.INFO
+    Logger.root.onRecord.listen((record) {
       // ignore: avoid_print
-      print(record.stackTrace);
-    }
-  });
+      print('${record.level.name}: ${record.time}: ${record.message}');
+      if (record.level > Level.INFO && record.stackTrace != null) {
+        // ignore: avoid_print
+        print(record.stackTrace);
+      }
+    });
+  }
 
   // initialize user-agent
   var userAgent = 'RecordScrobbler';
