@@ -1,7 +1,7 @@
 .PHONY: all secrets test analysis showCoverage analysis run icons clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
-ASSETS = $(wildcard assets/**) $(wildcard fonts/**)
+ASSETS = $(wildcard assets/**)
 SOURCES = $(CODE) $(ASSETS)
 
 all: analysis showCoverage
