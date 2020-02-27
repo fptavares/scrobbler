@@ -84,7 +84,15 @@ class HomeAppBar extends StatelessWidget {
           StretchMode.fadeTitle,
         ],
         centerTitle: true,
-        title: const Text('Record Scrobbler'),
+        title: GestureDetector(
+          onTap: () => PrimaryScrollController.of(context).animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          ),
+          child: const Text('Record Scrobbler',
+              style: TextStyle(fontFamily: 'OpenSans')),
+        ),
         background: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
