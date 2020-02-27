@@ -40,37 +40,29 @@ class HomePage extends StatelessWidget {
                   ? null
                   : handleFutureError(collection.reload(), context, log,
                       error: 'Failed to reload collection!'),
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                //AlwaysScrollableScrollPhysics
-                slivers: <Widget>[
-                  HomeAppBar(),
-                  CollectionGrid(),
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    fillOverscroll: true,
-                    child: Consumer<LoadingStatus>(
-                      builder: (_, loading, __) => Container(
-                        height: 160,
-                        child: loading == LoadingStatus.loading
-                            ? const Center(
-                                child: SizedBox(
-                                  height: 60,
-                                  width: 60,
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            : Container(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              child: const HomeBody(),
             ),
           ),
         ),
       ),
       floatingActionButton: ScrobbleFloatingButton(),
+    );
+  }
+}
+
+class HomeBody extends StatelessWidget {
+  const HomeBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      controller: PrimaryScrollController.of(context),
+      slivers: <Widget>[
+        HomeAppBar(),
+        CollectionGrid(),
+        const CollectionLoadingStatus(),
+      ],
     );
   }
 }

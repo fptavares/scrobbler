@@ -59,10 +59,11 @@ class MyApp extends StatelessWidget {
           create: (_) => LastfmSettings(prefs),
         ),
         ChangeNotifierProxyProvider<DiscogsSettings, Collection>(
-          create: (_) => Collection(userAgent),
-          update: (_, settings, collection) =>
-              collection..updateUsername(settings.username),
-        ),
+            create: (_) => Collection(userAgent),
+            update: (_, settings, collection) => collection
+              ..updateUsername(settings.username).catchError((e, stackTrace) =>
+                  Logger.root.warning(
+                      'Exception while updating username.', e, stackTrace))),
         ProxyProvider<LastfmSettings, Scrobbler>(
           lazy: false,
           create: (_) => Scrobbler(userAgent),

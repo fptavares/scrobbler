@@ -18,41 +18,41 @@ class EmptyState extends StatelessWidget {
 
     return Align(
       alignment: Alignment.topCenter,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 30.0,
-                bottom: 15.0,
-                left: 15.0,
-                right: 15.0,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: 30.0,
+          bottom: 15.0,
+          left: 15.0,
+          right: 15.0,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              flex: 10,
+              child: Image(image: AssetImage(imagePath),
               ),
-              child: Image(image: AssetImage(imagePath)),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
+            const Flexible(flex: 1, child: SizedBox(height: 23.0)),
+            Text(
               headline,
               style: theme.textTheme.display1.copyWith(
                 color: theme.accentColor,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          Text(
-            subhead,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.subhead.copyWith(
-              color: Colors.black54,
+            const Flexible(flex: 1, child: SizedBox(height: 8.0)),
+            Text(
+              subhead,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.subhead.copyWith(
+                color: Colors.black54,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -127,19 +128,21 @@ class Collection extends ChangeNotifier {
   String _username;
   final List<CollectionAlbum> _albumList = <CollectionAlbum>[];
 
-  final Loading _loading = Loading();
+  final _Progress _progress = _Progress();
 
   int _nextPage = 1;
   int _totalItems;
   int _totalPages;
 
-  Loading get loadingNotifier => _loading;
+  ValueNotifier<LoadingStatus> get loadingNotifier => _progress.statusNotifier;
 
-  bool get isLoading => _loading.value == LoadingStatus.loading;
+  bool get isLoading => _progress.status == LoadingStatus.loading;
 
   bool get isNotLoading => !isLoading;
 
-  bool get hasLoadingError => _loading.value == LoadingStatus.error;
+  bool get hasLoadingError => _progress.status == LoadingStatus.error;
+
+  String get errorMessage => _progress.errorMessage;
 
   bool get isEmpty => _albumList.isEmpty;
 
@@ -150,9 +153,6 @@ class Collection extends ChangeNotifier {
   bool get isFullyLoaded => _nextPage > 1 && _nextPage > _totalPages;
 
   bool get isNotFullyLoaded => !isFullyLoaded;
-
-  // ignore: avoid_setters_without_getters
-  set _loadingStatus(LoadingStatus newValue) => _loading.value = newValue;
 
   int get totalItems => _totalItems;
 
@@ -223,14 +223,14 @@ class Collection extends ChangeNotifier {
       throw UIException('Cannot load albums because the username is empty.');
     }
 
-    _loadingStatus = LoadingStatus.loading;
+    _progress.loading();
     try {
       _addAlbums(await _loadCollectionPage(_nextPage));
       _nextPage++;
 
-      _loadingStatus = LoadingStatus.finished;
-    } on Exception {
-      _loadingStatus = LoadingStatus.error;
+      _progress.finished();
+    } on Exception catch (e) {
+      _progress.error(e);
       rethrow;
     }
   }
@@ -253,7 +253,7 @@ class Collection extends ChangeNotifier {
           'Cannot load all remaining albums before loading the first page.');
     }
 
-    _loadingStatus = LoadingStatus.loading;
+    _progress.loading();
     try {
       final pages = await Future.wait<List<CollectionAlbum>>(
         <Future<List<CollectionAlbum>>>[
@@ -267,9 +267,9 @@ class Collection extends ChangeNotifier {
 
       _nextPage = _totalPages + 1; // setting page index to the end
 
-      _loadingStatus = LoadingStatus.finished;
-    } on Exception {
-      _loadingStatus = LoadingStatus.error;
+      _progress.finished();
+    } on Exception catch (e) {
+      _progress.error(e);
       rethrow;
     }
   }
@@ -283,8 +283,8 @@ class Collection extends ChangeNotifier {
         'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
         headers: _headers,
       );
-    } on Exception catch (e) {
-      throw UIException('Could not connect to the Discogs server: $e', e);
+    } on SocketException catch (e) {
+      throw UIException('Could not connect to Discogs. Please check your internet connection and try again later.', e);
     }
 
     if (response.statusCode == 200) {
@@ -327,8 +327,8 @@ class Collection extends ChangeNotifier {
         'https://api.discogs.com/releases/$releaseId',
         headers: _headers,
       );
-    } on Exception catch (e) {
-      throw UIException('Could not connect to the Discogs server: $e', e);
+    } on SocketException catch (e) {
+      throw UIException('Could not connect to Discogs. Please check your internet connection and try again later.', e);
     }
 
     if (response.statusCode == 200) {
@@ -352,8 +352,27 @@ class Collection extends ChangeNotifier {
 
 enum LoadingStatus { neverLoaded, loading, finished, error }
 
-class Loading extends ValueNotifier<LoadingStatus> {
-  Loading() : super(LoadingStatus.neverLoaded);
+class _Progress {
+  final ValueNotifier<LoadingStatus> statusNotifier =
+      ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
+  String errorMessage;
+
+  LoadingStatus get status => statusNotifier.value;
+
+  void loading() {
+    errorMessage = null;
+    statusNotifier.value = LoadingStatus.loading;
+  }
+
+  void finished() {
+    errorMessage = null;
+    statusNotifier.value = LoadingStatus.finished;
+  }
+
+  void error(Exception exception) {
+    errorMessage = exception is UIException ? exception.message : null;
+    statusNotifier.value = LoadingStatus.error;
+  }
 }
 
 String _oneNameForArtists(List<dynamic> artists) {

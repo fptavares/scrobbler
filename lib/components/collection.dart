@@ -12,36 +12,6 @@ class CollectionGrid extends StatelessWidget {
       padding: const EdgeInsets.all(5),
       sliver: Consumer<Collection>(
         builder: (context, collection, _) {
-          if (collection.isUserEmpty) {
-            return const SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: true,
-              child: EmptyState(
-                imagePath: 'assets/empty_nothing.png',
-                headline: 'Anyone out there?',
-                subhead: 'A Discogs account needs to be configured',
-              ),
-            );
-          }
-          if (collection.isEmpty && collection.isNotLoading) {
-            return SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: true,
-              child: collection.hasLoadingError
-                  ? const EmptyState(
-                      imagePath: 'assets/empty_error.png',
-                      headline: 'Whoops!',
-                      subhead:
-                          'Could not connect to Discogs to get your collection. Please try again later.')
-                  : const EmptyState(
-                      imagePath: 'assets/empty_home.png',
-                      headline: 'Nothing here',
-                      subhead:
-                          'It appears that the configured user collection is either empty, or not publically accessible.',
-                    ),
-            );
-          }
-
           return SliverGrid(
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 150,
@@ -54,6 +24,57 @@ class CollectionGrid extends StatelessWidget {
               },
               childCount: collection.albums.length,
             ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class CollectionLoadingStatus extends StatelessWidget {
+  const CollectionLoadingStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      fillOverscroll: true,
+      child: Consumer2<Collection, LoadingStatus>(
+        builder: (_, collection, status, __) {
+          if (collection.isUserEmpty) {
+            return const EmptyState(
+              imagePath: 'assets/empty_nothing.png',
+              headline: 'Anyone out there?',
+              subhead: 'A Discogs account needs to be configured',
+            );
+          }
+
+          if (collection.isEmpty && collection.isNotLoading) {
+            return collection.hasLoadingError
+                ? EmptyState(
+                    imagePath: 'assets/empty_error.png',
+                    headline: 'Whoops!',
+                    subhead: collection.errorMessage ??
+                        'Could not connect to Discogs to get your collection. Please try again later.')
+                : const EmptyState(
+                    imagePath: 'assets/empty_home.png',
+                    headline: 'Nothing here',
+                    subhead:
+                        'It appears that the configured user collection is either empty, or not publically accessible.',
+                  );
+          }
+
+          return Container(
+            height: 160,
+            child: status == LoadingStatus.loading
+                ? const Center(
+                    child: SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : Container(),
           );
         },
       ),

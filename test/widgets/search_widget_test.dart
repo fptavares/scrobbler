@@ -277,7 +277,6 @@ void main() {
 // Mock classes
 class MockCollection extends Mock implements Collection {
   @override
-  Loading get loadingNotifier => MockLoading();
+  ValueNotifier<LoadingStatus> get loadingNotifier =>
+      ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
 }
-
-class MockLoading extends Mock implements Loading {}

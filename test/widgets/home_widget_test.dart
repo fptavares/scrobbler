@@ -134,27 +134,25 @@ Future<void> main() async {
       verify(collection.loadMoreAlbums());
     });
 
-    testWidgets('reloads collection on drag beyond the top',
-            (tester) async {
-          when(collection.albums).thenReturn(
-              List.generate(20, (index) => testAlbum1.copyWith(id: index)));
+    testWidgets('reloads collection on drag beyond the top', (tester) async {
+      when(collection.albums).thenReturn(
+          List.generate(20, (index) => testAlbum1.copyWith(id: index)));
 
-          await tester.pumpWidget(createHome());
+      await tester.pumpWidget(createHome());
 
-          await tester.drag(
-              find.text('Record Scrobbler'), const Offset(0.0, 250.0));
-          await tester.pump();
-          await tester.pump(const Duration(seconds: 3));
+      await tester.drag(
+          find.text('Record Scrobbler'), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
 
-          verify(collection.reload());
-        });
+      verify(collection.reload());
+    });
   });
 }
 
 // Mock classes
 class MockCollection extends Mock implements Collection {
   @override
-  Loading get loadingNotifier => MockLoading();
+  ValueNotifier<LoadingStatus> get loadingNotifier =>
+      ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
 }
-
-class MockLoading extends Mock implements Loading {}
