@@ -29,7 +29,7 @@ void main() {
                 actions: <Widget>[
                   Builder(
                     builder: (context) => IconButton(
-                      icon: Icon(Icons.playlist_play),
+                      icon: const Icon(Icons.playlist_play),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -113,7 +113,7 @@ void main() {
       expect(find.byType(Dismissible), findsNWidgets(2));
       final firstItem = find.byType(Dismissible).first;
 
-      Future<void> desmissFirstItem() async {
+      Future<void> dismissFirstItem() async {
         await tester.fling(firstItem, const Offset(-500.0, 0.0), 10000.0);
 
         // below thanks to: https://github.com/flutter/flutter/blob/master/packages/flutter/test/widgets/dismissible_test.dart
@@ -125,13 +125,13 @@ void main() {
       }
 
       expect(find.text(testAlbum1.title), findsOneWidget);
-      await desmissFirstItem();
+      await dismissFirstItem();
       expect(find.text(testAlbum1.title), findsNothing);
 
       expect(find.byType(Dismissible), findsOneWidget);
 
       expect(find.text(testAlbum2.title), findsOneWidget);
-      await desmissFirstItem();
+      await dismissFirstItem();
       expect(find.text(testAlbum2.title), findsNothing);
 
       expect(find.byType(ListTile), findsNothing);
