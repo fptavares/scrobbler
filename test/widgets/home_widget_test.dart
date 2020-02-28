@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler/components/accounts.dart';
 import 'package:scrobbler/components/album.dart';
+import 'package:scrobbler/components/emtpy.dart';
 import 'package:scrobbler/components/home.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/playlist.dart';
@@ -146,6 +148,65 @@ Future<void> main() async {
       await tester.pump(const Duration(seconds: 3));
 
       verify(collection.reload());
+    });
+
+    testWidgets('scroll to top when user taps the app bar title',
+        (tester) async {
+      when(collection.albums).thenReturn(
+          List.generate(50, (index) => testAlbum1.copyWith(id: index)));
+
+      await tester.pumpWidget(createHome());
+
+      final firstAlbumFinder = find.byKey(const ValueKey<int>(0));
+      final lastAlbumFinder = find.byKey(const ValueKey<int>(49));
+
+      expect(firstAlbumFinder, findsOneWidget);
+      expect(lastAlbumFinder, findsNothing);
+
+      await tester.drag(firstAlbumFinder, const Offset(0.0, -1000.0));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+
+      expect(firstAlbumFinder, findsNothing);
+      expect(lastAlbumFinder, findsOneWidget);
+
+      await tester.tap(find.text('Record Scrobbler'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+
+      expect(firstAlbumFinder, findsOneWidget);
+      expect(lastAlbumFinder, findsNothing);
+    });
+
+    testWidgets('handles empty state error', (tester) async {
+      when(collection.hasLoadingError).thenReturn(true);
+      when(collection.isEmpty).thenReturn(true);
+      when(collection.isNotLoading).thenReturn(true);
+      when(collection.errorMessage).thenReturn('My test error message');
+      when(collection.albums).thenReturn([]);
+
+      await tester.pumpWidget(createHome());
+
+      expect(find.byType(EmptyState), findsOneWidget);
+      expect(find.byType(Image), findsOneWidget);
+      expect(find.text('Whoops!'), findsOneWidget);
+      expect(find.text('My test error message'), findsOneWidget);
+    });
+
+    testWidgets('doesn\'t show empty state on error if collection isn\'t empty',
+        (tester) async {
+      when(collection.hasLoadingError).thenReturn(true);
+      when(collection.isEmpty).thenReturn(false);
+      when(collection.isNotLoading).thenReturn(true);
+      when(collection.errorMessage).thenReturn('My test error message');
+      when(collection.albums).thenReturn([testAlbum1]);
+
+      await tester.pumpWidget(createHome());
+
+      expect(find.byType(EmptyState), findsNothing);
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('Whoops!'), findsNothing);
+      expect(find.text('My test error message'), findsNothing);
     });
   });
 }
