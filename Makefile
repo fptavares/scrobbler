@@ -1,4 +1,4 @@
-.PHONY: all secrets test analysis showCoverage analysis run icons clean
+.PHONY: all secrets test showCoverage analysis run icons clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
 ASSETS = $(wildcard assets/**)
