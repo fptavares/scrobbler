@@ -114,7 +114,7 @@ class CachedAlbumImage extends StatelessWidget {
                           album.title,
                           style: Theme.of(context).textTheme.subhead,
                           textAlign: TextAlign.center,
-                          maxLines: 3,
+                          maxLines: 2,
                         ),
                       ),
                     ),
