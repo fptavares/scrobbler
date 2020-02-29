@@ -75,11 +75,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Record Scrobbler',
         theme: ThemeData(
-          primarySwatch: Colors.amber, //blueGrey,
-          //brightness: Brightness.dark,
+          primarySwatch: Colors.amber,
           primaryColor: const Color(0xFF312F2D),
-          //accentColor: const Color(0xFFFFC66D),
-          //buttonColor: Colors.white,
         ),
         home: StartPage(),
         routes: <String, WidgetBuilder>{
