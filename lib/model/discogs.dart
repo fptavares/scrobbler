@@ -220,7 +220,8 @@ class Collection extends ChangeNotifier {
       return;
     }
     if (_username == null) {
-      throw UIException('Cannot load albums because the username is empty.');
+      log.info('Cannot load albums because the username is empty.');
+      return;
     }
 
     _progress.loading();

@@ -297,7 +297,7 @@ void main() {
 
       await collection.updateUsername(null);
 
-      await verifyThrows(collection.loadMoreAlbums);
+      await collection.loadMoreAlbums();
       await verifyThrows(collection.loadAllAlbums);
       await verifyThrows(collection.reload);
 
