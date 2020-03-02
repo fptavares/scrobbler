@@ -69,7 +69,8 @@ Future<void> main() async {
       await tester.pumpWidget(createHome());
 
       expect(find.byType(SvgPicture), findsOneWidget);
-      expect(find.text('Record Scrobbler'), findsOneWidget);
+      expect(find.text('record'), findsOneWidget);
+      expect(find.text('scrobbler'), findsOneWidget);
       expect(find.byIcon(Icons.search), findsOneWidget);
       expect(find.byIcon(Icons.playlist_play), findsOneWidget);
       expect(find.byIcon(Icons.menu), findsOneWidget);
@@ -143,7 +144,7 @@ Future<void> main() async {
       await tester.pumpWidget(createHome());
 
       await tester.drag(
-          find.text('Record Scrobbler'), const Offset(0.0, 250.0));
+          find.byKey(const ValueKey<int>(0)), const Offset(0.0, 250.0));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
@@ -170,7 +171,7 @@ Future<void> main() async {
       expect(firstAlbumFinder, findsNothing);
       expect(lastAlbumFinder, findsOneWidget);
 
-      await tester.tap(find.text('Record Scrobbler'));
+      await tester.tap(find.byKey(const Key('logo')));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 

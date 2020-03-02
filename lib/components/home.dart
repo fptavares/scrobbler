@@ -76,35 +76,66 @@ class HomeAppBar extends StatelessWidget {
       stretch: true,
       pinned: true,
       forceElevated: true,
-      expandedHeight: 150.0,
+      expandedHeight: 100.0,
       flexibleSpace: FlexibleSpaceBar(
+        centerTitle: true,
+        titlePadding: const EdgeInsets.only(top: 10.0),
         stretchModes: const <StretchMode>[
-          StretchMode.zoomBackground,
-          //StretchMode.blurBackground,
+          //StretchMode.zoomBackground,
+          StretchMode.blurBackground,
           StretchMode.fadeTitle,
         ],
-        centerTitle: true,
         title: GestureDetector(
           onTap: () => PrimaryScrollController.of(context).animateTo(
             0,
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
           ),
-          child: const Text('Record Scrobbler',
-              style: TextStyle(fontFamily: 'OpenSans')),
-        ),
-        background: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            SvgPicture.asset(
+          child: SafeArea(
+            key: const Key('logo'),
+            child: SvgPicture.asset(
               'assets/logo.svg',
-              semanticsLabel: 'Logo',
               color: Theme.of(context).accentColor,
+              height: 50,
+              excludeFromSemantics: true,
             ),
-            const SizedBox(height: 20),
-          ],
+          ),
+        ),
+        background: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 10.0,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: Text('record',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Colors.white30,
+                        fontFamily: 'Quicksand',
+                        fontSize: 24.0,
+                      )),
+                ),
+                const SizedBox(width: 90),
+                Expanded(
+                  flex: 1,
+                  child: Text('scrobbler',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Quicksand',
+                        fontSize: 24.0,
+                      )),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
       actions: <Widget>[

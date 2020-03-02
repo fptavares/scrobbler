@@ -89,7 +89,6 @@ class WelcomePage extends StatelessWidget {
                       child: SvgPicture.asset(
                         'assets/logo.svg',
                         color: Colors.amber,
-                        //Theme.of(context).primaryColor,
                         height: 150,
                       ),
                     ),
@@ -98,7 +97,7 @@ class WelcomePage extends StatelessWidget {
                       child: Text(
                         'Record Scrobbler',
                         style: TextStyle(
-                          fontFamily: 'OpenSans',
+                          fontFamily: 'Quicksand',
                           fontSize: 38,
                           color: Colors.amber,
                           fontWeight: FontWeight.w400,

@@ -53,6 +53,6 @@ flutter:
     - assets/
 
   fonts:
-    - family: OpenSans
+    - family: Quicksand
       fonts:
-        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/Quicksand-Regular.ttf

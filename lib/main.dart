@@ -76,7 +76,8 @@ class MyApp extends StatelessWidget {
         title: 'Record Scrobbler',
         theme: ThemeData(
           primarySwatch: Colors.amber,
-          primaryColor: const Color(0xFF312F2D),
+          primaryColor: const Color(0xFF2a241a),
+          disabledColor: const Color(0xFF2a241a),
         ),
         home: StartPage(),
         routes: <String, WidgetBuilder>{
