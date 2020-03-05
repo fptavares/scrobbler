@@ -82,10 +82,10 @@ class HomeAppBar extends StatelessWidget {
       stretch: true,
       pinned: true,
       forceElevated: true,
-      expandedHeight: 100.0,
+      expandedHeight: 90.0,
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
-        titlePadding: const EdgeInsets.only(top: 10.0),
+        titlePadding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
         stretchModes: const <StretchMode>[
           //StretchMode.zoomBackground,
           StretchMode.blurBackground,
@@ -99,11 +99,15 @@ class HomeAppBar extends StatelessWidget {
           ),
           child: SafeArea(
             key: const Key('logo'),
-            child: SvgPicture.asset(
-              'assets/logo.svg',
-              color: Theme.of(context).accentColor,
-              height: 50,
-              excludeFromSemantics: true,
+            child: Consumer<LoadingStatus>(
+              builder: (_, status, __) => SvgPicture.asset(
+                'assets/logo.svg',
+                color: status == LoadingStatus.loading
+                    ? Theme.of(context).accentColor.withAlpha(128)
+                    : Theme.of(context).accentColor,
+                width: 38,
+                excludeFromSemantics: true,
+              ),
             ),
           ),
         ),
@@ -120,24 +124,18 @@ class HomeAppBar extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   flex: 1,
-                  child: Text('record',
+                  child: Text('scrobbler.',
                       textAlign: TextAlign.right,
                       style: TextStyle(
-                        color: Colors.white30,
+                        color: Colors.white60,
                         fontFamily: 'Quicksand',
                         fontSize: 24.0,
                       )),
                 ),
-                const SizedBox(width: 90),
-                Expanded(
+                const SizedBox(width: 70),
+                const Expanded(
                   flex: 1,
-                  child: Text('scrobbler',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Quicksand',
-                        fontSize: 24.0,
-                      )),
+                  child: Text(''),
                 ),
               ],
             ),

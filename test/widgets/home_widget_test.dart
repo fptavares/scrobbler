@@ -69,8 +69,7 @@ Future<void> main() async {
       await tester.pumpWidget(createHome());
 
       expect(find.byType(SvgPicture), findsOneWidget);
-      expect(find.text('record'), findsOneWidget);
-      expect(find.text('scrobbler'), findsOneWidget);
+      expect(find.text('scrobbler.'), findsOneWidget);
       expect(find.byIcon(Icons.search), findsOneWidget);
       expect(find.byIcon(Icons.playlist_play), findsOneWidget);
       expect(find.byIcon(Icons.menu), findsOneWidget);

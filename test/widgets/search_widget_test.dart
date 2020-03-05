@@ -22,6 +22,8 @@ void main() {
         providers: [
           ChangeNotifierProvider<Collection>.value(value: collection),
           ChangeNotifierProvider<Playlist>.value(value: playlist),
+          ValueListenableProvider<LoadingStatus>.value(
+              value: collection.loadingNotifier),
         ],
         child: MaterialApp(
           home: Scaffold(
