@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:logging/logging.dart';
@@ -7,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'components/home.dart';
 import 'components/onboarding.dart';
 import 'components/playlist.dart';
+import 'model/analytics.dart';
 import 'model/discogs.dart';
 import 'model/lastfm.dart';
 import 'model/playlist.dart';
@@ -15,9 +20,24 @@ import 'model/settings.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Set `enableInDevMode` to true to see reports while in debug mode
+  // This is only to be used for confirming that reports are being
+  // submitted as expected. It is not intended to be used for everyday
+  // development.
+  Crashlytics.instance.enableInDevMode = true;
+
+  // Pass all uncaught errors to Crashlytics.
+  FlutterError.onError = Crashlytics.instance.recordFlutterError;
+
+  // initialize logger
   const isProduction = bool.fromEnvironment('dart.vm.product');
-  if (!isProduction) {
-    // initialize logger
+  if (isProduction) {
+    Logger.root.level = Level.WARNING;
+    Logger.root.onRecord.listen((record) {
+      analytics.logException('${record.level.name}: ${record.message}');
+      Crashlytics.instance.recordError(record.message, record.stackTrace);
+    });
+  } else {
     Logger.root.level = Level.ALL; // defaults to Level.INFO
     Logger.root.onRecord.listen((record) {
       // ignore: avoid_print
@@ -38,8 +58,12 @@ Future<void> main() async {
     Logger.root.warning('Failed to get User Agent', e, stacktrace);
   }
 
+  final prefs = await SharedPreferences.getInstance();
+
   // run app
-  runApp(MyApp(await SharedPreferences.getInstance(), userAgent));
+  runZoned(() {
+    runApp(MyApp(prefs, userAgent));
+  }, onError: Crashlytics.instance.recordError);
 }
 
 class MyApp extends StatelessWidget {
@@ -50,6 +74,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    analytics.logAppOpen();
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<DiscogsSettings>(
@@ -73,16 +99,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Record Scrobbler',
         theme: ThemeData(
           primarySwatch: Colors.amber,
           primaryColor: const Color(0xFF2a241a),
-          disabledColor: const Color(0xFF2a241a),
+          disabledColor: Colors.white30,
         ),
         home: StartPage(),
         routes: <String, WidgetBuilder>{
           '/playlist': (_) => PlaylistPage(),
         },
+        navigatorObservers: [FirebaseAnalyticsObserver(analytics: analytics)],
       ),
     );
   }

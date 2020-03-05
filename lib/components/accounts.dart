@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
+import '../model/analytics.dart';
 import '../model/lastfm.dart';
 import '../model/settings.dart';
 import 'error.dart';
@@ -39,6 +40,12 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
 
   final TextEditingController _lastfmUsernameController =
       TextEditingController();
+
+  @override
+  void initState() {
+    analytics.logAccountSettingsOpen();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -153,10 +160,16 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
 
       form.save();
 
+      if (discogs.username != _discogsUsername) {
+        analytics.logLogin(loginMethod: 'discogs');
+      }
+
       discogs.username = _discogsUsername;
       lastfm.username = _lastfmUsername;
 
       if (_lastfmPassword?.isNotEmpty ?? false) {
+        analytics.logLogin(loginMethod: 'lastfm');
+
         final scrobbler = Provider.of<Scrobbler>(context, listen: false);
 
         lastfm.sessionKey = await handleFutureError(

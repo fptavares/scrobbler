@@ -10,7 +10,7 @@ void displayAndLogError(
   if (e is! UIException) {
     log.severe(errorMessage, e, stackTrace);
   } else if (e is UIException && e.exception != null) {
-    log.info(errorMessage, e.exception, stackTrace);
+    log.warning(errorMessage, e.exception, stackTrace);
   }
 
   final scaffold = Scaffold.of(context);

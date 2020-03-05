@@ -158,6 +158,8 @@ class Collection extends ChangeNotifier {
 
   int get totalPages => _totalPages;
 
+  int get nextPage => _nextPage;
+
   List<CollectionAlbum> get albums => _albumList;
 
   Map<String, String> get _headers => <String, String>{

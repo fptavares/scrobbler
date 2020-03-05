@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
+import '../model/analytics.dart';
 import '../model/discogs.dart';
 import '../model/lastfm.dart';
 import '../model/playlist.dart';
@@ -38,6 +39,8 @@ class ScrobbleFloatingButton extends StatelessWidget {
   Future<void> handleScrobble(BuildContext context, Playlist playlist) async {
     final scrobbler = Provider.of<Scrobbler>(context, listen: false);
     final collection = Provider.of<Collection>(context, listen: false);
+
+    analytics.logScrobbling(numberOfAlbums: playlist.numberOfItems);
 
     try {
       await for (int accepted in playlist.scrobble(scrobbler, collection)) {

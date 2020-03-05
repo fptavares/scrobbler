@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+import '../model/analytics.dart';
 import '../model/settings.dart';
 import 'accounts.dart';
 
 class OnboardingPage extends StatelessWidget {
+  OnboardingPage() {
+    analytics.logOnboargding();
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = PageController(initialPage: 0);
@@ -15,6 +20,8 @@ class OnboardingPage extends StatelessWidget {
         backgroundColor: Colors.white30,
         child: const Text('Skip'),
         onPressed: () {
+          analytics.logSkippedOnboarding(fromPage: controller.page);
+
           final settings = Provider.of<DiscogsSettings>(context, listen: false);
           settings.skipped = true;
         },

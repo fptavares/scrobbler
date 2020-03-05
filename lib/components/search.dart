@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
+import '../model/analytics.dart';
 import '../model/discogs.dart';
 import '../model/playlist.dart';
 import 'album.dart';
@@ -10,6 +11,9 @@ import 'error.dart';
 import 'playlist.dart';
 
 class AlbumSearch extends SearchDelegate<CollectionAlbum> {
+  AlbumSearch() : super(keyboardType: TextInputType.text) {
+    analytics.setCurrentScreen(screenName: 'search');
+  }
 
   @override
   List<Widget> buildActions(BuildContext context) {

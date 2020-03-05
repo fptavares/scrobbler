@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../model/analytics.dart';
 import '../model/discogs.dart';
 import '../model/playlist.dart';
 import 'accounts.dart';
@@ -26,6 +27,8 @@ class HomePage extends StatelessWidget {
         onNotification: (scrollInfo) {
           if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
             if (collection.isNotLoading) {
+              analytics.logScrollToNextPage(page: collection.nextPage);
+
               handleFutureError(collection.loadMoreAlbums(), context, log,
                   error: 'Failed to load collection!');
             }
@@ -34,14 +37,17 @@ class HomePage extends StatelessWidget {
         },
         child: ValueListenableProvider<LoadingStatus>.value(
           value: collection.loadingNotifier,
-          child: Center(
-            child: RefreshIndicator(
-              onRefresh: () => collection.isLoading
-                  ? null
-                  : handleFutureError(collection.reload(), context, log,
-                      error: 'Failed to reload collection!'),
-              child: const HomeBody(),
-            ),
+          child: RefreshIndicator(
+            onRefresh: () {
+              if (collection.isLoading) {
+                return Future.value(null);
+              }
+              analytics.logPullToRefresh();
+
+              return handleFutureError(collection.reload(), context, log,
+                  error: 'Failed to reload collection!');
+            },
+            child: const HomeBody(),
           ),
         ),
       ),
