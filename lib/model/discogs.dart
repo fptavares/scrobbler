@@ -167,10 +167,10 @@ class Collection extends ChangeNotifier {
         'User-Agent': userAgent,
       };
 
-  void _clearAlbums() {
+  void _clearAndAddAlbums(List<CollectionAlbum> albums) {
     _albumList.clear();
-    log.info('Cleared all albums.');
-    notifyListeners();
+    log.fine('Cleared all albums.');
+    _addAlbums(albums);
   }
 
   void _addAlbums(List<CollectionAlbum> albums) {
@@ -204,11 +204,17 @@ class Collection extends ChangeNotifier {
     }
 
     log.fine('Reloading collection for $_username...');
-    _clearAlbums();
-    _nextPage = 1;
-    _totalItems = null;
-    _totalPages = null;
-    await loadMoreAlbums();
+
+    _progress.loading();
+    try {
+      _clearAndAddAlbums(await _loadCollectionPage(1));
+      _nextPage = 2;
+
+      _progress.finished();
+    } on Exception catch (e) {
+      _progress.error(e);
+      rethrow;
+    }
   }
 
   Future<void> loadMoreAlbums() async {
