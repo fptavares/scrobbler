@@ -289,7 +289,7 @@ class Collection extends ChangeNotifier {
     http.Response response;
     try {
       response = await httpClient.get(
-        'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=100&page=$page',
+        'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=99&page=$page',
         headers: _headers,
       );
     } on SocketException catch (e) {
