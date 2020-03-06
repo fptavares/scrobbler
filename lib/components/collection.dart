@@ -65,13 +65,11 @@ class CollectionLoadingStatus extends StatelessWidget {
           }
 
           return Container(
-            height: 160,
+            height: 80,
             child: status == LoadingStatus.loading
-                ? const Center(
-                    child: SizedBox(
-                      height: 60,
-                      width: 60,
-                      child: CircularProgressIndicator(),
+                ? Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Theme.of(context).primaryColor,
                     ),
                   )
                 : Container(),

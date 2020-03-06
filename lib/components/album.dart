@@ -77,7 +77,7 @@ class CachedAlbumImage extends StatelessWidget {
           height: 150,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0x55000000)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0x11000000)),
             ),
           ),
         ),
