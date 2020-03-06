@@ -41,10 +41,16 @@ Future<void> main() async {
     Logger.root.level = Level.ALL; // defaults to Level.INFO
     Logger.root.onRecord.listen((record) {
       // ignore: avoid_print
-      print('${record.level.name}: ${record.time}: ${record.message}');
-      if (record.level > Level.INFO && record.stackTrace != null) {
-        // ignore: avoid_print
-        print(record.stackTrace);
+      print('[${record.level.name}] ${record.loggerName}: ${record.message}');
+      if (record.level > Level.INFO) {
+        if (record.error != null) {
+          // ignore: avoid_print
+          print('Error: ${record.error}');
+        }
+        if (record.stackTrace != null) {
+          // ignore: avoid_print
+          print(record.stackTrace);
+        }
       }
     });
   }
