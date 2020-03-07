@@ -167,6 +167,15 @@ class Collection extends ChangeNotifier {
         'User-Agent': userAgent,
       };
 
+  void _reset() {
+    _albumList.clear();
+    _nextPage = 1;
+    _totalItems = null;
+    _totalPages = null;
+    log.fine('Reset collection.');
+    notifyListeners();
+  }
+
   void _clearAndAddAlbums(List<CollectionAlbum> albums) {
     _albumList.clear();
     log.fine('Cleared all albums.');
@@ -189,6 +198,11 @@ class Collection extends ChangeNotifier {
           'Collection updated with the same username, so didn\'t reload...');
       return;
     }
+
+    // If the username has changed, then we must remove any albums
+    // that may have been loaded from the previous user's collection.
+    _reset();
+
     _username = newUsername;
     log.fine('Updated colletion username to: $_username');
     await reload();
