@@ -1,3 +1,4 @@
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -34,7 +35,15 @@ Future<T> handleFutureError<T>(
   Logger logger, {
   String error,
   String success,
+  String trace,
 }) async {
+
+  Trace callTrace;
+  if (trace != null) {
+    callTrace = FirebasePerformance.instance.newTrace(trace);
+    callTrace.start();
+  }
+
   try {
     final result = await future;
     if (success != null) {
@@ -43,6 +52,8 @@ Future<T> handleFutureError<T>(
     return result;
   } on Exception catch (e, stackTrace) {
     displayAndLogError(context, logger, e, stackTrace, error);
+  } finally {
+    callTrace?.stop();
   }
   return Future<T>.value(null);
 }

@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
               analytics.logScrollToNextPage(page: collection.nextPage);
 
               handleFutureError(collection.loadMoreAlbums(), context, log,
-                  error: 'Failed to load collection!');
+                  error: 'Failed to load collection!', trace: 'load_more');
             }
           }
           return true;
@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
               analytics.logPullToRefresh();
 
               return handleFutureError(collection.reload(), context, log,
-                  error: 'Failed to reload collection!');
+                  error: 'Failed to reload collection!', trace: 'reload');
             },
             child: const HomeBody(),
           ),

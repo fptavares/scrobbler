@@ -176,7 +176,8 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
             scrobbler.initializeSession(_lastfmUsername, _lastfmPassword),
             context,
             log,
-            success: AccountsForm.saveSuccessMessage);
+            success: AccountsForm.saveSuccessMessage,
+            trace: 'init_lastfm_session');
       } else {
         displaySuccess(context, AccountsForm.saveSuccessMessage);
       }

@@ -74,7 +74,7 @@ class _SearchResultsList extends StatelessWidget {
         collection.isNotLoading) {
       analytics.logLoadAllForSearch(amount: collection.totalItems);
       WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(
-          collection.loadAllAlbums(), context, log,
+          collection.loadAllAlbums(), context, log, trace: 'load_all',
           error: 'Failed to load the full collection!'));
     }
 
