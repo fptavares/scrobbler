@@ -66,13 +66,20 @@ class CollectionLoadingStatus extends StatelessWidget {
 
           return Container(
             height: 80,
-            child: status == LoadingStatus.loading
-                ? Center(
-                    child: CircularProgressIndicator(
+            child: Center(
+              child: status == LoadingStatus.loading
+                  ? CircularProgressIndicator(
                       backgroundColor: Theme.of(context).primaryColor,
-                    ),
-                  )
-                : Container(),
+                    )
+                  : collection.isNotEmpty && collection.totalItems > 9
+                      ? Text(
+                          collection.isNotFullyLoaded
+                              ? 'Showing ${collection.albums.length} of ${collection.totalItems} albums'
+                              : '\u2014 and that is ${collection.totalItems} albums.',
+                          style: TextStyle(color: Theme.of(context).hintColor, fontStyle: FontStyle.italic),
+                        )
+                      : Container(),
+            ),
           );
         },
       ),
