@@ -160,6 +160,8 @@ class Collection extends ChangeNotifier {
 
   int get nextPage => _nextPage;
 
+  bool get hasMorePages => _totalPages != null && _nextPage <= _totalPages;
+
   List<CollectionAlbum> get albums => _albumList;
 
   Map<String, String> get _headers => <String, String>{

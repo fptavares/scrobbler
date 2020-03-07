@@ -63,6 +63,8 @@ Future<void> main() async {
       when(collection.isNotFullyLoaded).thenReturn(true);
       when(collection.isNotLoading).thenReturn(true);
       when(collection.isLoading).thenReturn(false);
+      when(collection.hasMorePages).thenReturn(true);
+      when(collection.totalItems).thenReturn(50);
     });
 
     testWidgets('renders properly', (tester) async {

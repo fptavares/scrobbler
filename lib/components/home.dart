@@ -26,7 +26,7 @@ class HomePage extends StatelessWidget {
       body: NotificationListener<ScrollNotification>(
         onNotification: (scrollInfo) {
           if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-            if (collection.isNotLoading) {
+            if (collection.isNotLoading && collection.hasMorePages) {
               analytics.logScrollToNextPage(page: collection.nextPage);
 
               handleFutureError(collection.loadMoreAlbums(), context, log,
