@@ -96,7 +96,7 @@ class HomeAppBar extends StatelessWidget {
             0,
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
-          ),
+          ).then((_) => analytics.logTapLogo()),
           child: SafeArea(
             key: const Key('logo'),
             child: Consumer<LoadingStatus>(

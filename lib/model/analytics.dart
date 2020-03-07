@@ -35,4 +35,8 @@ class _ScrobblerAnalytics extends FirebaseAnalytics {
   void logLoadAllForSearch({@required int amount}) {
     logEvent(name: 'load_all_on_search', parameters: {'amount': amount});
   }
+
+  void logTapLogo() {
+    logEvent(name: 'tap_logo');
+  }
 }
