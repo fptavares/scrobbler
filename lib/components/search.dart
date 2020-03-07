@@ -83,13 +83,13 @@ class _SearchResultsList extends StatelessWidget {
       duration: const Duration(milliseconds: 50),
       child: (albums.isEmpty)
           ? const EmptyState(
-              key: ValueKey<int>(1),
+              key: Key('empty_search'),
               imagePath: 'assets/empty_search.png',
               headline: AlbumSearch.emptyHeadlineMessage,
               subhead: AlbumSearch.emptySubheadMessage,
             )
           : Column(
-              key: const ValueKey<int>(2),
+              key: const Key('search_results'),
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
