@@ -31,4 +31,8 @@ class _ScrobblerAnalytics extends FirebaseAnalytics {
   void logOnboargding() {
     logEvent(name: 'onboarding');
   }
+
+  void logLoadAllForSearch({@required int amount}) {
+    logEvent(name: 'loadAllForSearch', parameters: {'amount': amount});
+  }
 }
