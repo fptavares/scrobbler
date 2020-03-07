@@ -9,30 +9,30 @@ class _ScrobblerAnalytics extends FirebaseAnalytics {
   }
 
   void logScrobbling({@required int numberOfAlbums}) {
-    logEvent(name: 'scrobble', parameters: {'numberOfAlbums': numberOfAlbums});
+    logEvent(name: 'scrobble', parameters: {'amount': numberOfAlbums});
   }
 
   void logSkippedOnboarding({@required double fromPage}) {
-    logEvent(name: 'skippedOnboarding', parameters: {'fromPage': fromPage});
+    logEvent(name: 'skip_onboarding', parameters: {'step': fromPage});
   }
 
   void logScrollToNextPage({@required int page}) {
-    logEvent(name: 'scrollToNextPage', parameters: {'page': page});
+    logEvent(name: 'scroll_next_page', parameters: {'page': page});
   }
 
   void logPullToRefresh() {
-    logEvent(name: 'pullToRefresh');
+    logEvent(name: 'pull_refresh');
   }
 
   void logAccountSettingsOpen() {
-    logEvent(name: 'accountSettingsOpen');
+    logEvent(name: 'open_account_settings');
   }
 
   void logOnboargding() {
-    logEvent(name: 'onboarding');
+    logEvent(name: 'start_onboarding');
   }
 
   void logLoadAllForSearch({@required int amount}) {
-    logEvent(name: 'loadAllForSearch', parameters: {'amount': amount});
+    logEvent(name: 'load_all_on_search', parameters: {'amount': amount});
   }
 }
