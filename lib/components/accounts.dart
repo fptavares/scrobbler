@@ -197,14 +197,14 @@ class FullHeightForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
-      child: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: LayoutBuilder(
-          builder: (_, viewportConstraints) => SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: viewportConstraints.maxHeight,
-              ),
+      child: LayoutBuilder(
+        builder: (_, viewportConstraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: viewportConstraints.maxHeight,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(30.0),
               child: child,
             ),
           ),
