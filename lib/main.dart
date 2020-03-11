@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:logging/logging.dart';
+import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,13 +55,18 @@ Future<void> main() async {
     });
   }
 
-  // initialize user-agent
-  var userAgent = 'RecordScrobbler';
+  var userAgent = 'Scrobbler';
   try {
-    userAgent = await FlutterUserAgent.getPropertyAsync('userAgent') as String;
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    final version = packageInfo.version;
+    final buildNumber = packageInfo.buildNumber;
+
+    userAgent = 'Scrobbler/$version+$buildNumber';
+
     Logger.root.info('Set user agent to: $userAgent');
-  } on Exception catch (e, stacktrace) {
-    Logger.root.warning('Failed to get User Agent', e, stacktrace);
+  } on Exception catch (e, st) {
+    Logger.root.warning('Failed to get package info for user agent', e, st);
   }
 
   final prefs = await SharedPreferences.getInstance();
