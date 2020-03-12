@@ -42,7 +42,7 @@ void main() {
     testWidgets('renders welcome screen', (tester) async {
       await tester.pumpWidget(await createOnboarding());
 
-      expect(find.text('Record Scrobbler'), findsOneWidget);
+      expect(find.text('Scrobbler'), findsOneWidget);
       expect(startButton, findsOneWidget);
       expect(skipButton, findsOneWidget);
 

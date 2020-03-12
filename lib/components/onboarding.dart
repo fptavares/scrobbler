@@ -102,7 +102,7 @@ class WelcomePage extends StatelessWidget {
                     const Flexible(
                       flex: 2,
                       child: Text(
-                        'Record Scrobbler',
+                        'Scrobbler',
                         style: TextStyle(
                           fontFamily: 'Quicksand',
                           fontSize: 38,
