@@ -1,4 +1,4 @@
-# Scrobbler
+# <img src='https://fptavares.github.io/img/scrobbler.png' alt='Scrobbler' width='330' />
 
 [![Build Status](https://api.cirrus-ci.com/github/fptavares/scrobbler.svg)](https://cirrus-ci.com/github/fptavares/scrobbler)
 [![Coverage Status](https://codecov.io/gh/fptavares/scrobbler/branch/master/graph/badge.svg)](https://codecov.io/gh/fptavares/scrobbler)
