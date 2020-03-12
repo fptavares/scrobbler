@@ -1,0 +1,18 @@
+# Screen capture tests
+tests:
+  - test_driver/app.dart
+
+# Interim location of screenshots from tests before processing
+staging: /tmp/screenshots
+
+# A list of locales supported in app
+locales:
+  - en-US
+
+# A list of devices to run tests on
+devices:
+  android:
+    Nexus 6P:
+
+# Frame screenshots
+frame: true

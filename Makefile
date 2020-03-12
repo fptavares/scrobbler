@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run icons clean
+.PHONY: all secrets test showCoverage analysis run ipa appbundle icons screenshots clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
 ASSETS = $(wildcard assets/**)
@@ -30,6 +30,20 @@ run: test
 
 icons:
 	flutter pub run flutter_launcher_icons:main
+
+ipa: test
+	flutter build ios --release \
+    && mkdir -p build/ios/iphoneos/Payload \
+    && cd build/ios/iphoneos \
+    && rm -rf Payload/Runner.app app.ipa \
+    && mv Runner.app Payload/ \
+    && zip -r app.ipa Payload
+
+appbundle: test
+	flutter build appbundle --release
+
+screenshots:
+	screenshots
 
 clean:
 	flutter clean

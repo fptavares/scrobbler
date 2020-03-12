@@ -11,7 +11,7 @@ description: The Record Scrobbler Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.0+4
 
 environment:
   sdk: ">=2.3.0 <3.0.0"
@@ -24,7 +24,7 @@ dependencies:
   provider: ^4.0.2
   flutter_svg: ^0.16.1
   shared_preferences: ^0.5.6+1
-  flutter_user_agent: ^1.2.1
+  package_info: ^0.4.0+14
   logging: ^0.11.4
   cached_network_image: ^2.0.0
   # Firebase added for analytics
@@ -38,8 +38,11 @@ dev_dependencies:
   mockito:
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
   flutter_launcher_icons:
   effective_dart:
+  screenshots:
 
 flutter_icons:
   android: true
@@ -55,7 +58,16 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/
+    - assets/discogs_logo.png
+    - assets/discogs_logo_white.png
+    - assets/empty_error.png
+    - assets/empty_home.png
+    - assets/empty_nothing.png
+    - assets/empty_playlist.png
+    - assets/empty_search.png
+    - assets/lastfm_logo.png
+    - assets/logo.svg
+    - assets/record_sleeve.png
 
   fonts:
     - family: Quicksand
