@@ -45,7 +45,7 @@ class CollectionLoadingStatus extends StatelessWidget {
             return const EmptyState(
               imagePath: 'assets/empty_nothing.png',
               headline: 'Anyone out there?',
-              subhead: 'A Discogs account needs to be configured',
+              subhead: 'A Discogs account needs to be configured before you can get startted scrobbling.\n\nYour Discogs collection will be displayed here, so that you can easily select which albums to scrobble.\n\nJust open the account settings on the top left corner when you\'re ready.',
             );
           }
 
