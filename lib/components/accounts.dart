@@ -84,7 +84,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                             : null,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
-                          labelText: 'Username',
+                          labelText: 'Discogs Username',
                         ),
                         initialValue: discogs.username,
                         onSaved: (value) => _discogsUsername = value,
@@ -110,7 +110,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                             : null,
                         keyboardType: TextInputType.emailAddress,
                         decoration:
-                            const InputDecoration(labelText: 'Username'),
+                            const InputDecoration(labelText: 'Last.fm Username'),
                         onSaved: (value) => _lastfmUsername = value,
                       ),
                       TextFormField(
@@ -122,7 +122,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                             ? AccountsForm.lastfmInvalidPasswordMessage
                             : null,
                         decoration:
-                            const InputDecoration(labelText: 'Password'),
+                            const InputDecoration(labelText: 'Last.fm Password'),
                         initialValue: _lastfmPassword,
                         onSaved: (value) => _lastfmPassword = value,
                       ),
