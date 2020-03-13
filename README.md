@@ -6,7 +6,7 @@
 The Record Scrobbler Flutter application allows you to browse a Discogs collection
 and scrobble records directly to Last.fm.
 
-<img src='https://fptavares.github.io/img/scrobbler.png' alt='Scrobbler' width='330' />
+<img src='https://fptavares.github.io/img/scrobbler.png' alt='Scrobbler' width='240' />
 
 ## Getting Started
 
