@@ -30,9 +30,7 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      tooltip: 'Back',
+    return BackButton(
       onPressed: () {
         close(context, null);
       },
