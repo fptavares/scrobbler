@@ -4,9 +4,11 @@ import '../components/error.dart';
 import 'discogs.dart';
 import 'lastfm.dart';
 
+enum ScrobblingStatus { idle, active, paused }
+
 class Playlist extends ChangeNotifier {
   final Map<int, PlaylistItem> _itemById = <int, PlaylistItem>{};
-  bool _isScrobbling = false;
+  var _status = ScrobblingStatus.idle;
 
   int get numberOfItems => _itemById.length;
 
@@ -14,7 +16,9 @@ class Playlist extends ChangeNotifier {
 
   bool get isNotEmpty => !isEmpty;
 
-  bool get isScrobbling => _isScrobbling;
+  bool get isScrobbling => _status != ScrobblingStatus.idle;
+
+  bool get isScrobblingPaused => _status == ScrobblingStatus.paused;
 
   List<PlaylistItem> getPlaylistItems() {
     return _itemById.values.toList();
@@ -22,32 +26,48 @@ class Playlist extends ChangeNotifier {
 
   Future<List<AlbumDetails>> _getAlbumsDetails(Collection collection) async {
     final albums = await Future.wait<AlbumDetails>(
-        _itemById.keys.map(collection.getAlbumDetails));
+        _itemById.keys.map(collection.loadAlbumDetails));
     return albums
         .expand((album) =>
             List<AlbumDetails>.filled(_itemById[album.releaseId].count, album))
         .toList();
   }
 
-  Stream<int> scrobble(Scrobbler scrobbler, Collection collection) async* {
+  Stream<int> scrobble(
+      Scrobbler scrobbler,
+      Collection collection,
+      Future<Map<int, Map<int, bool>>> requestInclusionMask(
+          List<AlbumDetails> albums)) async* {
     if (scrobbler.isNotAuthenticated) {
       throw UIException(
           'Oops! You need to login to Last.fm first with your username and password.');
     }
-    if (_isScrobbling) {
+    if (isScrobbling) {
       throw UIException(
           'Cannot scrobble again until the previous request is complete.');
     }
-    _isScrobbling = true;
+    _status = ScrobblingStatus.active;
     notifyListeners();
     try {
-      await for (final int accepted
-          in scrobbler.scrobbleAlbums(await _getAlbumsDetails(collection))) {
+      final albums = await _getAlbumsDetails(collection);
+
+      _status = ScrobblingStatus.paused;
+      notifyListeners();
+
+      final mask = await requestInclusionMask(albums);
+      if (mask == null) {
+        return;
+      }
+
+      _status = ScrobblingStatus.active;
+      notifyListeners();
+
+      await for (final int accepted in scrobbler.scrobbleAlbums(albums, mask)) {
         yield accepted;
       }
       clearAlbums();
     } finally {
-      _isScrobbling = false;
+      _status = ScrobblingStatus.idle;
       notifyListeners();
     }
   }
@@ -69,7 +89,7 @@ class Playlist extends ChangeNotifier {
   }
 
   PlaylistItem getPlaylistItem(CollectionAlbum album) {
-    return _isScrobbling ? null : _itemById[album.releaseId];
+    return isScrobbling ? null : _itemById[album.releaseId];
   }
 
   void clearZeroCountAlbums() {

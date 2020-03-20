@@ -62,7 +62,8 @@ class Scrobbler {
     }
   }
 
-  Stream<int> scrobbleAlbums(List<AlbumDetails> albums) async* {
+  Stream<int> scrobbleAlbums(
+      List<AlbumDetails> albums, Map<int, Map<int, bool>> mask) async* {
     if (_sessionKey == null) {
       throw UIException(
           'Oops! You need to login to Last.fm first with your username and password.');
@@ -72,17 +73,28 @@ class Scrobbler {
           'Your playlist is empty! Try to add some albums to it first.');
     }
 
-    final queue = _createScrobbleQueue(albums);
+    final queue = _createScrobbleQueue(albums, mask);
     for (final scrobbles in queue.batches) {
       yield await _postScrobbles(scrobbles);
     }
   }
 
-  ScrobbleQueue _createScrobbleQueue(List<AlbumDetails> albums) {
+  ScrobbleQueue _createScrobbleQueue(
+      List<AlbumDetails> albums, Map<int, Map<int, bool>> mask) {
     final queue = ScrobbleQueue();
 
-    for (final album in albums.reversed) {
-      for (final track in album.tracks.reversed) {
+    for (var albumIndex = albums.length - 1; albumIndex >= 0; albumIndex--) {
+      final album = albums[albumIndex];
+      final albumMask = mask[albumIndex] ?? const {};
+
+      for (var index = album.tracks.length - 1; index >= 0; index--) {
+        final track = album.tracks[index];
+        final trackIncluded = albumMask[index] ?? true; // included by default
+
+        if (!trackIncluded) {
+          continue;
+        }
+
         if (track.subTracks?.isNotEmpty ?? false) {
           for (final subTrack in track.subTracks.reversed) {
             queue.add(subTrack, album);

@@ -49,7 +49,7 @@ class AlbumButton extends StatelessWidget {
 class CachedAlbumImage extends StatelessWidget {
   const CachedAlbumImage(this.album, {Key key}) : super(key: key);
 
-  final CollectionAlbum album;
+  final Album album;
 
   BoxDecoration get boxDecoration => const BoxDecoration(
         boxShadow: <BoxShadow>[

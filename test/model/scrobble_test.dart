@@ -48,7 +48,7 @@ void main() {
       expect(returnedKey, equals(key));
     });
 
-    test('submits albums to Last.fm', () async {
+    test('submits all tracks to Last.fm', () async {
       // set a key
       scrobbler.updateSessionKey('test-session-key');
 
@@ -74,8 +74,15 @@ void main() {
       }, count: 2));
 
       // scrobble
-      final acceptedList = await scrobbler.scrobbleAlbums(albums).toList();
-      expect(acceptedList, equals([49, 29]));
+      final acceptedList = await scrobbler.scrobbleAlbums(
+        albums,
+        {
+          16: {0: false, 2: true},
+          18: {2: false}, // this is an index track with 2 sub-tracks
+          19: {1: true},
+        },
+      ).toList();
+      expect(acceptedList, equals([49, 26]));
     });
 
     Future<void> verifyThrows(Future<dynamic> function()) async {
@@ -93,8 +100,8 @@ void main() {
       await verifyThrows(() => scrobbler.initializeSession(username, password));
 
       scrobbler.updateSessionKey(key);
-      await verifyThrows(
-          () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async =>
+          await scrobbler.scrobbleAlbums([testAlbumDetails1], {}).toList());
     });
 
     test('throws UI exception on server error', () async {
@@ -104,8 +111,8 @@ void main() {
       await verifyThrows(() => scrobbler.initializeSession(username, password));
 
       scrobbler.updateSessionKey(key);
-      await verifyThrows(
-          () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async =>
+          await scrobbler.scrobbleAlbums([testAlbumDetails1], {}).toList());
     });
 
     test('throws UI exception if album list is empty', () async {
@@ -114,15 +121,15 @@ void main() {
 
       scrobbler.updateSessionKey(key);
       await verifyThrows(
-              () async => await scrobbler.scrobbleAlbums([]).toList());
+          () async => await scrobbler.scrobbleAlbums([], {}).toList());
     });
 
     test('throws UI exception if session key is empty', () async {
       scrobbler.httpClient =
           MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
-      await verifyThrows(
-              () async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async =>
+          await scrobbler.scrobbleAlbums([testAlbumDetails1], {}).toList());
     });
   });
 }

@@ -9,6 +9,8 @@ import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
 
+import '../test_albums.dart';
+
 void main() {
   group('Scrobble button', () {
     MockScrobbler scrobbler;
@@ -38,8 +40,10 @@ void main() {
     }
 
     setUp(() {
+      scrobbler = MockScrobbler();
       playlist = MockPlaylist();
       when(playlist.isScrobbling).thenReturn(false);
+      when(playlist.isScrobblingPaused).thenReturn(false);
       collection = MockCollection();
     });
 
@@ -66,7 +70,7 @@ void main() {
 
       final scrobbleResults = [10, 5];
 
-      when(playlist.scrobble(any, any))
+      when(playlist.scrobble(any, any, any))
           .thenAnswer((_) => Stream.fromIterable(scrobbleResults));
 
       await tester.pumpWidget(createButton());
@@ -74,8 +78,83 @@ void main() {
       await tester.tap(find.byIcon(Icons.play_arrow));
       await tester.pump();
 
-      verify(playlist.scrobble(scrobbler, collection)).called(1);
+      verify(playlist.scrobble(scrobbler, collection, any)).called(1);
     });
+
+    testWidgets(
+      'allows editing the playlist before submitting',
+      (tester) async {
+        when(playlist.isEmpty).thenReturn(false);
+
+        var mask = {};
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              floatingActionButton: Builder(
+                builder: (context) => FloatingActionButton(
+                  child: Icon(Icons.play_arrow),
+                  onPressed: () async {
+                    mask =
+                        await ScrobbleFloatingButton.showPlaylistOptionsDialog(
+                            context, [testAlbumDetails1, testAlbumDetails1]);
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.play_arrow));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(find.byType(ScrobblePlaylistEditor), findsOneWidget);
+        expect(find.text(testAlbumDetails1.title), findsNWidgets(2));
+        expect(find.text(testAlbumDetails1.artist), findsNWidgets(2));
+
+        // tap to expand tile
+        await tester.tap(find.text(testAlbumDetails1.title).first);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        // drag up to expose all child tiles
+        await tester.drag(find.text(testAlbumDetails1.title).first, const Offset(0, -300));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 3));
+
+        expect(find.byType(CheckboxListTile),
+            findsNWidgets(testAlbumDetails1.tracks.length));
+        expect(find.text(testAlbumDetails1.tracks.first.title), findsOneWidget);
+
+        await tester.tap(find.text(testAlbumDetails1.tracks[0].title));
+        await tester.pump();
+
+        await tester.tap(find.text(testAlbumDetails1.tracks[1].title));
+        await tester.pump();
+
+        await tester.tap(find.text(testAlbumDetails1.tracks[2].title));
+        await tester.pump();
+
+        await tester.tap(find.text(testAlbumDetails1.tracks[1].title));
+        await tester.pump();
+
+        // dismissing the bottom sheet to dispose its AnimationController
+        // https://stackoverflow.com/questions/57580244/flutter-showmodalbottomsheet-ticker-was-not-disposed-during-tests
+        await tester.tap(find.byType(FlatButton));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(
+            mask,
+            equals({
+              0: {0: false, 1: true, 2: false}
+            }));
+      },
+    );
 
     testWidgets('doesn\'t allow tap if playlist is already scrobbling',
         (tester) async {
@@ -85,27 +164,31 @@ void main() {
       await tester.pumpWidget(createButton());
 
       expect(find.byIcon(Icons.play_arrow), findsNothing);
-      expect(tester.widget<FloatingActionButton>(find.byType(FloatingActionButton)).onPressed, isNull);
+      expect(
+          tester
+              .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+              .onPressed,
+          isNull);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pump();
 
-      verifyNever(playlist.scrobble(scrobbler, collection));
+      verifyNever(playlist.scrobble(any, any, any));
     });
 
     testWidgets('display error if scrobbling fails', (tester) async {
       when(playlist.isEmpty).thenReturn(false);
 
       const exception = SocketException('no connection');
-      when(playlist.scrobble(any, any)).thenThrow(exception);
+      when(playlist.scrobble(any, any, any)).thenThrow(exception);
 
       await tester.pumpWidget(createButton());
 
       await tester.tap(find.byIcon(Icons.play_arrow));
       await tester.pump();
 
-      verify(playlist.scrobble(scrobbler, collection)).called(1);
+      verify(playlist.scrobble(scrobbler, collection, any)).called(1);
 
       expect(find.text(exception.toString()), findsOneWidget);
     });

@@ -131,29 +131,44 @@ void main() {
       // create mocks
       final scrobbler = MockScrobbler();
       when(scrobbler.isNotAuthenticated).thenReturn(false);
-      when(scrobbler.scrobbleAlbums(argThat(isList)))
+      when(scrobbler.scrobbleAlbums(any, any))
           .thenAnswer((_) => Stream.fromIterable(scrobbleResults));
 
       final collection = MockCollection();
-      when(collection.getAlbumDetails(any)).thenAnswer(
+      when(collection.loadAlbumDetails(any)).thenAnswer(
           (i) => Future.value(FakeAlbumDetails(i.positionalArguments.first)));
 
       // scrobble
-      final accepted = await playlist.scrobble(scrobbler, collection).toList();
+      final accepted = await playlist
+          .scrobble(
+            scrobbler,
+            collection,
+            (_) => Future.value({
+              0: {0: false}
+            }),
+          )
+          .toList();
 
       // check that get album details is called exactly twice for the right IDs
-      var verification = verify(collection.getAlbumDetails(captureAny));
+      var verification = verify(collection.loadAlbumDetails(captureAny));
       verification.called(2);
       expect(
           verification.captured, [testAlbum1.releaseId, testAlbum2.releaseId]);
 
       // check scrobble that results are passed through
       expect(accepted, equals(scrobbleResults));
-      verification = verify(scrobbler.scrobbleAlbums(captureAny));
+      verification = verify(scrobbler.scrobbleAlbums(captureAny, captureAny));
       verification.called(1);
       expect(
-        verification.captured.first.map((a) => a.releaseId),
-        [testAlbum1.releaseId, testAlbum1.releaseId, testAlbum2.releaseId],
+        verification.captured[0].map((a) => a.releaseId),
+        equals(
+            [testAlbum1.releaseId, testAlbum1.releaseId, testAlbum2.releaseId]),
+      );
+      expect(
+        verification.captured[1],
+        equals({
+          0: {0: false}
+        }),
       );
     });
   });

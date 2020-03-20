@@ -8,7 +8,14 @@ import 'package:logging/logging.dart';
 import '../components/error.dart';
 import '../secrets.dart';
 
-class CollectionAlbum {
+abstract class Album {
+  int get releaseId;
+  String get artist;
+  String get title;
+  String get thumbUrl;
+}
+
+class CollectionAlbum implements Album {
   CollectionAlbum(
       {this.id,
       this.releaseId,
@@ -36,11 +43,15 @@ class CollectionAlbum {
   }
 
   final int id;
+  @override
   final int releaseId;
+  @override
   final String artist;
+  @override
   final String title;
-  final int year;
+  @override
   final String thumbUrl;
+  final int year;
   final int rating;
   final String dateAdded;
   String searchString;
@@ -64,11 +75,12 @@ class CollectionAlbum {
   }
 }
 
-class AlbumDetails {
+class AlbumDetails implements Album {
   AlbumDetails({
     this.releaseId,
     @required this.artist,
     @required this.title,
+    @required this.thumbUrl,
     @required this.tracks,
   });
 
@@ -77,16 +89,23 @@ class AlbumDetails {
       releaseId: json['id'] as int,
       artist: _oneNameForArtists(json['artists'] as List<dynamic>),
       title: json['title'] as String,
+      thumbUrl: json['thumb'] as String,
       tracks: (json['tracklist'] as List<dynamic>)
+          .where((track) => track['type_'] != 'heading')
           .map<AlbumTrack>((track) => AlbumTrack.fromJson(track))
           .toList(),
     );
   }
 
-  int releaseId;
-  String artist;
-  String title;
-  List<AlbumTrack> tracks;
+  @override
+  final int releaseId;
+  @override
+  final String artist;
+  @override
+  final String title;
+  @override
+  final String thumbUrl;
+  final List<AlbumTrack> tracks;
 }
 
 class AlbumTrack {
@@ -345,7 +364,7 @@ class Collection extends ChangeNotifier {
         .toList();
   }
 
-  Future<AlbumDetails> getAlbumDetails(int releaseId) async {
+  Future<AlbumDetails> loadAlbumDetails(int releaseId) async {
     http.Response response;
     try {
       response = await httpClient.get(

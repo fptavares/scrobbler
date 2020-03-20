@@ -170,7 +170,7 @@ void main() {
         });
       }, count: 1));
 
-      final album = await collection.getAlbumDetails(249504);
+      final album = await collection.loadAlbumDetails(249504);
       expect(album.releaseId, equals(249504));
       expect(album.artist, equals('Rick Astley'));
       expect(album.title, equals('Never Gonna Give You Up'));
@@ -197,7 +197,7 @@ void main() {
         });
       }, count: 1));
 
-      final album = await collection.getAlbumDetails(1287017);
+      final album = await collection.loadAlbumDetails(1287017);
       expect(album.releaseId, equals(1287017));
       expect(album.tracks[2].title, equals('Rapsodie Espagnole'));
 
@@ -252,7 +252,7 @@ void main() {
 
       collection.httpClient = MockClient((_) async => Response('', 400));
 
-      await verifyThrows(() => collection.getAlbumDetails(249504));
+      await verifyThrows(() => collection.loadAlbumDetails(249504));
     });
 
     test('throws UI exception on network error', () async {
@@ -289,7 +289,7 @@ void main() {
       collection.httpClient =
           MockClient((_) async => throw const SocketException(''));
 
-      await verifyThrows(() => collection.getAlbumDetails(249504));
+      await verifyThrows(() => collection.loadAlbumDetails(249504));
     });
 
     test('doesn\'t try to load collection if username is empty', () async {
