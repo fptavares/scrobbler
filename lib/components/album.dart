@@ -68,7 +68,10 @@ class CachedAlbumImage extends StatelessWidget {
       imageUrl: album.thumbUrl,
       imageBuilder: (context, imageProvider) => Container(
         decoration: boxDecoration,
-        child: Image(image: imageProvider),
+        child: Image(
+          image: imageProvider,
+          semanticLabel: '${album.artist} - ${album.title}',
+        ),
       ),
       placeholder: (context, url) => const AspectRatio(
         aspectRatio: 1,
