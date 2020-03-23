@@ -81,12 +81,14 @@ void main() {
       verify(playlist.scrobble(scrobbler, collection, any)).called(1);
     });
 
+    // need to dismiss the bottom sheet to dispose its AnimationController
+    // https://stackoverflow.com/questions/57580244/flutter-showmodalbottomsheet-ticker-was-not-disposed-during-tests
     testWidgets(
       'allows editing the playlist before submitting',
       (tester) async {
         when(playlist.isEmpty).thenReturn(false);
 
-        var mask = {};
+        ScrobbleOptions options;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -96,7 +98,7 @@ void main() {
                 builder: (context) => FloatingActionButton(
                   child: Icon(Icons.play_arrow),
                   onPressed: () async {
-                    mask =
+                    options =
                         await ScrobbleFloatingButton.showPlaylistOptionsDialog(
                             context, [testAlbumDetails1, testAlbumDetails1]);
                   },
@@ -122,7 +124,8 @@ void main() {
         await tester.pump(const Duration(seconds: 1));
 
         // drag up to expose all child tiles
-        await tester.drag(find.text(testAlbumDetails1.title).first, const Offset(0, -300));
+        await tester.drag(
+            find.text(testAlbumDetails1.title).first, const Offset(0, -300));
         await tester.pump();
         await tester.pump(const Duration(seconds: 3));
 
@@ -142,17 +145,37 @@ void main() {
         await tester.tap(find.text(testAlbumDetails1.tracks[1].title));
         await tester.pump();
 
-        // dismissing the bottom sheet to dispose its AnimationController
-        // https://stackoverflow.com/questions/57580244/flutter-showmodalbottomsheet-ticker-was-not-disposed-during-tests
+        // submit
         await tester.tap(find.byType(FlatButton));
         await tester.pump();
         await tester.pump(const Duration(seconds: 1));
 
         expect(
-            mask,
+            options.inclusionMask,
             equals({
               0: {0: false, 1: true, 2: false}
             }));
+
+        expect(options.offsetInSeconds, equals(0));
+
+        // reopen options dialog
+        await tester.tap(find.byIcon(Icons.play_arrow));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(find.byType(ScrobblePlaylistEditor), findsOneWidget);
+
+        // change time offset slider to middle value (= 60 minutes)
+        await tester.tap(find.byType(Slider));
+        await tester.pump();
+
+        // submit
+        await tester.tap(find.byType(FlatButton));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(options.inclusionMask, equals({}));
+        expect(options.offsetInSeconds, equals(60 * 60));
       },
     );
 

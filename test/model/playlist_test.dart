@@ -143,33 +143,33 @@ void main() {
           .scrobble(
             scrobbler,
             collection,
-            (_) => Future.value({
+            (_) => Future.value(const ScrobbleOptions(inclusionMask: {
               0: {0: false}
-            }),
+            }, offsetInSeconds: 15 * 60)),
           )
           .toList();
 
       // check that get album details is called exactly twice for the right IDs
-      var verification = verify(collection.loadAlbumDetails(captureAny));
-      verification.called(2);
-      expect(
-          verification.captured, [testAlbum1.releaseId, testAlbum2.releaseId]);
+      final loadAlbum = verify(collection.loadAlbumDetails(captureAny));
+      loadAlbum.called(2);
+      expect(loadAlbum.captured, [testAlbum1.releaseId, testAlbum2.releaseId]);
 
       // check scrobble that results are passed through
       expect(accepted, equals(scrobbleResults));
-      verification = verify(scrobbler.scrobbleAlbums(captureAny, captureAny));
-      verification.called(1);
+      final scrobble = verify(scrobbler.scrobbleAlbums(captureAny, captureAny));
+      scrobble.called(1);
       expect(
-        verification.captured[0].map((a) => a.releaseId),
+        scrobble.captured[0].map((a) => a.releaseId),
         equals(
             [testAlbum1.releaseId, testAlbum1.releaseId, testAlbum2.releaseId]),
       );
+      final options = scrobble.captured[1] as ScrobbleOptions;
       expect(
-        verification.captured[1],
-        equals({
-          0: {0: false}
-        }),
-      );
+          options.inclusionMask,
+          equals({
+            0: {0: false}
+          }));
+      expect(options.offsetInSeconds, equals(15 * 60));
     });
   });
 }

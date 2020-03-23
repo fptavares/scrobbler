@@ -48,12 +48,75 @@ void main() {
       expect(returnedKey, equals(key));
     });
 
-    test('submits all tracks to Last.fm', () async {
+    test('submits more than 50 tracks to Last.fm with exclusions but no offset',
+        () async {
       // set a key
       scrobbler.updateSessionKey('test-session-key');
 
       // generate list of albums to scrobble
       final albums = List.generate(20, (index) => testAlbumDetails1);
+
+      // inclusion mask
+      const mask = {
+        16: {0: false, 2: true},
+        18: {2: false}, // this is an index track with 2 sub-tracks
+        19: {1: true},
+      };
+
+      // expected timestamp ranges
+      final now = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+      final endTime = now - 60; // minus duration of the last track played
+      final startTime = endTime -
+          20 * testAlbumDetails1DurationInSeconds +
+          (4 * 60 + 44) +
+          2 * 60; // 20 times the album minus 3 excluded tracks
+
+      // override http client
+      scrobbler.httpClient =
+          MockClient(expectAsync1<Future<Response>, Request>((request) async {
+        expect(request.method, equals('POST'));
+        expect(request.url.toString(),
+            equals('https://ws.audioscrobbler.com/2.0/'));
+        final regexp = RegExp(r'^track\[[1-4]?[0-9]\]$');
+        final trackKeys = request.bodyFields.keys.where(regexp.hasMatch);
+        final tracks = trackKeys.length;
+
+        var index = 0;
+        for (var key in trackKeys) {
+          // expect that the tracks use the correct index
+          expect(key, equals('track[$index]'));
+          // expect the timestamp to be in the range from now beck to total duration of playlist
+          // 2 second delta to account for the test running on a slower platform
+          expect(int.parse(request.bodyFields['timestamp[$index]']),
+              inInclusiveRange(startTime - 2, endTime + 2));
+
+          index++;
+        }
+
+        return Response(_createScrobbleResponse(tracks - 1, 1), 200);
+      }, count: 2));
+
+      // scrobble
+      final acceptedList = await scrobbler
+          .scrobbleAlbums(albums,
+              const ScrobbleOptions(inclusionMask: mask, offsetInSeconds: 0))
+          .toList();
+      expect(acceptedList, equals([50 - 1, 30 - 1 - 3]));
+    });
+
+    test('submit a single album to Last.fm with a 4 hour offset', () async {
+      const offset = 240 * 60; // 4 hour offset
+
+      // set a key
+      scrobbler.updateSessionKey('test-session-key');
+
+      // list of albums to scrobble
+      final albums = [testAlbumDetails1];
+
+      // expected timestamp for the most recent track submitted
+      final now = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+      final endTime = now - offset - 60; // last track is 60 seconds (default)
+      final startTime = now - offset - testAlbumDetails1DurationInSeconds;
 
       // override http client
       scrobbler.httpClient =
@@ -70,19 +133,24 @@ void main() {
           expect(key, 'track[${index++}]');
         }
 
-        return Response(_createScrobbleResponse(tracks - 1, 1), 200);
-      }, count: 2));
+        // expect first timestamp to be close to the expected end time
+        // 2 second delta to account for the test running on a slower platform
+        expect(
+            int.parse(request.bodyFields['timestamp[0]']), closeTo(endTime, 2));
+        // expect last timestamp to be close to the expected start time
+        // 2 second delta to account for the test running on a slower platform
+        expect(int.parse(request.bodyFields['timestamp[$tracks]']),
+            closeTo(startTime, 2));
+
+        return Response(_createScrobbleResponse(tracks, 0), 200);
+      }, count: 1));
 
       // scrobble
-      final acceptedList = await scrobbler.scrobbleAlbums(
-        albums,
-        {
-          16: {0: false, 2: true},
-          18: {2: false}, // this is an index track with 2 sub-tracks
-          19: {1: true},
-        },
-      ).toList();
-      expect(acceptedList, equals([49, 26]));
+      final acceptedList = await scrobbler
+          .scrobbleAlbums(albums,
+              const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: offset))
+          .toList();
+      expect(acceptedList, equals([4]));
     });
 
     Future<void> verifyThrows(Future<dynamic> function()) async {
@@ -101,7 +169,7 @@ void main() {
 
       scrobbler.updateSessionKey(key);
       await verifyThrows(() async =>
-          await scrobbler.scrobbleAlbums([testAlbumDetails1], {}).toList());
+          await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
 
     test('throws UI exception on server error', () async {
@@ -112,7 +180,7 @@ void main() {
 
       scrobbler.updateSessionKey(key);
       await verifyThrows(() async =>
-          await scrobbler.scrobbleAlbums([testAlbumDetails1], {}).toList());
+          await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
 
     test('throws UI exception if album list is empty', () async {
@@ -121,7 +189,7 @@ void main() {
 
       scrobbler.updateSessionKey(key);
       await verifyThrows(
-          () async => await scrobbler.scrobbleAlbums([], {}).toList());
+          () async => await scrobbler.scrobbleAlbums([]).toList());
     });
 
     test('throws UI exception if session key is empty', () async {
@@ -129,7 +197,7 @@ void main() {
           MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       await verifyThrows(() async =>
-          await scrobbler.scrobbleAlbums([testAlbumDetails1], {}).toList());
+          await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
   });
 }

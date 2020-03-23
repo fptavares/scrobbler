@@ -55,9 +55,9 @@ class ScrobbleFloatingButton extends StatelessWidget {
     }
   }
 
-  static Future<Map<int, Map<int, bool>>> showPlaylistOptionsDialog(
+  static Future<ScrobbleOptions> showPlaylistOptionsDialog(
       BuildContext context, List<AlbumDetails> albums) async {
-    return showModalBottomSheet<Map<int, Map<int, bool>>>(
+    return showModalBottomSheet<ScrobbleOptions>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -98,6 +98,7 @@ class ScrobblePlaylistEditor extends StatefulWidget {
 
 class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
   final Map<int, Map<int, bool>> _includeMask = {};
+  int _timeOffsetIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +155,31 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
             },
           ),
         ),
+        const Divider(),
+        ListTile(
+          dense: true,
+          leading: const Text('When?'),
+          title: Slider(
+            value: _timeOffsetIndex.toDouble(),
+            onChanged: (newTime) =>
+                setState(() => _timeOffsetIndex = newTime.round()),
+            min: 0,
+            max: (_timeOffsetValues.length - 1).toDouble(),
+            divisions: _timeOffsetValues.length - 1,
+            label: _timeOffsetLabels[_timeOffsetIndex],
+          ),
+        ),
         ListTile(
           title: FlatButton(
             color: Theme.of(context).accentColor,
             child: const Text('Submit'),
-            onPressed: () => Navigator.pop(context, _includeMask),
+            onPressed: () => Navigator.pop(
+              context,
+              ScrobbleOptions(
+                inclusionMask: _includeMask,
+                offsetInSeconds: _timeOffsetValues[_timeOffsetIndex] * 60,
+              ),
+            ),
           ),
         ),
       ],
@@ -176,4 +197,15 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
     // include by default
     return (_includeMask[albumIndex] ?? const {})[trackIndex] ?? true;
   }
+
+  static const _timeOffsetValues = [0, 15, 30, 60, 120, 240, 300];
+  static const _timeOffsetLabels = [
+    'Now',
+    '15 minutes ago',
+    '30 minutes ago',
+    '1 hour ago',
+    '2 hours ago',
+    '4 hours ago',
+    '6 hours ago',
+  ];
 }

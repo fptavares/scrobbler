@@ -24,6 +24,7 @@ final CollectionAlbum testAlbum2 = CollectionAlbum(
 );
 final List<CollectionAlbum> testAlbums = [testAlbum1, testAlbum2];
 
+const int testAlbumDetails1DurationInSeconds = 4 * 60 + 44 + 3 * 60;
 final AlbumDetails testAlbumDetails1 = AlbumDetails(
   releaseId: 456,
   artist: 'Radiohead',

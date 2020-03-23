@@ -36,7 +36,7 @@ class Playlist extends ChangeNotifier {
   Stream<int> scrobble(
       Scrobbler scrobbler,
       Collection collection,
-      Future<Map<int, Map<int, bool>>> requestInclusionMask(
+      Future<ScrobbleOptions> requestOptions(
           List<AlbumDetails> albums)) async* {
     if (scrobbler.isNotAuthenticated) {
       throw UIException(
@@ -54,15 +54,15 @@ class Playlist extends ChangeNotifier {
       _status = ScrobblingStatus.paused;
       notifyListeners();
 
-      final mask = await requestInclusionMask(albums);
-      if (mask == null) {
+      final options = await requestOptions(albums);
+      if (options == null) {
         return;
       }
 
       _status = ScrobblingStatus.active;
       notifyListeners();
 
-      await for (final int accepted in scrobbler.scrobbleAlbums(albums, mask)) {
+      await for (final int accepted in scrobbler.scrobbleAlbums(albums, options)) {
         yield accepted;
       }
       clearAlbums();

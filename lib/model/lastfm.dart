@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
@@ -62,8 +63,8 @@ class Scrobbler {
     }
   }
 
-  Stream<int> scrobbleAlbums(
-      List<AlbumDetails> albums, Map<int, Map<int, bool>> mask) async* {
+  Stream<int> scrobbleAlbums(List<AlbumDetails> albums,
+      [ScrobbleOptions options]) async* {
     if (_sessionKey == null) {
       throw UIException(
           'Oops! You need to login to Last.fm first with your username and password.');
@@ -73,19 +74,22 @@ class Scrobbler {
           'Your playlist is empty! Try to add some albums to it first.');
     }
 
-    final queue = _createScrobbleQueue(albums, mask);
+    final queue = _createScrobbleQueue(albums, options);
     for (final scrobbles in queue.batches) {
       yield await _postScrobbles(scrobbles);
     }
   }
 
   ScrobbleQueue _createScrobbleQueue(
-      List<AlbumDetails> albums, Map<int, Map<int, bool>> mask) {
-    final queue = ScrobbleQueue();
+      List<AlbumDetails> albums, ScrobbleOptions options) {
+    // set default values if options are null
+    options ??= const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: 0);
+
+    final queue = ScrobbleQueue(options.offsetInSeconds);
 
     for (var albumIndex = albums.length - 1; albumIndex >= 0; albumIndex--) {
       final album = albums[albumIndex];
-      final albumMask = mask[albumIndex] ?? const {};
+      final albumMask = options.inclusionMask[albumIndex] ?? const {};
 
       for (var index = album.tracks.length - 1; index >= 0; index--) {
         final track = album.tracks[index];
@@ -108,6 +112,9 @@ class Scrobbler {
   }
 
   Future<int> _postScrobbles(List<Map<String, String>> scrobbles) async {
+    if (scrobbles.isEmpty) {
+      return 0;
+    }
     log.info('Posting ${scrobbles.length} tracks to Last.fm...');
     http.Response response;
     try {
@@ -177,10 +184,15 @@ class Scrobbler {
 }
 
 class ScrobbleQueue {
+  ScrobbleQueue(int timeOffset)
+      : assert(timeOffset >= 0),
+        timestamp =
+            (DateTime.now().millisecondsSinceEpoch / 1000).floor() - timeOffset;
+
   List<List<Map<String, String>>> batches = <List<Map<String, String>>>[
     <Map<String, String>>[]
   ];
-  int timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+  int timestamp;
 
   void add(AlbumTrack track, AlbumDetails album) {
     final splitDuration = (track.duration?.isNotEmpty ?? false)
@@ -203,4 +215,11 @@ class ScrobbleQueue {
       'timestamp[$index]': timestamp.toString(),
     });
   }
+}
+
+class ScrobbleOptions {
+  const ScrobbleOptions({@required this.inclusionMask, @required this.offsetInSeconds});
+
+  final Map<int, Map<int, bool>> inclusionMask;
+  final int offsetInSeconds;
 }
