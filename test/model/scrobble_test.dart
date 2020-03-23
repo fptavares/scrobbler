@@ -139,7 +139,7 @@ void main() {
             int.parse(request.bodyFields['timestamp[0]']), closeTo(endTime, 2));
         // expect last timestamp to be close to the expected start time
         // 2 second delta to account for the test running on a slower platform
-        expect(int.parse(request.bodyFields['timestamp[$tracks]']),
+        expect(int.parse(request.bodyFields['timestamp[${tracks - 1}]']),
             closeTo(startTime, 2));
 
         return Response(_createScrobbleResponse(tracks, 0), 200);
