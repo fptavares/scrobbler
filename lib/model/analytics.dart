@@ -74,10 +74,15 @@ class MetricHttpClient extends BaseClient {
     try {
       response = await innerClient.send(request);
       metric
-        ..responsePayloadSize = response.contentLength
         ..responseContentType = response.headers['Content-Type']
-        ..requestPayloadSize = request.contentLength
         ..httpResponseCode = response.statusCode;
+
+      if (response.contentLength != null) {
+        metric.responsePayloadSize = response.contentLength;
+      }
+      if (request.contentLength != null) {
+        metric.requestPayloadSize = request.contentLength;
+      }
     } finally {
       await metric.stop();
     }
