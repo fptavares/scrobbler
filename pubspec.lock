@@ -100,7 +100,7 @@ packages:
     source: hosted
     version: "1.2.1"
   file:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: file
       url: "https://pub.dartlang.org"
@@ -161,7 +161,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_cache_manager:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_cache_manager
       url: "https://pub.dartlang.org"
@@ -363,7 +363,7 @@ packages:
     source: hosted
     version: "1.0.10"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       url: "https://pub.dartlang.org"
@@ -384,12 +384,26 @@ packages:
     source: hosted
     version: "0.1.4"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.5"
+  path_provider_macos:
+    dependency: transitive
+    description:
+      name: path_provider_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.4"
+  path_provider_platform_interface:
+    dependency: "direct dev"
+    description:
+      name: path_provider_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   pedantic:
     dependency: transitive
     description:
@@ -412,7 +426,7 @@ packages:
     source: hosted
     version: "2.2.1"
   plugin_platform_interface:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"

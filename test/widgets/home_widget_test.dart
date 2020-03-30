@@ -149,7 +149,7 @@ Future<void> main() async {
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
-      verify(collection.reload());
+      verify(collection.reload(emptyCache: true));
     });
 
     testWidgets('scroll to top when user taps the app bar title',

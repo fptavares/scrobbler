@@ -44,7 +44,8 @@ class HomePage extends StatelessWidget {
               }
               analytics.logPullToRefresh();
 
-              return handleFutureError(collection.reload(), context, log,
+              return handleFutureError(
+                  collection.reload(emptyCache: true), context, log,
                   error: 'Failed to reload collection!', trace: 'reload');
             },
             child: const HomeBody(),
@@ -92,11 +93,13 @@ class HomeAppBar extends StatelessWidget {
           StretchMode.fadeTitle,
         ],
         title: GestureDetector(
-          onTap: () => PrimaryScrollController.of(context).animateTo(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          ).then((_) => analytics.logTapLogo()),
+          onTap: () => PrimaryScrollController.of(context)
+              .animateTo(
+                0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              )
+              .then((_) => analytics.logTapLogo()),
           child: SafeArea(
             key: const Key('logo'),
             child: Consumer<LoadingStatus>(

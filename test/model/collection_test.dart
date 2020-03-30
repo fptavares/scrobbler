@@ -1,25 +1,78 @@
 import 'dart:io';
 
+import 'package:file/local.dart';
+import 'package:firebase_performance/firebase_performance.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/src/cache_store.dart';
+import 'package:flutter_cache_manager/src/web_helper.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:scrobbler/secrets.dart';
-import 'package:test/test.dart';
+import 'package:sqflite/src/sqflite_impl.dart' as sqflite_impl;
 
 import 'collection_test_data.dart';
 
 const userAgent = 'test user-agent';
 const username = 'test_user';
 
-void main() {
+Future<void> main() async {
+  final tempDir = await const LocalFileSystem()
+      .systemTempDirectory
+      .createTemp('scrobblerTest');
+  final tempPath = tempDir.path;
+
   group('Discogs collection', () {
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     Collection collection;
 
-    setUp(() {
+    setUpAll(() async {
+      // mock platform channel for path provider
+      PathProviderPlatform.instance =
+          MockPathProviderPlatform(tempPath: tempPath);
+      // mock platform channel for sqflite
+      sqflite_impl.channel.setMockMethodCallHandler((call) async {
+        switch (call.method) {
+          case 'getDatabasesPath':
+            return '/tmp/test';
+          case 'openDatabase':
+            return 0;
+          default:
+            return null;
+        }
+      });
+      // mock platform channel for firebase performance
+      FirebasePerformance.channel.setMockMethodCallHandler((methodCall) async {
+        switch (methodCall.method) {
+          case 'FirebasePerformance#isPerformanceCollectionEnabled':
+            return false;
+          default:
+            return null;
+        }
+      });
+    });
+
+    tearDownAll(() {
+      // delete temp files created for the tests
+      tempDir.deleteSync(recursive: true);
+    });
+
+    setUp(() async {
       collection = Collection(userAgent);
-      collection.httpClient = null;
+
+      // mock cache manager
+      final store = MockStore();
+      final cachePath = await Collection.cache.getFilePath();
+      when(store.filePath).thenAnswer((_) async => cachePath);
+      Collection.cache.store = store;
+      Collection.cache.webHelper =
+          WebHelper(store, CacheManager.fetchFromServer);
     });
 
     void verifyCommonHeaders(Request request) {
@@ -73,16 +126,23 @@ void main() {
     }
 
     test('loads the initial page for a valid username', () async {
-      collection.httpClient = createPageMockClient(expectedHits: 1);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 1);
+
+      expect(collection.isEmpty, isTrue);
+      expect(collection.isUserEmpty, isTrue);
 
       await collection.updateUsername(username);
       expect(collection.albums.length, 2);
       expect(collection.isFullyLoaded, equals(false));
       verifyCollectionTotals();
+
+      expect(collection.isEmpty, isFalse);
+      expect(collection.isNotEmpty, isTrue);
+      expect(collection.isUserEmpty, isFalse);
     });
 
     test('loads the next page for a valid username', () async {
-      collection.httpClient = createPageMockClient(expectedHits: 2);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 2);
 
       // page 1
       await collection.updateUsername(username);
@@ -96,25 +156,33 @@ void main() {
     });
 
     test('loads the last page for a valid username', () async {
-      collection.httpClient = createPageMockClient(expectedHits: 3);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
+
+      expect(collection.nextPage, equals(1));
+      expect(collection.hasMorePages, isFalse);
 
       // page 1
       await collection.updateUsername(username);
       expect(collection.albums.length, 2);
+      expect(collection.nextPage, equals(2));
+      expect(collection.hasMorePages, isTrue);
 
       // page 2
       await collection.loadMoreAlbums();
       expect(collection.albums.length, 4);
+      expect(collection.nextPage, equals(3));
+      expect(collection.hasMorePages, isTrue);
 
       // last page (3)
       await collection.loadMoreAlbums();
       expect(collection.albums.length, 5);
-      expect(collection.isFullyLoaded, equals(true));
+      expect(collection.isFullyLoaded, isTrue);
+      expect(collection.hasMorePages, isFalse);
       verifyCollectionTotals();
     });
 
     test('loads all albums for a valid username (for search)', () async {
-      collection.httpClient = createPageMockClient(expectedHits: 3);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
 
       // initialize
       await collection.updateUsername(username);
@@ -127,8 +195,32 @@ void main() {
       verifyCollectionTotals();
     });
 
+    test('reloads albums for a valid username', () async {
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
+
+      // initialize
+      await collection.updateUsername(username);
+      expect(collection.albums.length, 2);
+      verifyNever(Collection.cache.store.emptyCache());
+
+      // load all
+      await collection.loadAllAlbums();
+      expect(collection.albums.length, 5);
+      expect(collection.isFullyLoaded, equals(true));
+      verifyNever(Collection.cache.store.emptyCache());
+
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 1);
+
+      // refresh
+      await collection.reload(emptyCache: true);
+      expect(collection.albums.length, 2);
+      expect(collection.isFullyLoaded, equals(false));
+      verifyCollectionTotals();
+      verify(Collection.cache.store.emptyCache()).called(1);
+    });
+
     test('search works', () async {
-      collection.httpClient = createPageMockClient(expectedHits: 3);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
 
       // initialize
       await collection.updateUsername(username);
@@ -145,6 +237,9 @@ void main() {
       expect(results.length, equals(1));
       expect(results[0].id, 426578531);
 
+      results = collection.search('blux');
+      expect(results.length, equals(0));
+
       results = collection.search('bear grizzly vecka');
       expect(results.length, equals(1));
       expect(results[0].id, 32925711);
@@ -158,7 +253,7 @@ void main() {
     });
 
     test('loads album details', () async {
-      collection.httpClient =
+      Collection.innerHttpClient =
           MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('GET'));
         expect(request.url.toString(),
@@ -185,7 +280,7 @@ void main() {
     });
 
     test('loads album details with subtracks', () async {
-      collection.httpClient =
+      Collection.innerHttpClient =
           MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('GET'));
         expect(request.url.toString(),
@@ -212,100 +307,189 @@ void main() {
       expect(album.tracks.length, equals(4));
     });
 
-    Future<void> verifyThrows(Future<dynamic> function()) async {
+    Future<T> verifyThrows<T extends Exception>(
+        Future<dynamic> function()) async {
       try {
         await function();
         fail('Exception not thrown on: $function');
       } on Exception catch (e) {
-        expect(e, const TypeMatcher<UIException>());
+        expect(e, isA<T>());
+        return e;
       }
     }
 
     test('throws UI exception on server error', () async {
-      collection.httpClient = createErrorMockClient(code: 400);
+      Collection.innerHttpClient = createErrorMockClient(code: 400);
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(() => collection.updateUsername('something-else'));
+      await verifyThrows<UIException>(
+          () => collection.updateUsername('something-else'));
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
       // allow one successful request to fill totalPages
-      collection.httpClient = createPageMockClient(expectedHits: 1);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 1);
       await collection.updateUsername(username);
+      expect(collection.hasLoadingError, isFalse);
+      expect(collection.errorMessage, isNull);
 
-      collection.httpClient = createErrorMockClient(code: 400);
-
-      expect(collection.isLoading, isFalse);
-      await verifyThrows(collection.loadMoreAlbums);
-      expect(collection.isLoading, isFalse);
-      expect(collection.hasLoadingError, isTrue);
+      Collection.innerHttpClient = createErrorMockClient(code: 400);
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(collection.loadAllAlbums);
+      await verifyThrows<UIException>(collection.loadMoreAlbums);
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(collection.reload);
+      await verifyThrows<UIException>(collection.loadAllAlbums);
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
-      collection.httpClient = MockClient((_) async => Response('', 400));
+      expect(collection.isLoading, isFalse);
+      await verifyThrows<UIException>(collection.reload);
+      expect(collection.isLoading, isFalse);
+      expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
-      await verifyThrows(() => collection.loadAlbumDetails(249504));
+      Collection.innerHttpClient = MockClient((_) async => Response('', 400));
+
+      await verifyThrows<UIException>(
+          () => collection.loadAlbumDetails(249504));
+    });
+
+    test('throws a different UI exception on 404 not found', () async {
+      Collection.innerHttpClient = createErrorMockClient(code: 404);
+
+      final exception404 = await verifyThrows<UIException>(
+          () => collection.updateUsername(username));
+      expect(collection.isLoading, isFalse);
+      expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
+
+      Collection.innerHttpClient = createErrorMockClient(code: 500);
+
+      final exception500 =
+          await verifyThrows<UIException>(() => collection.reload());
+
+      expect(exception404.message, isNot(equals(exception500.message)));
     });
 
     test('throws UI exception on network error', () async {
-      collection.httpClient =
+      Collection.innerHttpClient =
           createErrorMockClient(exception: const SocketException(''));
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(() => collection.updateUsername('something-else'));
+      await verifyThrows<UIException>(
+          () => collection.updateUsername('something-else'));
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
       // allow one successful request to fill totalPages
-      collection.httpClient = createPageMockClient(expectedHits: 1);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 1);
       await collection.updateUsername(username);
+      expect(collection.hasLoadingError, isFalse);
+      expect(collection.errorMessage, isNull);
 
-      collection.httpClient =
+      Collection.innerHttpClient =
           createErrorMockClient(exception: const SocketException(''));
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(collection.loadMoreAlbums);
+      await verifyThrows<UIException>(collection.loadMoreAlbums);
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(collection.loadAllAlbums);
+      await verifyThrows<UIException>(collection.loadAllAlbums);
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
       expect(collection.isLoading, isFalse);
-      await verifyThrows(collection.reload);
+      await verifyThrows<UIException>(collection.reload);
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
 
-      collection.httpClient =
+      Collection.innerHttpClient =
           MockClient((_) async => throw const SocketException(''));
 
-      await verifyThrows(() => collection.loadAlbumDetails(249504));
+      await verifyThrows<UIException>(
+          () => collection.loadAlbumDetails(249504));
+    });
+
+    test('doesn\'t allow loading all albums before loading first page',
+        () async {
+      Collection.innerHttpClient = createErrorMockClient(code: 401);
+
+      await verifyThrows<UIException>(
+          () => collection.updateUsername(username));
+
+      expect(collection.isEmpty, isTrue);
+      expect(collection.isUserEmpty, isFalse);
+
+      await verifyThrows<UIException>(collection.loadAllAlbums);
+      expect(collection.isEmpty, isTrue);
+      expect(collection.isLoading, isFalse);
+    });
+
+    test('bypasses the cache manager on file system error', () async {
+      when(Collection.cache.store.retrieveCacheData(any))
+          .thenThrow(const FileSystemException(''));
+
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
+
+      await collection.updateUsername(username);
+      expect(collection.isLoading, isFalse);
+      expect(collection.hasLoadingError, isFalse);
+      expect(collection.albums.length, 2);
+
+      await collection.loadMoreAlbums();
+      expect(collection.isLoading, isFalse);
+      expect(collection.hasLoadingError, isFalse);
+      expect(collection.albums.length, 4);
+
+      await collection.loadAllAlbums();
+      expect(collection.hasLoadingError, isFalse);
+      expect(collection.albums.length, 5);
+
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 1);
+
+      await collection.reload();
+      expect(collection.isLoading, isFalse);
+      expect(collection.hasLoadingError, isFalse);
+      expect(collection.albums.length, 2);
+
+      Collection.innerHttpClient = MockClient(
+          expectAsync1<Future<Response>, Request>(
+              (request) async => Response(jsonForRelease, 200,
+                  headers: {HttpHeaders.contentTypeHeader: 'application/json'}),
+              count: 1));
+
+      final album = await collection.loadAlbumDetails(249504);
+      expect(album, isNotNull);
     });
 
     test('doesn\'t try to load collection if username is empty', () async {
-      collection.httpClient = EmptyMockHttpClient();
+      Collection.innerHttpClient = EmptyMockHttpClient();
 
       await collection.updateUsername(null);
 
-      await collection.loadMoreAlbums();
-      await verifyThrows(collection.loadAllAlbums);
-      await verifyThrows(collection.reload);
+      expect(collection.isUserEmpty, isTrue);
 
-      verifyNever(collection.httpClient.get(anything));
+      await collection.loadMoreAlbums();
+      await verifyThrows<UIException>(collection.loadAllAlbums);
+      await verifyThrows<UIException>(collection.reload);
+
+      verifyNever(Collection.innerHttpClient.get(anything));
     });
 
     test('doesn\'t try to load collection if it\'s already loading', () async {
-      collection.httpClient = EmptyMockHttpClient();
+      Collection.innerHttpClient = EmptyMockHttpClient();
 
       collection.loadingNotifier.value = LoadingStatus.loading;
 
@@ -315,12 +499,12 @@ void main() {
       await collection.loadAllAlbums();
       await collection.reload();
 
-      verifyNever(collection.httpClient.get(anything));
+      verifyNever(Collection.innerHttpClient.get(anything));
     });
 
     test('doesn\'t try to load collection if it\' already fully loaded',
         () async {
-      collection.httpClient = createPageMockClient(expectedHits: 3);
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
 
       await collection.updateUsername(username);
       await collection.loadAllAlbums();
@@ -328,14 +512,45 @@ void main() {
       expect(collection.isFullyLoaded, isTrue);
       expect(collection.isNotFullyLoaded, isFalse);
 
-      collection.httpClient = EmptyMockHttpClient();
+      Collection.innerHttpClient = EmptyMockHttpClient();
 
       await collection.loadMoreAlbums();
       await collection.loadAllAlbums();
 
-      verifyNever(collection.httpClient.get(anything));
+      verifyNever(Collection.innerHttpClient.get(anything));
+    });
+
+    test(
+        'doesn\'t reload collection if the username is updated to the same value',
+        () async {
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 1);
+
+      await collection.updateUsername(username);
+
+      Collection.innerHttpClient = EmptyMockHttpClient();
+
+      await collection.updateUsername(username);
+
+      verifyNever(Collection.innerHttpClient.get(anything));
     });
   });
 }
 
 class EmptyMockHttpClient extends Mock implements Client {}
+
+class MockStore extends Mock implements CacheStore {}
+
+class MockWebHelper extends Mock implements WebHelper {}
+
+class MockPathProviderPlatform extends Mock
+    with
+        MockPlatformInterfaceMixin // ignore: prefer_mixin
+    implements
+        PathProviderPlatform {
+  MockPathProviderPlatform({@required this.tempPath});
+
+  final String tempPath;
+
+  @override
+  Future<String> getTemporaryPath() async => tempPath;
+}

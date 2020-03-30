@@ -2,16 +2,23 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../components/error.dart';
 import '../secrets.dart';
+import 'analytics.dart';
 
 abstract class Album {
   int get releaseId;
+
   String get artist;
+
   String get title;
+
   String get thumbUrl;
 }
 
@@ -55,11 +62,6 @@ class CollectionAlbum implements Album {
   final int rating;
   final String dateAdded;
   String searchString;
-
-  @override
-  String toString() {
-    return '$id: $title ($year) by $artist';
-  }
 
   CollectionAlbum copyWith({@required int id}) {
     return CollectionAlbum(
@@ -139,10 +141,24 @@ class AlbumTrack {
 class Collection extends ChangeNotifier {
   Collection(this.userAgent);
 
-  final Logger log = Logger('Collection');
+  static final MetricHttpClient _httpClient = MetricHttpClient(http.Client());
+
+  @visibleForTesting
+  static set innerHttpClient(http.Client newClient) {
+    _httpClient.innerClient = newClient;
+  }
+
+  @visibleForTesting
+  static http.Client get innerHttpClient => _httpClient.innerClient;
+
+  static final CacheManager _cache = CacheManager();
+
+  @visibleForTesting
+  static CacheManager get cache => _cache;
+
+  static final Logger log = Logger('Collection');
 
   final String userAgent;
-  http.Client httpClient = http.Client();
 
   String _username;
   final List<CollectionAlbum> _albumList = <CollectionAlbum>[];
@@ -229,7 +245,7 @@ class Collection extends ChangeNotifier {
     await reload();
   }
 
-  Future<void> reload() async {
+  Future<void> reload({bool emptyCache = false}) async {
     if (isLoading) {
       log.info('Cannot reload yet because the collection is still loading...');
       return;
@@ -242,6 +258,9 @@ class Collection extends ChangeNotifier {
 
     _progress.loading();
     try {
+      if (emptyCache) {
+        _cache.emptyCache();
+      }
       _clearAndAddAlbums(await _loadCollectionPage(1));
       _nextPage = 2;
 
@@ -318,42 +337,21 @@ class Collection extends ChangeNotifier {
     }
   }
 
-  Future<List<CollectionAlbum>> _loadCollectionPage(int page) async {
-    log.info('Started loading albums (page $page) for $_username...');
+  Future<List<CollectionAlbum>> _loadCollectionPage(int pageNumber) async {
+    log.info('Started loading albums (page $pageNumber) for $_username...');
 
-    http.Response response;
-    try {
-      response = await httpClient.get(
-        'https://api.discogs.com/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=99&page=$page',
-        headers: _headers,
-      );
-    } on SocketException catch (e) {
-      throw UIException('Could not connect to Discogs. Please check your internet connection and try again later.', e);
-    }
+    final page = await _get(
+        '/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=$_pageSize&page=$pageNumber');
 
-    if (response.statusCode == 200) {
-      // If server returns an OK response, parse the JSON.
-      final page = json.decode(response.body) as Map<String, dynamic>;
+    final pageInfo = page['pagination'] as Map<String, dynamic>;
+    _totalItems = pageInfo['items'] as int;
+    _totalPages = pageInfo['pages'] as int;
+    final releases = page['releases'] as List<dynamic>;
 
-      final pageInfo = page['pagination'] as Map<String, dynamic>;
-      _totalItems = pageInfo['items'] as int;
-      _totalPages = pageInfo['pages'] as int;
-      final releases = page['releases'] as List<dynamic>;
-
-      return releases
-          .map((dynamic release) =>
-              CollectionAlbum.fromJson(release as Map<String, dynamic>))
-          .toList();
-    } else if (response.statusCode == 404) {
-      throw UIException(
-          'Discogs couldn\'t find your collection! Please make that the username you provided is correct.');
-    } else {
-      log.info(
-          'Discogs responded with an error loading collection page (${response.statusCode}): ${response.body}');
-      // If that response was not OK, throw an error.
-      throw UIException(
-          'The Discogs service is currently unavailable (${response.statusCode}). Please try again later.');
-    }
+    return releases
+        .map((dynamic release) =>
+            CollectionAlbum.fromJson(release as Map<String, dynamic>))
+        .toList();
   }
 
   List<CollectionAlbum> search(String query) {
@@ -365,31 +363,47 @@ class Collection extends ChangeNotifier {
   }
 
   Future<AlbumDetails> loadAlbumDetails(int releaseId) async {
-    http.Response response;
-    try {
-      response = await httpClient.get(
-        'https://api.discogs.com/releases/$releaseId',
-        headers: _headers,
-      );
-    } on SocketException catch (e) {
-      throw UIException('Could not connect to Discogs. Please check your internet connection and try again later.', e);
-    }
+    log.info('Loading album details for: $releaseId');
 
-    if (response.statusCode == 200) {
-      // If server returns an OK response, parse the JSON.
-      log.info('Loaded album details for: $releaseId');
-      return AlbumDetails.fromJson(
-          json.decode(response.body) as Map<String, dynamic>);
-    } else {
-      log.info(
-          'Discogs responded with an error loading album details (${response.statusCode}): ${response.body}');
-      // If that response was not OK, throw an error.
-      throw UIException(
-          'The Discogs service is currently unavailable (${response.statusCode}). Please try again later.');
-    }
+    return AlbumDetails.fromJson(await _get('/releases/$releaseId'));
   }
 
-  static const int pageSize = 50;
+  Future<Map<String, dynamic>> _get(String apiPath) async {
+    final url = 'https://api.discogs.com$apiPath';
+    String content;
+
+    try {
+      content = await _cache.get(url, headers: _headers);
+    } on SocketException catch (e) {
+      throw UIException(
+          'Could not connect to Discogs. Please check your internet connection and try again later.',
+          e);
+    } on HttpException catch (e) {
+      // If that response was not OK, throw an error.
+      throw UIException(
+          'The Discogs service is currently unavailable. Please try again later.',
+          e);
+    } on FileSystemException catch (e) {
+      log.severe('Failed to read the chached file', e);
+      // try falling back to direct download
+      content = (await _fetchFromDiscogs(url, headers: _headers)).body;
+    }
+
+    return json.decode(content) as Map<String, dynamic>;
+  }
+
+  static Future<http.Response> _fetchFromDiscogs(String url,
+      {Map<String, String> headers}) async {
+    log.fine('Fetching from Discogs: $url');
+    final response = await _httpClient.get(url, headers: headers);
+    if (response?.statusCode == 404) {
+      throw UIException(
+          'Oops! Couldn\t find what you\'re looking for on Discogs (404 error).');
+    }
+    return response;
+  }
+
+  static const int _pageSize = 99;
   static const String _consumerKey = discogsConsumerKey;
   static const String _consumerSecret = discogsConsumerSecret;
 }
@@ -427,4 +441,30 @@ String _oneNameForArtists(List<dynamic> artists) {
     RegExp(r'^(.+) \([0-9]+\)$'),
     (m) => m[1],
   );
+}
+
+@visibleForTesting
+class CacheManager extends BaseCacheManager {
+  CacheManager()
+      : super(key,
+            maxAgeCacheObject: const Duration(days: 30),
+            fileFetcher: fetchFromServer);
+
+  static Future<FileFetcherResponse> fetchFromServer(String url,
+          {Map<String, String> headers}) async =>
+      HttpFileFetcherResponse(
+          await Collection._fetchFromDiscogs(url, headers: headers));
+
+  static const key = 'scrobblerCache';
+
+  @override
+  Future<String> getFilePath() async {
+    final directory = await getTemporaryDirectory();
+    return p.join(directory.path, key);
+  }
+
+  Future<String> get(String url, {Map<String, String> headers}) async {
+    final fileInfo = await getFile(url, headers: headers).first;
+    return fileInfo.file.readAsStringSync();
+  }
 }
