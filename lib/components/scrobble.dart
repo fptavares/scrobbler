@@ -112,11 +112,11 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      //crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         AppBar(
           leading: const CloseButton(),
-          title: Text('Scrobbling ${widget.albums.length} albums'),
+          title: Text(
+              'Scrobbling ${widget.albums.length} album${widget.albums.length == 1 ? '' : 's'}'),
         ),
         Flexible(
           child: ListView.builder(
