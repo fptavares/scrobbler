@@ -145,6 +145,14 @@ void main() {
         await tester.tap(find.text(testAlbumDetails1.tracks[1].title));
         await tester.pump();
 
+        // show tooltip on tap
+        expect(find.text('When?'), findsOneWidget);
+        await tester.tap(find.text('When?'));
+        await tester.pump(const Duration(seconds: 2)); // faded in
+
+        expect(find.text(ScrobblePlaylistEditor.whenTooltipMessage),
+            findsOneWidget);
+
         // submit
         await tester.tap(find.byType(FlatButton));
         await tester.pump();

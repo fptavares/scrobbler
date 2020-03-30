@@ -94,11 +94,16 @@ class ScrobblePlaylistEditor extends StatefulWidget {
 
   @override
   _ScrobblePlaylistEditorState createState() => _ScrobblePlaylistEditorState();
+
+  @visibleForTesting
+  static String whenTooltipMessage = 'When you finished listening to the albums';
 }
 
 class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
   final Map<int, Map<int, bool>> _includeMask = {};
   int _timeOffsetIndex = 0;
+
+  final _whenToolTipKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +163,24 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
         const Divider(),
         ListTile(
           dense: true,
-          leading: const Text('When?'),
+          leading: GestureDetector(
+            onTap: () {
+              final dynamic tooltip = _whenToolTipKey.currentState;
+              tooltip.ensureTooltipVisible();
+            },
+            child: Tooltip(
+              key: _whenToolTipKey,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  const Text('When?'),
+                  Icon(Icons.info_outline, size: 20, color: Colors.grey[300]),
+                ],
+              ),
+              message: ScrobblePlaylistEditor.whenTooltipMessage,
+            ),
+          ),
           title: Slider(
             value: _timeOffsetIndex.toDouble(),
             onChanged: (newTime) =>
