@@ -43,7 +43,9 @@ class ScrobbleFloatingButton extends StatelessWidget {
     final scrobbler = Provider.of<Scrobbler>(context, listen: false);
     final collection = Provider.of<Collection>(context, listen: false);
 
-    analytics.logScrobbling(numberOfAlbums: playlist.numberOfItems);
+    analytics.logScrobbleOptionsOpen(
+        numberOfAlbums: playlist.numberOfItems,
+        maxCount: playlist.maxItemCount());
 
     try {
       await for (int accepted in playlist.scrobble(scrobbler, collection,
@@ -195,18 +197,34 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
           title: FlatButton(
             color: Theme.of(context).accentColor,
             child: const Text('Submit'),
-            onPressed: () => Navigator.pop(
-              context,
-              ScrobbleOptions(
-                inclusionMask: _includeMask,
-                offsetInSeconds: _timeOffsetValues[_timeOffsetIndex] * 60,
-              ),
-            ),
+            onPressed: () => _handleSubmit(context),
           ),
         ),
       ],
     );
   }
+
+  void _handleSubmit(BuildContext context) {
+    final offsetInMinutes = _timeOffsetValues[_timeOffsetIndex];
+
+    Navigator.pop(
+      context,
+      ScrobbleOptions(
+        inclusionMask: _includeMask,
+        offsetInSeconds: offsetInMinutes * 60,
+      ),
+    );
+
+    analytics.logScrobbling(
+        numberOfAlbums: widget.albums.length,
+        numberOfExclusions: _numberOfExclusions(),
+        offsetInMinutes: offsetInMinutes);
+  }
+
+  int _numberOfExclusions() => _includeMask.values.fold(
+      0,
+      (acc, albumMask) =>
+          acc + albumMask.values.where((included) => !included).length);
 
   void _setMask(int albumIndex, int trackIndex, bool included) {
     setState(() {

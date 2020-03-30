@@ -1,10 +1,11 @@
 import 'dart:io';
 
+import 'package:firebase_performance/firebase_performance.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:test/test.dart';
 
 import '../test_albums.dart';
 
@@ -19,14 +20,28 @@ void main() {
     const key = 'd580d57f32848f5dcf574d1ce18d78b2';
     Scrobbler scrobbler;
 
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    setUpAll(() {
+      // mock platform channel for firebase performance
+      FirebasePerformance.channel.setMockMethodCallHandler((methodCall) async {
+        switch (methodCall.method) {
+          case 'FirebasePerformance#isPerformanceCollectionEnabled':
+            return false;
+          default:
+            return null;
+        }
+      });
+    });
+
     setUp(() {
       scrobbler = Scrobbler(userAgent);
-      scrobbler.httpClient = null;
+      scrobbler.innerHttpClient = null;
     });
 
     test('initializes a Last.fm session', () async {
       // override http client
-      scrobbler.httpClient =
+      scrobbler.innerHttpClient =
           MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
         expect(request.url.toString(),
@@ -72,7 +87,7 @@ void main() {
           2 * 60; // 20 times the album minus 3 excluded tracks
 
       // override http client
-      scrobbler.httpClient =
+      scrobbler.innerHttpClient =
           MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
         expect(request.url.toString(),
@@ -119,7 +134,7 @@ void main() {
       final startTime = now - offset - testAlbumDetails1DurationInSeconds;
 
       // override http client
-      scrobbler.httpClient =
+      scrobbler.innerHttpClient =
           MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
         expect(request.url.toString(),
@@ -163,7 +178,7 @@ void main() {
     }
 
     test('throws UI exception on server error', () async {
-      scrobbler.httpClient = MockClient((_) async => Response('', 500));
+      scrobbler.innerHttpClient = MockClient((_) async => Response('', 500));
 
       await verifyThrows(() => scrobbler.initializeSession(username, password));
 
@@ -173,7 +188,7 @@ void main() {
     });
 
     test('throws UI exception on server error', () async {
-      scrobbler.httpClient =
+      scrobbler.innerHttpClient =
           MockClient((_) async => throw const SocketException(''));
 
       await verifyThrows(() => scrobbler.initializeSession(username, password));
@@ -184,7 +199,7 @@ void main() {
     });
 
     test('throws UI exception if album list is empty', () async {
-      scrobbler.httpClient =
+      scrobbler.innerHttpClient =
           MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       scrobbler.updateSessionKey(key);
@@ -193,7 +208,7 @@ void main() {
     });
 
     test('throws UI exception if session key is empty', () async {
-      scrobbler.httpClient =
+      scrobbler.innerHttpClient =
           MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       await verifyThrows(() async =>

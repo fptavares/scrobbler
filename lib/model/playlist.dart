@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import '../components/error.dart';
@@ -94,6 +96,13 @@ class Playlist extends ChangeNotifier {
 
   void clearZeroCountAlbums() {
     _itemById.removeWhere((_, item) => item.count == 0);
+  }
+
+  int maxItemCount() {
+    if (_itemById.isEmpty) {
+      return 0;
+    }
+    return _itemById.values.map((item) => item.count).reduce(max);
   }
 }
 

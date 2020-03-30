@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 
 import '../components/error.dart';
 import '../secrets.dart';
+import 'analytics.dart';
 import 'discogs.dart';
 
 class Scrobbler {
@@ -18,7 +19,15 @@ class Scrobbler {
 
   final String userAgent;
 
-  http.Client httpClient = http.Client();
+  final MetricHttpClient _httpClient = MetricHttpClient(http.Client());
+
+  @visibleForTesting
+  http.Client get innerHttpClient => _httpClient.innerClient;
+
+  @visibleForTesting
+  set innerHttpClient(http.Client newClient) {
+    _httpClient.innerClient = newClient;
+  }
 
   String _sessionKey;
 
@@ -161,7 +170,7 @@ class Scrobbler {
   }
 
   Future<http.Response> _postRequest(Map<String, String> params) async {
-    final response = await httpClient
+    final response = await _httpClient
         .post('https://ws.audioscrobbler.com/2.0/', body: <String, String>{
       ...params,
       'api_sig': _createAPISignature(params),
@@ -218,7 +227,8 @@ class ScrobbleQueue {
 }
 
 class ScrobbleOptions {
-  const ScrobbleOptions({@required this.inclusionMask, @required this.offsetInSeconds});
+  const ScrobbleOptions(
+      {@required this.inclusionMask, @required this.offsetInSeconds});
 
   final Map<int, Map<int, bool>> inclusionMask;
   final int offsetInSeconds;

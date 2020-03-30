@@ -1,5 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 
 final _ScrobblerAnalytics analytics = _ScrobblerAnalytics();
 
@@ -8,8 +10,23 @@ class _ScrobblerAnalytics extends FirebaseAnalytics {
     logEvent(name: 'exception', parameters: {'exDescription': description});
   }
 
-  void logScrobbling({@required int numberOfAlbums}) {
-    logEvent(name: 'scrobble', parameters: {'amount': numberOfAlbums});
+  void logScrobbling(
+      {@required int numberOfAlbums,
+      @required int numberOfExclusions,
+      @required int offsetInMinutes}) {
+    logEvent(name: 'scrobble', parameters: {
+      'amount': numberOfAlbums,
+      'exclusions': numberOfExclusions,
+      'offset': offsetInMinutes
+    });
+  }
+
+  void logScrobbleOptionsOpen(
+      {@required int numberOfAlbums, @required int maxCount}) {
+    logEvent(name: 'open_scrobble_options', parameters: {
+      'amount': numberOfAlbums,
+      'max_count': maxCount
+    });
   }
 
   void logSkippedOnboarding({@required double fromPage}) {
@@ -38,5 +55,33 @@ class _ScrobblerAnalytics extends FirebaseAnalytics {
 
   void logTapLogo() {
     logEvent(name: 'tap_logo');
+  }
+}
+
+class MetricHttpClient extends BaseClient {
+  MetricHttpClient(this.innerClient);
+
+  Client innerClient;
+
+  @override
+  Future<StreamedResponse> send(BaseRequest request) async {
+    final metric = FirebasePerformance.instance
+        .newHttpMetric(request.url.toString(), HttpMethod.Get);
+
+    await metric.start();
+
+    StreamedResponse response;
+    try {
+      response = await innerClient.send(request);
+      metric
+        ..responsePayloadSize = response.contentLength
+        ..responseContentType = response.headers['Content-Type']
+        ..requestPayloadSize = request.contentLength
+        ..httpResponseCode = response.statusCode;
+    } finally {
+      await metric.stop();
+    }
+
+    return response;
   }
 }
