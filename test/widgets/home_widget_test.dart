@@ -80,6 +80,19 @@ Future<void> main() async {
       verify(collection.albums);
     });
 
+    testWidgets('shows progress indicator when loading ', (tester) async {
+      when(collection.albums).thenReturn([]);
+      when(collection.isEmpty).thenReturn(true);
+      when(collection.isNotLoading).thenReturn(false);
+      when(collection.isLoading).thenReturn(true);
+
+      await tester.pumpWidget(createHome());
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      verify(collection.isLoading);
+    });
+
     testWidgets('opens drawer on menu button tap', (tester) async {
       await tester.pumpWidget(createHome());
 

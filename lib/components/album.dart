@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:provider/provider.dart';
 
 import '../model/discogs.dart';
@@ -51,27 +52,14 @@ class CachedAlbumImage extends StatelessWidget {
 
   final Album album;
 
-  BoxDecoration get boxDecoration => const BoxDecoration(
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Color(0x88000000),
-            blurRadius: 5.0, // has the effect of softening the shadow
-            spreadRadius: -3, // has the effect of extending the shadow
-            offset: Offset(2, 2),
-          )
-        ],
-      );
-
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
       imageUrl: album.thumbUrl,
-      imageBuilder: (context, imageProvider) => Container(
-        decoration: boxDecoration,
-        child: Image(
-          image: imageProvider,
-          semanticLabel: '${album.artist} - ${album.title}',
-        ),
+      imageBuilder: (context, image) => _AlbumImage(
+        decoration: _shadowDecoration,
+        image: image,
+        album: album,
       ),
       placeholder: (context, url) => const AspectRatio(
         aspectRatio: 1,
@@ -85,53 +73,109 @@ class CachedAlbumImage extends StatelessWidget {
           ),
         ),
       ),
-      errorWidget: (context, url, error) => AspectRatio(
-        aspectRatio: 1.0,
-        child: Container(
-          decoration: boxDecoration,
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              _defaultImage,
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: Text(
-                          album.artist,
-                          style: Theme.of(context).textTheme.title,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                        ),
+      errorWidget: (context, url, error) => _DefaultAlbumImage(
+        decoration: _shadowDecoration,
+        album: album,
+      ),
+      cacheManager: cacheManager,
+    );
+  }
+
+  static const BoxDecoration _shadowDecoration = BoxDecoration(
+    boxShadow: <BoxShadow>[
+      BoxShadow(
+        color: Color(0x88000000),
+        blurRadius: 5.0, // has the effect of softening the shadow
+        spreadRadius: -3, // has the effect of extending the shadow
+        offset: Offset(2, 2),
+      )
+    ],
+  );
+
+  @visibleForTesting
+  static BaseCacheManager cacheManager;
+}
+
+class _AlbumImage extends StatelessWidget {
+  const _AlbumImage({
+    Key key,
+    @required this.decoration,
+    @required this.image,
+    @required this.album,
+  }) : super(key: key);
+
+  final Decoration decoration;
+  final ImageProvider image;
+  final Album album;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: decoration,
+      child: Image(
+        image: image,
+        semanticLabel: '${album.artist} - ${album.title}',
+      ),
+    );
+  }
+}
+
+class _DefaultAlbumImage extends StatelessWidget {
+  const _DefaultAlbumImage({
+    Key key,
+    @required this.decoration,
+    @required this.album,
+  }) : super(key: key);
+
+  final BoxDecoration decoration;
+  final Album album;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1.0,
+      child: Container(
+        decoration: decoration,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            const Image(image: _defaultImage),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text(
+                        album.artist,
+                        style: Theme.of(context).textTheme.title,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
                       ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: Text(
-                          album.title,
-                          style: Theme.of(context).textTheme.subhead,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                        ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text(
+                        album.title,
+                        style: Theme.of(context).textTheme.subhead,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  static final _defaultImage = () {
-    return const Image(image: AssetImage('assets/record_sleeve.png'));
-  }();
+  static const _defaultImage = AssetImage('assets/record_sleeve.png');
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/components/scrobble.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
@@ -211,7 +212,7 @@ void main() {
     testWidgets('display error if scrobbling fails', (tester) async {
       when(playlist.isEmpty).thenReturn(false);
 
-      const exception = SocketException('no connection');
+      final exception = UIException('no connection', const SocketException(''));
       when(playlist.scrobble(any, any, any)).thenThrow(exception);
 
       await tester.pumpWidget(createButton());
@@ -221,7 +222,7 @@ void main() {
 
       verify(playlist.scrobble(scrobbler, collection, any)).called(1);
 
-      expect(find.text(exception.toString()), findsOneWidget);
+      expect(find.text('no connection'), findsOneWidget);
     });
   });
 }

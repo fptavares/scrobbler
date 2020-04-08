@@ -45,7 +45,8 @@ class CollectionLoadingStatus extends StatelessWidget {
             return const EmptyState(
               imagePath: 'assets/empty_nothing.png',
               headline: 'Anyone out there?',
-              subhead: 'A Discogs account needs to be configured before you can get startted scrobbling.\n\nYour Discogs collection will be displayed here, so that you can easily select which albums to scrobble.\n\nJust open the account settings on the top left corner when you\'re ready.',
+              subhead:
+                  'A Discogs account needs to be configured before you can get startted scrobbling.\n\nYour Discogs collection will be displayed here, so that you can easily select which albums to scrobble.\n\nJust open the account settings on the top left corner when you\'re ready.',
             );
           }
 
@@ -67,16 +68,17 @@ class CollectionLoadingStatus extends StatelessWidget {
           return Container(
             height: 80,
             child: Center(
-              child: status == LoadingStatus.loading
+              child: collection.isLoading
                   ? CircularProgressIndicator(
-                      backgroundColor: Theme.of(context).primaryColor,
-                    )
+                      backgroundColor: Theme.of(context).primaryColor)
                   : collection.isNotEmpty && collection.totalItems > 9
                       ? Text(
                           collection.isNotFullyLoaded
                               ? 'Showing ${collection.albums.length} of ${collection.totalItems} albums'
                               : '\u2014 and that is ${collection.totalItems} albums.',
-                          style: TextStyle(color: Theme.of(context).hintColor, fontStyle: FontStyle.italic),
+                          style: TextStyle(
+                              color: Theme.of(context).hintColor,
+                              fontStyle: FontStyle.italic),
                         )
                       : Container(),
             ),
