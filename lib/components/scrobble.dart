@@ -67,7 +67,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
       builder: (context) => DraggableScrollableSheet(
         //initialChildSize: 0.3,
         maxChildSize: 0.9,
-        minChildSize: 0.2,
+        //minChildSize: 0.3,
         builder: (context, scrollController) {
           return Container(
             color: Colors.white,
