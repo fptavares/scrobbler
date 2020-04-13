@@ -11,8 +11,18 @@ locales:
 
 # A list of devices to run tests on
 devices:
+  ios:
+    iPhone 8 Plus:
+    iPhone 11 Pro Max:
+    iPad Pro (12.9-inch) (2nd generation):
+      orientation: Portrait
+    iPad Pro (12.9-inch) (3rd generation):
+      orientation: Portrait
   android:
     Nexus 6P:
+      frame: true
+    Nexus 9:
+      frame: true
 
 # Frame screenshots
-frame: true
+frame: false

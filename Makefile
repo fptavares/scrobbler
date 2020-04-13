@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run ipa appbundle icons screenshots clean
+.PHONY: all secrets test showCoverage analysis run ios ipa android icons screenshots clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
 ASSETS = $(wildcard assets/**)
@@ -31,6 +31,9 @@ run: test
 icons:
 	flutter pub run flutter_launcher_icons:main
 
+ios: test
+	flutter build ios --release
+
 ipa: test
 	flutter build ios --release \
     && mkdir -p build/ios/iphoneos/Payload \
@@ -39,11 +42,13 @@ ipa: test
     && mv Runner.app Payload/ \
     && zip -r app.ipa Payload
 
-appbundle: test
+android: test
 	flutter build appbundle --release
 
 screenshots:
-	screenshots
+	screenshots \
+	&& cd ios/fastlane/screenshots/en-US \
+	&& fastlane frameit
 
 clean:
 	flutter clean
