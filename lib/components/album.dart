@@ -25,19 +25,22 @@ class AlbumButton extends StatelessWidget {
 
             return GestureDetector(
               onTap: () => playlist.addAlbum(album),
-              child: Stack(
-                children: <Widget>[
-                  image,
-                  if (item != null && item.count > 0)
-                    Positioned(
-                      top: 3.0,
-                      right: 3.0,
-                      child: GestureDetector(
-                        onTap: () => playlist.removeAlbum(album),
-                        child: PlaylistCountIndicator(item: item),
+              child: Tooltip(
+                message: '${album.title} by ${album.artist}',
+                child: Stack(
+                  children: <Widget>[
+                    image,
+                    if (item != null && item.count > 0)
+                      Positioned(
+                        top: 3.0,
+                        right: 3.0,
+                        child: GestureDetector(
+                          onTap: () => playlist.removeAlbum(album),
+                          child: PlaylistCountIndicator(item: item),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -56,10 +59,9 @@ class CachedAlbumImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CachedNetworkImage(
       imageUrl: album.thumbUrl,
-      imageBuilder: (context, image) => _AlbumImage(
+      imageBuilder: (context, image) => AlbumImage(
         decoration: _shadowDecoration,
         image: image,
-        album: album,
       ),
       placeholder: (context, url) => const AspectRatio(
         aspectRatio: 1,
@@ -96,28 +98,28 @@ class CachedAlbumImage extends StatelessWidget {
   static BaseCacheManager cacheManager;
 }
 
-class _AlbumImage extends StatelessWidget {
-  const _AlbumImage({
+class AlbumImage extends StatelessWidget {
+  const AlbumImage({
     Key key,
     @required this.decoration,
     @required this.image,
-    @required this.album,
   }) : super(key: key);
 
   final Decoration decoration;
   final ImageProvider image;
-  final Album album;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: decoration,
-      child: Image(
-        image: image,
-        semanticLabel: '${album.artist} - ${album.title}',
-      ),
+      child: imageBuilder(image),
     );
   }
+
+  @visibleForTesting
+  // ignore: prefer_function_declarations_over_variables
+  static Widget Function(ImageProvider) imageBuilder =
+      (image) => Image(image: image);
 }
 
 class _DefaultAlbumImage extends StatelessWidget {
