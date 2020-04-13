@@ -61,13 +61,26 @@ void main() {
     testWidgets('renders and lists all currently loaded albums',
         (tester) async {
       // mock search results
-      when(collection.search(any)).thenReturn([testAlbum1]);
+      when(collection.search(any)).thenReturn([testAlbum1, testAlbum2]);
 
       await pumpSearchWidget(tester);
 
-      expect(find.byType(CachedAlbumImage), findsOneWidget);
+      expect(find.byType(CachedAlbumImage), findsNWidgets(2));
+
       expect(find.text(testAlbum1.artist), findsOneWidget);
       expect(find.text(testAlbum1.title), findsOneWidget);
+      for (final format in testAlbum1.formats) {
+        expect(find.text(format.toString()), findsOneWidget);
+      }
+      expect(find.text('Released in ${testAlbum1.year}'), findsOneWidget);
+
+      expect(find.text(testAlbum2.artist), findsOneWidget);
+      expect(find.text(testAlbum2.title), findsOneWidget);
+      for (final format in testAlbum2.formats) {
+        expect(find.text(format.toString()), findsOneWidget);
+      }
+      expect(testAlbum2.year, equals(0));
+      expect(find.text('Released in 0'), findsNothing);
 
       // search seems to build suggestions twice when it loads
       verify(collection.search('')).called(lessThanOrEqualTo(2));

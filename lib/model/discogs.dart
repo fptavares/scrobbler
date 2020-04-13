@@ -24,14 +24,15 @@ abstract class Album {
 
 class CollectionAlbum implements Album {
   CollectionAlbum(
-      {this.id,
-      this.releaseId,
-      this.artist,
-      this.title,
-      this.year,
-      this.thumbUrl,
-      this.rating,
-      this.dateAdded}) {
+      {@required this.id,
+      @required this.releaseId,
+      @required this.artist,
+      @required this.title,
+      @required this.formats,
+      @required this.year,
+      @required this.thumbUrl,
+      @required this.rating,
+      @required this.dateAdded}) {
     searchString = '$artist $title'.toLowerCase();
   }
 
@@ -42,6 +43,10 @@ class CollectionAlbum implements Album {
       releaseId: json['id'] as int,
       artist: _oneNameForArtists(info['artists'] as List<dynamic>),
       title: info['title'] as String,
+      formats: (info['formats'] as List<dynamic>)
+              ?.map((format) => AlbumFormat.fromJson(format))
+              ?.toList() ??
+          [],
       year: info['year'] as int,
       thumbUrl: info['thumb'] as String,
       rating: json['rating'] as int,
@@ -58,6 +63,7 @@ class CollectionAlbum implements Album {
   final String title;
   @override
   final String thumbUrl;
+  final List<AlbumFormat> formats;
   final int year;
   final int rating;
   final String dateAdded;
@@ -69,11 +75,45 @@ class CollectionAlbum implements Album {
       releaseId: releaseId,
       artist: artist,
       title: title,
+      formats: formats,
       year: year,
       thumbUrl: thumbUrl,
       rating: rating,
       dateAdded: dateAdded,
     );
+  }
+}
+
+class AlbumFormat {
+  AlbumFormat({this.name, this.extraText, this.descriptions, this.quantity});
+
+  factory AlbumFormat.fromJson(Map<String, dynamic> json) {
+    return AlbumFormat(
+      name: json['name'],
+      extraText: json['text'],
+      descriptions: (json['descriptions'] as List<dynamic>)
+              ?.map((description) => description as String)
+              ?.toList() ??
+          [],
+      quantity: int.tryParse(json['qty']) ?? 1,
+    );
+  }
+
+  final String name;
+  final String extraText;
+  final List<String> descriptions;
+  final int quantity;
+
+  @override
+  String toString() {
+    var string = '${quantity > 1 ? '$quantity x ' : ''}$name';
+    if (extraText?.isNotEmpty ?? false) {
+      string += ' $extraText';
+    }
+    if (descriptions?.isNotEmpty ?? false) {
+      string += ' (${descriptions.join(', ')})';
+    }
+    return string;
   }
 }
 
@@ -265,7 +305,8 @@ class Collection extends ChangeNotifier {
       _nextPage = 2;
 
       _progress.finished();
-    } on Exception catch (e) {
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
       _progress.error(e);
       rethrow;
     }
@@ -292,7 +333,8 @@ class Collection extends ChangeNotifier {
       _nextPage++;
 
       _progress.finished();
-    } on Exception catch (e) {
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
       _progress.error(e);
       rethrow;
     }
@@ -331,7 +373,8 @@ class Collection extends ChangeNotifier {
       _nextPage = _totalPages + 1; // setting page index to the end
 
       _progress.finished();
-    } on Exception catch (e) {
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
       _progress.error(e);
       rethrow;
     }
@@ -427,7 +470,7 @@ class _Progress {
     statusNotifier.value = LoadingStatus.finished;
   }
 
-  void error(Exception exception) {
+  void error(Object exception) {
     errorMessage = exception is UIException ? exception.message : null;
     statusNotifier.value = LoadingStatus.error;
   }

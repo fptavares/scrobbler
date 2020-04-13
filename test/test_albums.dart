@@ -6,8 +6,16 @@ final CollectionAlbum testAlbum1 = CollectionAlbum(
   artist: 'Radiohead',
   title: 'OK Computer',
   year: 1997,
+  formats: [
+    AlbumFormat(
+        name: 'Vinyl',
+        descriptions: ['LP', 'Album', 'Limited Edition', 'Reissue'],
+        extraText: '180 gram',
+        quantity: 2),
+    AlbumFormat(name: 'CD', descriptions: [], extraText: null, quantity: 1)
+  ],
   thumbUrl:
-  'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
+      'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
   rating: 5,
   dateAdded: '2017-06-22T14:34:40-07:00',
 );
@@ -16,9 +24,13 @@ final CollectionAlbum testAlbum2 = CollectionAlbum(
   releaseId: 249504,
   artist: 'Rick Astley',
   title: 'Never Gonna Give You Up',
-  year: 1987,
+  year: 0,
+  formats: [
+    AlbumFormat(
+        name: 'Vinyl', descriptions: ['7"', '45 RPM', 'Single'], quantity: 1)
+  ],
   thumbUrl:
-  'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
+      'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
   rating: 3,
   dateAdded: '2019-06-22T14:34:40-07:00',
 );
@@ -30,7 +42,7 @@ final AlbumDetails testAlbumDetails1 = AlbumDetails(
   artist: 'Radiohead',
   title: 'OK Computer',
   thumbUrl:
-  'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
+      'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
   tracks: [
     AlbumTrack(title: 'Airbag', duration: '4:44'),
     AlbumTrack(title: 'Paranoid Android', position: 'A2'),

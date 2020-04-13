@@ -117,7 +117,16 @@ class _SearchResultsList extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          subtitle: Text(album.artist),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(album.artist),
+                              for (final format in album.formats ?? [])
+                                Text(format.toString()),
+                              if (album.year > 1000)
+                                Text('Released in ${album.year}'),
+                            ],
+                          ),
                           trailing: (item != null && item.count > 0)
                               ? GestureDetector(
                                   onTap: () => playlist.removeAlbum(album),
