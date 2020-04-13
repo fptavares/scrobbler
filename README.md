@@ -10,7 +10,15 @@
 The Record Scrobbler Flutter application allows you to browse a Discogs collection
 and scrobble records directly to Last.fm.
 
-## Getting Started
+# Install it
+
+## iOS App Store
+<a href="https://apps.apple.com/us/app/scrobbler/id1505776204?mt=8" style="display:inline-block;overflow:hidden;background:url(https://linkmaker.itunes.apple.com/en-us/badge-lrg.svg?releaseDate=2020-04-11&kind=iossoftware&bubble=ios_apps) no-repeat;width:135px;height:40px;"></a>
+
+## Google Play Store
+<a href='https://play.google.com/store/apps/details?id=io.github.fptavares.scrobbler&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+
+# Build it
 
 ```bash
 $ make secrets
