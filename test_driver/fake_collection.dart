@@ -12,58 +12,70 @@ const fakeCollectionData = r'''
   },
   "releases": [
     {
-      "instance_id": 445150826,
-      "date_added": "2020-03-11T09:16:58-07:00",
+      "instance_id": 454830773,
+      "date_added": "2020-04-07T13:32:16-07:00",
       "basic_information": {
-        "styles": [
-          "Leftfield",
-          "Breaks",
-          "Downtempo"
-        ],
+        "styles": [],
         "labels": [
           {
-            "name": "EMI",
+            "name": "Parkwood Entertainment",
             "entity_type": "1",
-            "catno": "7243 5 77829 1 3",
-            "resource_url": "https://api.discogs.com/labels/26126",
-            "id": 26126,
+            "catno": "88843045342",
+            "resource_url": "https://api.discogs.com/labels/256388",
+            "id": 256388,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Columbia",
+            "entity_type": "1",
+            "catno": "88843045342",
+            "resource_url": "https://api.discogs.com/labels/1866",
+            "id": 1866,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2004,
-        "master_url": "https://api.discogs.com/masters/124439",
+        "year": 2014,
+        "master_url": "https://api.discogs.com/masters/631282",
         "artists": [
           {
             "join": "",
-            "name": "Beyoncé",
+            "name": "Beyonc\u00e9",
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/598",
-            "id": 598
+            "resource_url": "https://api.discogs.com/artists/52835",
+            "id": 52835
           }
         ],
-        "id": 821997,
+        "id": 9577379,
         "genres": [
-          "Electronic"
+          "Hip Hop",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/9/99/Beyonce_album.png",
-        "title": "Beyoncé",
+        "title": "Beyonc\u00e9",
         "formats": [
           {
             "descriptions": [
-              "LP",
               "Album"
             ],
-            "name": "Vinyl",
+            "name": "CD",
+            "qty": "1"
+          },
+          {
+            "descriptions": [
+              "Album"
+            ],
+            "text": "Region A, B, C",
+            "name": "Blu-ray",
             "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/821997",
-        "master_id": 124439
+        "resource_url": "https://api.discogs.com/releases/9577379",
+        "master_id": 631282
       },
-      "id": 821997,
+      "id": 9577379,
       "rating": 0
     },
     {
@@ -251,85 +263,106 @@ const fakeCollectionData = r'''
       "rating": 0
     },
     {
-      "instance_id": 428475133,
-      "date_added": "2020-01-10T03:26:47-08:00",
+      "instance_id": 454830664,
+      "date_added": "2020-04-07T13:31:59-07:00",
       "basic_information": {
         "styles": [
-          "Alternative Rock"
+          "K-pop",
+          "Dance-pop",
+          "Ballad"
         ],
         "labels": [
           {
-            "name": "Analog Spark",
+            "name": "S.M. Entertainment",
             "entity_type": "1",
-            "catno": "AS00033",
-            "resource_url": "https://api.discogs.com/labels/900641",
-            "id": 900641,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Universal Music Special Markets",
-            "entity_type": "1",
-            "catno": "B0025998-01",
-            "resource_url": "https://api.discogs.com/labels/56128",
-            "id": 56128,
+            "catno": "SMK 0534",
+            "resource_url": "https://api.discogs.com/labels/478174",
+            "id": 478174,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2017,
-        "master_url": "https://api.discogs.com/masters/51023",
+        "year": 2015,
+        "master_url": "https://api.discogs.com/masters/1052675",
         "artists": [
           {
             "join": "",
-            "name": "EXO",
+            "name": "EXO (12)",
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/155833",
-            "id": 155833
+            "resource_url": "https://api.discogs.com/artists/4038105",
+            "id": 4038105
           }
         ],
-        "id": 10485244,
+        "id": 7349734,
         "genres": [
-          "Rock"
+          "Electronic",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Exo_love_me_right.jpg/600px-Exo_love_me_right.jpg",
         "title": "Love Me Right",
         "formats": [
           {
             "descriptions": [
-              "LP",
               "Album",
               "Reissue"
             ],
-            "text": "Gatefold, 180 Gram",
-            "name": "Vinyl",
+            "text": "Korean Ver.",
+            "name": "CD",
             "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/10485244",
-        "master_id": 51023
+        "resource_url": "https://api.discogs.com/releases/7349734",
+        "master_id": 1052675
       },
-      "id": 10485244,
+      "id": 7349734,
       "rating": 0
     },
     {
-      "instance_id": 426579199,
-      "date_added": "2020-01-03T07:20:02-08:00",
+      "instance_id": 454831276,
+      "date_added": "2020-04-07T13:33:40-07:00",
       "basic_information": {
-        "styles": [],
+        "styles": [
+          "Alternative Rock",
+          "Grunge"
+        ],
         "labels": [
           {
-            "name": "Fader Label",
+            "name": "Epic",
             "entity_type": "1",
-            "catno": "9299184310",
-            "resource_url": "https://api.discogs.com/labels/44882",
-            "id": 44882,
+            "catno": "4945901000",
+            "resource_url": "https://api.discogs.com/labels/1005",
+            "id": 1005,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Epic",
+            "entity_type": "1",
+            "catno": "494590 1",
+            "resource_url": "https://api.discogs.com/labels/1005",
+            "id": 1005,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Epic",
+            "entity_type": "1",
+            "catno": "EPC 494590 1",
+            "resource_url": "https://api.discogs.com/labels/1005",
+            "id": 1005,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Epic",
+            "entity_type": "1",
+            "catno": "4945901003",
+            "resource_url": "https://api.discogs.com/labels/1005",
+            "id": 1005,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2019,
-        "master_url": "https://api.discogs.com/masters/1595350",
+        "year": 2000,
+        "master_url": "https://api.discogs.com/masters/72997",
         "artists": [
           {
             "join": "",
@@ -337,14 +370,13 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/6512329",
-            "id": 6512329
+            "resource_url": "https://api.discogs.com/artists/175395",
+            "id": 175395
           }
         ],
-        "id": 14225762,
+        "id": 1092382,
         "genres": [
-          "Rock",
-          "Pop"
+          "Rock"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Pearljam-binaural.jpg",
         "title": "Binaural",
@@ -355,35 +387,43 @@ const fakeCollectionData = r'''
               "Album"
             ],
             "name": "Vinyl",
-            "qty": "1"
+            "qty": "2"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/14225762",
-        "master_id": 1595350
+        "resource_url": "https://api.discogs.com/releases/1092382",
+        "master_id": 72997
       },
-      "id": 14225762,
+      "id": 1092382,
       "rating": 0
     },
     {
-      "instance_id": 384635230,
-      "date_added": "2019-06-28T03:30:33-07:00",
+      "instance_id": 454831799,
+      "date_added": "2020-04-07T13:35:11-07:00",
       "basic_information": {
         "styles": [
-          "Indie Rock"
+          "Funk"
         ],
         "labels": [
           {
-            "name": "Matador",
+            "name": "Artist Partners",
             "entity_type": "1",
-            "catno": "OLE-1179-1",
-            "resource_url": "https://api.discogs.com/labels/194",
-            "id": 194,
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/935461",
+            "id": 935461,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Atlantic",
+            "entity_type": "1",
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/681",
+            "id": 681,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2018,
-        "master_url": "https://api.discogs.com/masters/1375250",
+        "year": 2017,
+        "master_url": "https://api.discogs.com/masters/1197392",
         "artists": [
           {
             "join": "",
@@ -391,68 +431,55 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/5207788",
-            "id": 5207788
+            "resource_url": "https://api.discogs.com/artists/4061019",
+            "id": 4061019
           }
         ],
-        "id": 12718726,
+        "id": 10179332,
         "genres": [
-          "Rock"
+          "Funk / Soul",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Charlie_Puth_-_Attention_%28Official_Single_Cover%29.png/600px-Charlie_Puth_-_Attention_%28Official_Single_Cover%29.png",
         "title": "Attention",
         "formats": [
           {
             "descriptions": [
-              "LP",
-              "Album"
+              "FLAC",
+              "Single"
             ],
-            "name": "Vinyl",
+            "name": "File",
             "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/12718726",
-        "master_id": 1375250
+        "resource_url": "https://api.discogs.com/releases/10179332",
+        "master_id": 1197392
       },
-      "id": 12718726,
+      "id": 10179332,
       "rating": 0
     },
     {
-      "instance_id": 426578531,
-      "date_added": "2020-01-03T07:17:36-08:00",
+      "instance_id": 454832604,
+      "date_added": "2020-04-07T13:37:29-07:00",
       "basic_information": {
         "styles": [
-          "Folk Rock"
+          "Modern Classical",
+          "Contemporary",
+          "Ambient"
         ],
         "labels": [
           {
-            "name": "Reprise Records",
+            "name": "EastWest",
             "entity_type": "1",
-            "catno": "MS 2038",
-            "resource_url": "https://api.discogs.com/labels/157",
-            "id": 157,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Reprise Records",
-            "entity_type": "1",
-            "catno": "7599 27199-1",
-            "resource_url": "https://api.discogs.com/labels/157",
-            "id": 157,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Reprise Records",
-            "entity_type": "1",
-            "catno": "REP 44 128",
-            "resource_url": "https://api.discogs.com/labels/157",
-            "id": 157,
+            "catno": "3984-25107-2",
+            "resource_url": "https://api.discogs.com/labels/999",
+            "id": 999,
             "entity_type_name": "Label"
           }
         ],
-        "year": 0,
-        "master_url": "https://api.discogs.com/masters/47744",
+        "year": 1998,
+        "master_url": "https://api.discogs.com/masters/12986",
         "artists": [
           {
             "join": "",
@@ -460,57 +487,83 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/90233",
-            "id": 90233
+            "resource_url": "https://api.discogs.com/artists/7027",
+            "id": 7027
           }
         ],
-        "id": 4509162,
+        "id": 92798,
         "genres": [
-          "Rock",
-          "Folk, World, & Country"
+          "Electronic",
+          "Classical"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/5/55/Vangelis_El_Greco_album_art.jpeg",
         "title": "El Greco",
         "formats": [
           {
             "descriptions": [
-              "LP",
-              "Album",
-              "Reissue"
+              "Album"
             ],
-            "text": "180g",
-            "name": "Vinyl",
+            "name": "CD",
             "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/4509162",
-        "master_id": 47744
+        "resource_url": "https://api.discogs.com/releases/92798",
+        "master_id": 12986
       },
-      "id": 4509162,
-      "rating": 4
+      "id": 92798,
+      "rating": 0
     },
     {
-      "instance_id": 426572305,
-      "date_added": "2020-01-03T06:55:18-08:00",
+      "instance_id": 454832953,
+      "date_added": "2020-04-07T13:38:32-07:00",
       "basic_information": {
         "styles": [
           "Alternative Rock",
-          "Art Rock",
-          "Prog Rock"
+          "Chanson",
+          "Pop Rock",
+          "Indie Rock",
+          "Soft Rock",
+          "Ragga HipHop",
+          "Hard Rock",
+          "Classic Rock"
         ],
         "labels": [
           {
-            "name": "Virgin",
+            "name": "Sony Music",
             "entity_type": "1",
-            "catno": "7243 8 49253 1 4",
-            "resource_url": "https://api.discogs.com/labels/750",
-            "id": 750,
+            "catno": "88697 90504 2",
+            "resource_url": "https://api.discogs.com/labels/25487",
+            "id": 25487,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "EMI",
+            "entity_type": "1",
+            "catno": "88697 90504 2",
+            "resource_url": "https://api.discogs.com/labels/26126",
+            "id": 26126,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Universal Music Group",
+            "entity_type": "1",
+            "catno": "88697 90504 2",
+            "resource_url": "https://api.discogs.com/labels/38404",
+            "id": 38404,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Warner Music Group",
+            "entity_type": "1",
+            "catno": "88697 90504 2",
+            "resource_url": "https://api.discogs.com/labels/2345",
+            "id": 2345,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2008,
-        "master_url": "https://api.discogs.com/masters/20866",
+        "year": 2011,
+        "master_url": "https://api.discogs.com/masters/336439",
         "artists": [
           {
             "join": "",
@@ -518,69 +571,62 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/242802",
-            "id": 242802
+            "resource_url": "https://api.discogs.com/artists/194",
+            "id": 194
           }
         ],
-        "id": 1450554,
+        "id": 2863535,
         "genres": [
-          "Rock"
+          "Hip Hop",
+          "Rock",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Songs_for_Japan_album_cover.svg/600px-Songs_for_Japan_album_cover.svg.png",
         "title": "Songs For Japan",
         "formats": [
           {
             "descriptions": [
-              "LP",
-              "Album",
-              "Limited Edition",
-              "Reissue"
+              "Compilation"
             ],
-            "text": "Gatefold, 180 gram",
-            "name": "Vinyl",
+            "name": "CD",
             "qty": "2"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/1450554",
-        "master_id": 20866
+        "resource_url": "https://api.discogs.com/releases/2863535",
+        "master_id": 336439
       },
-      "id": 1450554,
+      "id": 2863535,
       "rating": 0
     },
     {
-      "instance_id": 342893767,
-      "date_added": "2019-01-01T05:20:50-08:00",
+      "instance_id": 454838514,
+      "date_added": "2020-04-07T13:54:13-07:00",
       "basic_information": {
-        "styles": [],
+        "styles": [
+          "Europop",
+          "Ballad"
+        ],
         "labels": [
           {
-            "name": "Columbia",
+            "name": "Jive",
             "entity_type": "1",
-            "catno": "19075858971",
-            "resource_url": "https://api.discogs.com/labels/1866",
-            "id": 1866,
+            "catno": "9221152",
+            "resource_url": "https://api.discogs.com/labels/2186",
+            "id": 2186,
             "entity_type_name": "Label"
           },
           {
-            "name": "Legacy",
+            "name": "Trans Continental Records",
             "entity_type": "1",
-            "catno": "19075858971",
-            "resource_url": "https://api.discogs.com/labels/15491",
-            "id": 15491,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Sony Music",
-            "entity_type": "1",
-            "catno": "19075858971",
-            "resource_url": "https://api.discogs.com/labels/25487",
-            "id": 25487,
+            "catno": "9221152",
+            "resource_url": "https://api.discogs.com/labels/39944",
+            "id": 39944,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2018,
-        "master_url": "https://api.discogs.com/masters/1446874",
+        "year": 2000,
+        "master_url": "https://api.discogs.com/masters/48563",
         "artists": [
           {
             "join": "",
@@ -588,52 +634,51 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/59792",
-            "id": 59792
+            "resource_url": "https://api.discogs.com/artists/11002",
+            "id": 11002
           }
         ],
-        "id": 12708533,
+        "id": 660167,
         "genres": [
-          "Folk, World, & Country"
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Backstreet_Boys_-_Black_%26_Blue_album_cover.png",
         "title": "Black & Blue",
         "formats": [
           {
             "descriptions": [
-              "LP",
               "Album"
             ],
-            "name": "Vinyl",
-            "qty": "2"
+            "name": "CD",
+            "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/12708533",
-        "master_id": 1446874
+        "resource_url": "https://api.discogs.com/releases/660167",
+        "master_id": 48563
       },
-      "id": 12708533,
-      "rating": 5
+      "id": 660167,
+      "rating": 0
     },
     {
-      "instance_id": 373769614,
-      "date_added": "2019-05-07T09:35:21-07:00",
+      "instance_id": 454833766,
+      "date_added": "2020-04-07T13:40:50-07:00",
       "basic_information": {
         "styles": [
-          "Emo"
+          "Vocal"
         ],
         "labels": [
           {
-            "name": "Big Scary Monsters",
+            "name": "Interscope Records",
             "entity_type": "1",
-            "catno": "BSM248V",
-            "resource_url": "https://api.discogs.com/labels/43155",
-            "id": 43155,
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/2311",
+            "id": 2311,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2019,
-        "master_url": "https://api.discogs.com/masters/1517815",
+        "year": 2012,
+        "master_url": "https://api.discogs.com/masters/577970",
         "artists": [
           {
             "join": "",
@@ -641,60 +686,52 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/312291",
-            "id": 312291
+            "resource_url": "https://api.discogs.com/artists/2445772",
+            "id": 2445772
           }
         ],
-        "id": 13393380,
+        "id": 3994597,
         "genres": [
-          "Rock"
+          "Jazz",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Lana_Del_Rey_Blue_Velvet_Cover.jpeg/600px-Lana_Del_Rey_Blue_Velvet_Cover.jpeg",
         "title": "Blue Velvet",
         "formats": [
           {
             "descriptions": [
-              "LP",
-              "Album"
+              "MP3",
+              "Single"
             ],
-            "name": "Vinyl",
+            "text": "256 kbps",
+            "name": "File",
             "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/13393380",
-        "master_id": 1517815
+        "resource_url": "https://api.discogs.com/releases/3994597",
+        "master_id": 577970
       },
-      "id": 13393380,
-      "rating": 4
+      "id": 3994597,
+      "rating": 0
     },
     {
-      "instance_id": 371606106,
-      "date_added": "2019-04-28T07:52:21-07:00",
+      "instance_id": 454834068,
+      "date_added": "2020-04-07T13:41:44-07:00",
       "basic_information": {
-        "styles": [
-          "Alternative Rock"
-        ],
+        "styles": [],
         "labels": [
           {
-            "name": "Zuma Rock Records",
+            "name": "Stax",
             "entity_type": "1",
-            "catno": "none",
-            "resource_url": "https://api.discogs.com/labels/271844",
-            "id": 271844,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Round Hill Records",
-            "entity_type": "1",
-            "catno": "RHR 002LP",
-            "resource_url": "https://api.discogs.com/labels/910686",
-            "id": 910686,
+            "catno": "STX-38802-01",
+            "resource_url": "https://api.discogs.com/labels/24936",
+            "id": 24936,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2017,
-        "master_url": "https://api.discogs.com/masters/38985",
+        "year": 2016,
+        "master_url": "https://api.discogs.com/masters/983528",
         "artists": [
           {
             "join": "",
@@ -702,11 +739,11 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/3961",
-            "id": 3961
+            "resource_url": "https://api.discogs.com/artists/1724155",
+            "id": 1724155
           }
         ],
-        "id": 9794211,
+        "id": 8355111,
         "genres": [
           "Rock"
         ],
@@ -716,74 +753,7 @@ const fakeCollectionData = r'''
           {
             "descriptions": [
               "LP",
-              "Album",
-              "Reissue",
-              "Remastered"
-            ],
-            "text": "Black/White Swirl",
-            "name": "Vinyl",
-            "qty": "2"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/9794211",
-        "master_id": 38985
-      },
-      "id": 9794211,
-      "rating": 0
-    },
-    {
-      "instance_id": 384635432,
-      "date_added": "2019-06-28T03:32:36-07:00",
-      "basic_information": {
-        "styles": [
-          "Post Rock",
-          "Experimental",
-          "Ambient"
-        ],
-        "labels": [
-          {
-            "name": "Polydor",
-            "entity_type": "1",
-            "catno": "00600753655191",
-            "resource_url": "https://api.discogs.com/labels/1610",
-            "id": 1610,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Universal Music Group International",
-            "entity_type": "1",
-            "catno": "00600753655191",
-            "resource_url": "https://api.discogs.com/labels/138199",
-            "id": 138199,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 2016,
-        "master_url": "https://api.discogs.com/masters/26553",
-        "artists": [
-          {
-            "join": "",
-            "name": "Kanye West",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/60480",
-            "id": 60480
-          }
-        ],
-        "id": 8574859,
-        "genres": [
-          "Rock"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Kanye_West_-_Champions_Cover.jpg/600px-Kanye_West_-_Champions_Cover.jpg",
-        "title": "Champions",
-        "formats": [
-          {
-            "descriptions": [
-              "LP",
-              "Album",
-              "Reissue"
+              "Album"
             ],
             "text": "180 Gram",
             "name": "Vinyl",
@@ -791,33 +761,170 @@ const fakeCollectionData = r'''
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/8574859",
-        "master_id": 26553
+        "resource_url": "https://api.discogs.com/releases/8355111",
+        "master_id": 983528
       },
-      "id": 8574859,
+      "id": 8355111,
       "rating": 0
     },
     {
-      "instance_id": 378972122,
-      "date_added": "2019-05-31T07:28:08-07:00",
+      "instance_id": 454834469,
+      "date_added": "2020-04-07T13:42:47-07:00",
       "basic_information": {
-        "styles": [
-          "Alternative Rock",
-          "Emo",
-          "Indie Rock"
-        ],
+        "styles": [],
         "labels": [
           {
-            "name": "Polyvinyl Record Company",
+            "name": "Def Jam Recordings",
             "entity_type": "1",
-            "catno": "prc 025lp",
-            "resource_url": "https://api.discogs.com/labels/37250",
-            "id": 37250,
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/4241",
+            "id": 4241,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2019,
-        "master_url": "https://api.discogs.com/masters/191896",
+        "year": 2016,
+        "master_url": "https://api.discogs.com/masters/1178791",
+        "artists": [
+          {
+            "join": ",",
+            "name": "Kanye West",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/137880",
+            "id": 137880
+          },
+          {
+            "join": ",",
+            "name": "Gucci Mane",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/419677",
+            "id": 419677
+          },
+          {
+            "join": ",",
+            "name": "Big Sean",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/1201210",
+            "id": 1201210
+          },
+          {
+            "join": ",",
+            "name": "2 Chainz",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/2523290",
+            "id": 2523290
+          },
+          {
+            "join": ",",
+            "name": "Travis Scott (2)",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/2742944",
+            "id": 2742944
+          },
+          {
+            "join": ",",
+            "name": "Yo Gotti",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/333565",
+            "id": 333565
+          },
+          {
+            "join": ",",
+            "name": "Quavo",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/3755115",
+            "id": 3755115
+          },
+          {
+            "join": "",
+            "name": "Desiigner",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/4187945",
+            "id": 4187945
+          }
+        ],
+        "id": 8646876,
+        "genres": [
+          "Hip Hop"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Kanye_West_-_Champions_Cover.jpg/600px-Kanye_West_-_Champions_Cover.jpg",
+        "title": "Champions",
+        "formats": [
+          {
+            "descriptions": [
+              "FLAC",
+              "Single"
+            ],
+            "name": "File",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/8646876",
+        "master_id": 1178791
+      },
+      "id": 8646876,
+      "rating": 0
+    },
+    {
+      "instance_id": 454834924,
+      "date_added": "2020-04-07T13:44:03-07:00",
+      "basic_information": {
+        "styles": [
+          "Grunge",
+          "Acoustic"
+        ],
+        "labels": [
+          {
+            "name": "Geffen Records",
+            "entity_type": "1",
+            "catno": "493 523-1",
+            "resource_url": "https://api.discogs.com/labels/821",
+            "id": 821,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Sub Pop",
+            "entity_type": "1",
+            "catno": "493 523-1",
+            "resource_url": "https://api.discogs.com/labels/77343",
+            "id": 77343,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Geffen Records",
+            "entity_type": "1",
+            "catno": "493 590-1(493 523-1)",
+            "resource_url": "https://api.discogs.com/labels/821",
+            "id": 821,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Sub Pop",
+            "entity_type": "1",
+            "catno": "493 590-1(493 523-1)",
+            "resource_url": "https://api.discogs.com/labels/77343",
+            "id": 77343,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 2002,
+        "master_url": "https://api.discogs.com/masters/42476",
         "artists": [
           {
             "join": "",
@@ -825,11 +932,11 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/312291",
-            "id": 312291
+            "resource_url": "https://api.discogs.com/artists/125246",
+            "id": 125246
           }
         ],
-        "id": 13638427,
+        "id": 1156083,
         "genres": [
           "Rock"
         ],
@@ -839,352 +946,7 @@ const fakeCollectionData = r'''
           {
             "descriptions": [
               "LP",
-              "Album",
-              "Repress"
-            ],
-            "text": "Clear with Blue Smoke, 180g",
-            "name": "Vinyl",
-            "qty": "1"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/13638427",
-        "master_id": 191896
-      },
-      "id": 13638427,
-      "rating": 0
-    },
-    {
-      "instance_id": 376235169,
-      "date_added": "2019-05-18T14:03:31-07:00",
-      "basic_information": {
-        "styles": [],
-        "labels": [
-          {
-            "name": "A&M Records",
-            "entity_type": "1",
-            "catno": "69712 4095 1",
-            "resource_url": "https://api.discogs.com/labels/904",
-            "id": 904,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 1996,
-        "master_url": "https://api.discogs.com/masters/574102",
-        "artists": [
-          {
-            "join": "",
-            "name": "Dido",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/611613",
-            "id": 611613
-          }
-        ],
-        "id": 2170868,
-        "genres": [
-          "Rock"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Don%27t_believe_in_love.jpg",
-        "title": "Don't Believe In Love",
-        "formats": [
-          {
-            "descriptions": [
-              "LP",
-              "Album",
-              "Promo"
-            ],
-            "text": "Blue",
-            "name": "Vinyl",
-            "qty": "1"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/2170868",
-        "master_id": 574102
-      },
-      "id": 2170868,
-      "rating": 0
-    },
-    {
-      "instance_id": 358851906,
-      "date_added": "2019-03-05T02:21:23-08:00",
-      "basic_information": {
-        "styles": [
-          "Alternative Rock",
-          "Industrial",
-          "Soundtrack"
-        ],
-        "labels": [
-          {
-            "name": "Lakeshore Records",
-            "entity_type": "1",
-            "catno": "none",
-            "resource_url": "https://api.discogs.com/labels/16958",
-            "id": 16958,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Phineas Atwood Productions",
-            "entity_type": "1",
-            "catno": "none",
-            "resource_url": "https://api.discogs.com/labels/760586",
-            "id": 760586,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 2016,
-        "master_url": "https://api.discogs.com/masters/106708",
-        "artists": [
-          {
-            "join": "",
-            "name": "The XX",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/194",
-            "id": 194
-          }
-        ],
-        "id": 9411058,
-        "genres": [
-          "Electronic",
-          "Rock",
-          "Stage & Screen"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Xx_album_cover.svg/600px-Xx_album_cover.svg.png",
-        "title": "XX",
-        "formats": [
-          {
-            "descriptions": [
-              "LP",
-              "Album",
-              "Numbered",
-              "Reissue"
-            ],
-            "text": "Blue Translucent ",
-            "name": "Vinyl",
-            "qty": "2"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/9411058",
-        "master_id": 106708
-      },
-      "id": 9411058,
-      "rating": 0
-    },
-    {
-      "instance_id": 358851666,
-      "date_added": "2019-03-05T02:19:44-08:00",
-      "basic_information": {
-        "styles": [
-          "Alternative Rock",
-          "Indie Pop",
-          "Indie Rock"
-        ],
-        "labels": [
-          {
-            "name": "Dead Oceans",
-            "entity_type": "1",
-            "catno": "DOC188",
-            "resource_url": "https://api.discogs.com/labels/94740",
-            "id": 94740,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 2019,
-        "master_url": "https://api.discogs.com/masters/1492985",
-        "artists": [
-          {
-            "join": "",
-            "name": "New Order",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/6947982",
-            "id": 6947982
-          }
-        ],
-        "id": 13222883,
-        "genres": [
-          "Rock",
-          "Pop",
-          "Folk, World, & Country"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/6/62/Nineteen63_%28New_Order_album_-_cover_art%29.jpg",
-        "title": "Nineteen63",
-        "formats": [
-          {
-            "descriptions": [
-              "LP",
-              "Album"
-            ],
-            "name": "Vinyl",
-            "qty": "1"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/13222883",
-        "master_id": 1492985
-      },
-      "id": 13222883,
-      "rating": 0
-    },
-    {
-      "instance_id": 342894906,
-      "date_added": "2019-01-01T05:26:43-08:00",
-      "basic_information": {
-        "styles": [
-          "Folk"
-        ],
-        "labels": [
-          {
-            "name": "Matador",
-            "entity_type": "1",
-            "catno": "OLE-1408-1",
-            "resource_url": "https://api.discogs.com/labels/194",
-            "id": 194,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 2018,
-        "master_url": "https://api.discogs.com/masters/1443762",
-        "artists": [
-          {
-            "join": "",
-            "name": "Charlie Puth",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/6774153",
-            "id": 6774153
-          }
-        ],
-        "id": 12704594,
-        "genres": [
-          "Rock",
-          "Pop",
-          "Folk, World, & Country"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/6/67/Charlie_Puth_-_How_Long_%28Official_Single_Cover%29.jpg",
-        "title": "How Long",
-        "formats": [
-          {
-            "descriptions": [
-              "12\"",
-              "45 RPM",
-              "EP"
-            ],
-            "name": "Vinyl",
-            "qty": "1"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/12704594",
-        "master_id": 1443762
-      },
-      "id": 12704594,
-      "rating": 0
-    },
-    {
-      "instance_id": 372117056,
-      "date_added": "2019-04-30T12:01:36-07:00",
-      "basic_information": {
-        "styles": [
-          "Indie Rock",
-          "Noise"
-        ],
-        "labels": [
-          {
-            "name": "Saddle Creek",
-            "entity_type": "1",
-            "catno": "LBJ-273",
-            "resource_url": "https://api.discogs.com/labels/19372",
-            "id": 19372,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 2018,
-        "master_url": "https://api.discogs.com/masters/1444238",
-        "artists": [
-          {
-            "join": "",
-            "name": "Drake",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/4849875",
-            "id": 4849875
-          }
-        ],
-        "id": 12707142,
-        "genres": [
-          "Rock"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/DRAKE_MAKE_ME_PROUD_ITUNES_ART.png/603px-DRAKE_MAKE_ME_PROUD_ITUNES_ART.png",
-        "title": "Make Me Proud",
-        "formats": [
-          {
-            "descriptions": [
-              "LP"
-            ],
-            "name": "Vinyl",
-            "qty": "1"
-          }
-        ],
-        "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/12707142",
-        "master_id": 1444238
-      },
-      "id": 12707142,
-      "rating": 0
-    },
-    {
-      "instance_id": 371607744,
-      "date_added": "2019-04-28T07:57:13-07:00",
-      "basic_information": {
-        "styles": [
-          "Indie Rock"
-        ],
-        "labels": [
-          {
-            "name": "Kill Rock Stars",
-            "entity_type": "1",
-            "catno": "KRS620",
-            "resource_url": "https://api.discogs.com/labels/5661",
-            "id": 5661,
-            "entity_type_name": "Label"
-          }
-        ],
-        "year": 2017,
-        "master_url": "https://api.discogs.com/masters/6126",
-        "artists": [
-          {
-            "join": "",
-            "name": "Queen & David Bowie",
-            "anv": "",
-            "tracks": "",
-            "role": "",
-            "resource_url": "https://api.discogs.com/artists/243300",
-            "id": 243300
-          }
-        ],
-        "id": 9965763,
-        "genres": [
-          "Rock",
-          "Pop"
-        ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Queen_%26_David_Bowie_-_Under_Pressure.jpeg/600px-Queen_%26_David_Bowie_-_Under_Pressure.jpeg",
-        "title": "Under Pressure",
-        "formats": [
-          {
-            "descriptions": [
-              "LP",
-              "Album",
-              "Limited Edition",
-              "Reissue",
+              "Compilation",
               "Remastered"
             ],
             "name": "Vinyl",
@@ -1192,110 +954,128 @@ const fakeCollectionData = r'''
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/9965763",
-        "master_id": 6126
+        "resource_url": "https://api.discogs.com/releases/1156083",
+        "master_id": 42476
       },
-      "id": 9965763,
+      "id": 1156083,
       "rating": 0
     },
     {
-      "instance_id": 342894172,
-      "date_added": "2019-01-01T05:23:05-08:00",
+      "instance_id": 454835294,
+      "date_added": "2020-04-07T13:45:01-07:00",
       "basic_information": {
-        "styles": [],
+        "styles": [
+          "Synth-pop",
+          "Downtempo",
+          "Vocal"
+        ],
         "labels": [
           {
-            "name": "Pax Americana Record Company",
+            "name": "Sony BMG Music Entertainment",
             "entity_type": "1",
-            "catno": "PAX-AM 050",
-            "resource_url": "https://api.discogs.com/labels/170491",
-            "id": 170491,
+            "catno": "88697391362",
+            "resource_url": "https://api.discogs.com/labels/53569",
+            "id": 53569,
             "entity_type_name": "Label"
           },
           {
-            "name": "Pax Americana Record Company",
+            "name": "RCA Label Group",
             "entity_type": "1",
-            "catno": "1790022734",
-            "resource_url": "https://api.discogs.com/labels/170491",
-            "id": 170491,
+            "catno": "88697391362",
+            "resource_url": "https://api.discogs.com/labels/448584",
+            "id": 448584,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Cheeky Records",
+            "entity_type": "1",
+            "catno": "88697391362",
+            "resource_url": "https://api.discogs.com/labels/1669",
+            "id": 1669,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2015,
-        "master_url": "https://api.discogs.com/masters/1242826",
+        "year": 2008,
+        "master_url": "https://api.discogs.com/masters/97700",
         "artists": [
           {
             "join": "",
-            "name": "Cee-Lo",
+            "name": "Dido",
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/4138698",
-            "id": 4138698
+            "resource_url": "https://api.discogs.com/artists/6277",
+            "id": 6277
           }
         ],
-        "id": 6959934,
+        "id": 1540742,
         "genres": [
-          "Rock"
+          "Electronic",
+          "Pop"
         ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Cee_Lo_Green_-_Fuck_you%21.jpg/600px-Cee_Lo_Green_-_Fuck_you%21.jpg",
-        "title": "F**k You!",
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Don%27t_believe_in_love.jpg",
+        "title": "Don't Believe In Love",
         "formats": [
           {
             "descriptions": [
-              "7\"",
-              "45 RPM",
-              "Single",
-              "Limited Edition"
+              "Single"
             ],
-            "name": "Vinyl",
+            "name": "CD",
             "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/6959934",
-        "master_id": 1242826
+        "resource_url": "https://api.discogs.com/releases/1540742",
+        "master_id": 97700
       },
-      "id": 6959934,
-      "rating": 5
+      "id": 1540742,
+      "rating": 0
     },
     {
-      "instance_id": 426569645,
-      "date_added": "2020-01-03T06:45:34-08:00",
+      "instance_id": 454835534,
+      "date_added": "2020-04-07T13:45:43-07:00",
       "basic_information": {
         "styles": [
-          "Contemporary",
-          "Modern"
+          "Indie Rock"
         ],
         "labels": [
           {
-            "name": "Mercury KX",
+            "name": "XL Recordings",
             "entity_type": "1",
-            "catno": "4818679",
-            "resource_url": "https://api.discogs.com/labels/1093554",
-            "id": 1093554,
+            "catno": "XL LP 450",
+            "resource_url": "https://api.discogs.com/labels/160",
+            "id": 160,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Young Turks",
+            "entity_type": "1",
+            "catno": "YT031LP",
+            "resource_url": "https://api.discogs.com/labels/82232",
+            "id": 82232,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2019,
-        "master_url": "https://api.discogs.com/masters/1636382",
+        "year": 2009,
+        "master_url": "https://api.discogs.com/masters/175869",
         "artists": [
           {
             "join": "",
-            "name": "Keaton Henson",
+            "name": "The XX",
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/2234062",
-            "id": 2234062
+            "resource_url": "https://api.discogs.com/artists/1416238",
+            "id": 1416238
           }
         ],
-        "id": 14370801,
+        "id": 1976385,
         "genres": [
-          "Classical"
+          "Electronic",
+          "Rock"
         ],
-        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Album_cover%2C_How_To_Build_A_Clock.jpeg/600px-Album_cover%2C_How_To_Build_A_Clock.jpeg",
-        "title": "Six Lethargies",
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Xx_album_cover.svg/600px-Xx_album_cover.svg.png",
+        "title": "XX",
         "formats": [
           {
             "descriptions": [
@@ -1303,33 +1083,423 @@ const fakeCollectionData = r'''
               "Album"
             ],
             "name": "Vinyl",
-            "qty": "2"
+            "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/14370801",
-        "master_id": 1636382
+        "resource_url": "https://api.discogs.com/releases/1976385",
+        "master_id": 175869
       },
-      "id": 14370801,
+      "id": 1976385,
       "rating": 0
     },
     {
-      "instance_id": 342893027,
-      "date_added": "2019-01-01T05:16:45-08:00",
+      "instance_id": 454836120,
+      "date_added": "2020-04-07T13:47:20-07:00",
       "basic_information": {
-        "styles": [],
+        "styles": [
+          "Alternative Rock",
+          "House",
+          "Deep House",
+          "Synth-pop"
+        ],
         "labels": [
           {
-            "name": "Dead Oceans",
+            "name": "London Records",
             "entity_type": "1",
-            "catno": "DOC142",
-            "resource_url": "https://api.discogs.com/labels/94740",
-            "id": 94740,
+            "catno": "NUCDP 6",
+            "resource_url": "https://api.discogs.com/labels/1060",
+            "id": 1060,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "London Records",
+            "entity_type": "1",
+            "catno": "NUCDP6",
+            "resource_url": "https://api.discogs.com/labels/1060",
+            "id": 1060,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "London Records",
+            "entity_type": "1",
+            "catno": "857941.2",
+            "resource_url": "https://api.discogs.com/labels/1060",
+            "id": 1060,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 1995,
+        "master_url": "https://api.discogs.com/masters/40425",
+        "artists": [
+          {
+            "join": "",
+            "name": "New Order",
+            "anv": "NewOrder",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/3909",
+            "id": 3909
+          }
+        ],
+        "id": 95204,
+        "genres": [
+          "Electronic",
+          "Rock",
+          "Pop"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/6/62/Nineteen63_%28New_Order_album_-_cover_art%29.jpg",
+        "title": "Nineteen63",
+        "formats": [
+          {
+            "descriptions": [
+              "Single"
+            ],
+            "name": "CD",
+            "qty": "1"
+          },
+          {
+            "descriptions": [
+              "Limited Edition"
+            ],
+            "name": "Box Set",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/95204",
+        "master_id": 40425
+      },
+      "id": 95204,
+      "rating": 0
+    },
+    {
+      "instance_id": 454836982,
+      "date_added": "2020-04-07T13:49:42-07:00",
+      "basic_information": {
+        "styles": [
+          "Funk"
+        ],
+        "labels": [
+          {
+            "name": "Artist Partners",
+            "entity_type": "1",
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/935461",
+            "id": 935461,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Atlantic",
+            "entity_type": "1",
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/681",
+            "id": 681,
             "entity_type_name": "Label"
           }
         ],
         "year": 2017,
-        "master_url": "https://api.discogs.com/masters/1242340",
+        "master_url": "https://api.discogs.com/masters/1267586",
+        "artists": [
+          {
+            "join": "",
+            "name": "Charlie Puth",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/4061019",
+            "id": 4061019
+          }
+        ],
+        "id": 10969329,
+        "genres": [
+          "Funk / Soul",
+          "Pop"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/6/67/Charlie_Puth_-_How_Long_%28Official_Single_Cover%29.jpg",
+        "title": "How Long",
+        "formats": [
+          {
+            "descriptions": [
+              "FLAC",
+              "Single"
+            ],
+            "name": "File",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/10969329",
+        "master_id": 1267586
+      },
+      "id": 10969329,
+      "rating": 0
+    },
+    {
+      "instance_id": 454837261,
+      "date_added": "2020-04-07T13:50:33-07:00",
+      "basic_information": {
+        "styles": [],
+        "labels": [
+          {
+            "name": "Cash Money Records",
+            "entity_type": "1",
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/19799",
+            "id": 19799,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 2011,
+        "master_url": null,
+        "artists": [
+          {
+            "join": "Feat.",
+            "name": "Drake",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/151199",
+            "id": 151199
+          },
+          {
+            "join": "",
+            "name": "Nicki Minaj",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/1615988",
+            "id": 1615988
+          }
+        ],
+        "id": 10428819,
+        "genres": [
+          "Hip Hop"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/DRAKE_MAKE_ME_PROUD_ITUNES_ART.png/603px-DRAKE_MAKE_ME_PROUD_ITUNES_ART.png",
+        "title": "Make Me Proud",
+        "formats": [
+          {
+            "descriptions": [
+              "AAC",
+              "Single"
+            ],
+            "text": "256 kbps",
+            "name": "File",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/10428819",
+        "master_id": 0
+      },
+      "id": 10428819,
+      "rating": 0
+    },
+    {
+      "instance_id": 454837556,
+      "date_added": "2020-04-07T13:51:28-07:00",
+      "basic_information": {
+        "styles": [
+          "Pop Rock"
+        ],
+        "labels": [
+          {
+            "name": "EMI",
+            "entity_type": "1",
+            "catno": "1 C 006-64 626",
+            "resource_url": "https://api.discogs.com/labels/26126",
+            "id": 26126,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 1981,
+        "master_url": "https://api.discogs.com/masters/13442",
+        "artists": [
+          {
+            "join": "&",
+            "name": "Queen",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/81013",
+            "id": 81013
+          },
+          {
+            "join": "",
+            "name": "David Bowie",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/10263",
+            "id": 10263
+          }
+        ],
+        "id": 369899,
+        "genres": [
+          "Rock"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Queen_%26_David_Bowie_-_Under_Pressure.jpeg/600px-Queen_%26_David_Bowie_-_Under_Pressure.jpeg",
+        "title": "Under Pressure",
+        "formats": [
+          {
+            "descriptions": [
+              "7\"",
+              "45 RPM",
+              "Single"
+            ],
+            "name": "Vinyl",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/369899",
+        "master_id": 13442
+      },
+      "id": 369899,
+      "rating": 0
+    },
+    {
+      "instance_id": 454837935,
+      "date_added": "2020-04-07T13:52:37-07:00",
+      "basic_information": {
+        "styles": [
+          "Pop Rap",
+          "Soul"
+        ],
+        "labels": [
+          {
+            "name": "Elektra",
+            "entity_type": "1",
+            "catno": "0-526352",
+            "resource_url": "https://api.discogs.com/labels/651",
+            "id": 651,
+            "entity_type_name": "Label"
+          },
+          {
+            "name": "Radiculture Records",
+            "entity_type": "1",
+            "catno": "0-526352",
+            "resource_url": "https://api.discogs.com/labels/131692",
+            "id": 131692,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 2010,
+        "master_url": "https://api.discogs.com/masters/280345",
+        "artists": [
+          {
+            "join": "",
+            "name": "Cee-Lo",
+            "anv": "Cee Lo Green",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/57770",
+            "id": 57770
+          }
+        ],
+        "id": 2567040,
+        "genres": [
+          "Hip Hop",
+          "Funk / Soul"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Cee_Lo_Green_-_Fuck_you%21.jpg/600px-Cee_Lo_Green_-_Fuck_you%21.jpg",
+        "title": "F**k You!",
+        "formats": [
+          {
+            "descriptions": [
+              "12\"",
+              "Single",
+              "45 RPM",
+              "Limited Edition"
+            ],
+            "text": "Yellow",
+            "name": "Vinyl",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/2567040",
+        "master_id": 280345
+      },
+      "id": 2567040,
+      "rating": 0
+    },
+    {
+      "instance_id": 445150826,
+      "date_added": "2020-03-11T09:16:58-07:00",
+      "basic_information": {
+        "styles": [
+          "Leftfield",
+          "Breaks",
+          "Downtempo"
+        ],
+        "labels": [
+          {
+            "name": "EMI",
+            "entity_type": "1",
+            "catno": "7243 5 77829 1 3",
+            "resource_url": "https://api.discogs.com/labels/26126",
+            "id": 26126,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 2004,
+        "master_url": "https://api.discogs.com/masters/124439",
+        "artists": [
+          {
+            "join": "",
+            "name": "Faultline",
+            "anv": "",
+            "tracks": "",
+            "role": "",
+            "resource_url": "https://api.discogs.com/artists/598",
+            "id": 598
+          }
+        ],
+        "id": 821997,
+        "genres": [
+          "Electronic"
+        ],
+        "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Album_cover%2C_How_To_Build_A_Clock.jpeg/600px-Album_cover%2C_How_To_Build_A_Clock.jpeg",
+        "title": "Your Love Means Everything",
+        "formats": [
+          {
+            "descriptions": [
+              "LP",
+              "Album"
+            ],
+            "name": "Vinyl",
+            "qty": "1"
+          }
+        ],
+        "cover_image": "",
+        "resource_url": "https://api.discogs.com/releases/821997",
+        "master_id": 124439
+      },
+      "id": 821997,
+      "rating": 0
+    },
+    {
+      "instance_id": 454840083,
+      "date_added": "2020-04-07T13:58:53-07:00",
+      "basic_information": {
+        "styles": [
+          "RnB/Swing",
+          "Contemporary R&B"
+        ],
+        "labels": [
+          {
+            "name": "Def Jam Recordings",
+            "entity_type": "1",
+            "catno": "B0025134-01",
+            "resource_url": "https://api.discogs.com/labels/4241",
+            "id": 4241,
+            "entity_type_name": "Label"
+          }
+        ],
+        "year": 2016,
+        "master_url": "https://api.discogs.com/masters/950545",
         "artists": [
           {
             "join": "",
@@ -1337,13 +1507,14 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/4138698",
-            "id": 4138698
+            "resource_url": "https://api.discogs.com/artists/321128",
+            "id": 321128
           }
         ],
-        "id": 10901377,
+        "id": 9155571,
         "genres": [
-          "Rock"
+          "Hip Hop",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/5/52/Cover_Art_de_ANTI.png",
         "title": "Anti",
@@ -1354,45 +1525,35 @@ const fakeCollectionData = r'''
               "Album"
             ],
             "name": "Vinyl",
-            "qty": "1"
+            "qty": "2"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/10901377",
-        "master_id": 1242340
+        "resource_url": "https://api.discogs.com/releases/9155571",
+        "master_id": 950545
       },
-      "id": 10901377,
-      "rating": 4
+      "id": 9155571,
+      "rating": 0
     },
     {
-      "instance_id": 329336425,
-      "date_added": "2018-10-28T08:25:39-07:00",
+      "instance_id": 454840538,
+      "date_added": "2020-04-07T14:00:21-07:00",
       "basic_information": {
         "styles": [
-          "Abstract",
-          "Synth-pop",
-          "Experimental"
+          "Synth-pop"
         ],
         "labels": [
           {
-            "name": "Virgin EMI Records",
+            "name": "EMI",
             "entity_type": "1",
-            "catno": "671 524-3",
-            "resource_url": "https://api.discogs.com/labels/567148",
-            "id": 567148,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "UMC",
-            "entity_type": "1",
-            "catno": "671 524-3",
-            "resource_url": "https://api.discogs.com/labels/176614",
-            "id": 176614,
+            "catno": "TRADE 1",
+            "resource_url": "https://api.discogs.com/labels/26126",
+            "id": 26126,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2018,
-        "master_url": "https://api.discogs.com/masters/32795",
+        "year": 1987,
+        "master_url": "https://api.discogs.com/masters/121154",
         "artists": [
           {
             "join": "",
@@ -1400,72 +1561,54 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/10069",
-            "id": 10069
+            "resource_url": "https://api.discogs.com/artists/10262",
+            "id": 10262
           }
         ],
-        "id": 12673052,
+        "id": 893294,
         "genres": [
-          "Electronic"
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/9/90/Skin_Trade_%28Duran_Duran_album_-_cover_art%29.jpg",
         "title": "Skin Trade",
         "formats": [
           {
             "descriptions": [
-              "LP",
-              "Album",
-              "Reissue"
+              "7\"",
+              "45 RPM",
+              "Single"
             ],
-            "text": "Expanded Edition ",
             "name": "Vinyl",
-            "qty": "2"
+            "qty": "1"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/12673052",
-        "master_id": 32795
+        "resource_url": "https://api.discogs.com/releases/893294",
+        "master_id": 121154
       },
-      "id": 12673052,
+      "id": 893294,
       "rating": 0
     },
     {
-      "instance_id": 426568882,
-      "date_added": "2020-01-03T06:42:48-08:00",
+      "instance_id": 454841571,
+      "date_added": "2020-04-07T14:03:32-07:00",
       "basic_information": {
         "styles": [
-          "Alternative Rock",
           "Pop Rock",
-          "Jazz-Rock"
+          "Experimental"
         ],
         "labels": [
           {
-            "name": "Bama Rags Records",
+            "name": "Apple Records",
             "entity_type": "1",
-            "catno": "88875189401",
-            "resource_url": "https://api.discogs.com/labels/134729",
-            "id": 134729,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "RCA",
-            "entity_type": "1",
-            "catno": "88875189401",
-            "resource_url": "https://api.discogs.com/labels/895",
-            "id": 895,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "Legacy",
-            "entity_type": "1",
-            "catno": "88875189401",
-            "resource_url": "https://api.discogs.com/labels/15491",
-            "id": 15491,
+            "catno": "PMC 7067/8",
+            "resource_url": "https://api.discogs.com/labels/25693",
+            "id": 25693,
             "entity_type_name": "Label"
           }
         ],
-        "year": 2016,
-        "master_url": "https://api.discogs.com/masters/271472",
+        "year": 1968,
+        "master_url": "https://api.discogs.com/masters/46402",
         "artists": [
           {
             "join": "",
@@ -1473,11 +1616,11 @@ const fakeCollectionData = r'''
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/30674",
-            "id": 30674
+            "resource_url": "https://api.discogs.com/artists/82730",
+            "id": 82730
           }
         ],
-        "id": 8772005,
+        "id": 456663,
         "genres": [
           "Rock"
         ],
@@ -1488,80 +1631,75 @@ const fakeCollectionData = r'''
             "descriptions": [
               "LP",
               "Album",
-              "Reissue",
-              "Remastered"
+              "Misprint",
+              "Numbered",
+              "Mono"
             ],
-            "text": "180g",
             "name": "Vinyl",
             "qty": "2"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/8772005",
-        "master_id": 271472
+        "resource_url": "https://api.discogs.com/releases/456663",
+        "master_id": 46402
       },
-      "id": 8772005,
-      "rating": 5
+      "id": 456663,
+      "rating": 0
     },
     {
-      "instance_id": 373770067,
-      "date_added": "2019-05-07T09:37:21-07:00",
+      "instance_id": 454841923,
+      "date_added": "2020-04-07T14:04:44-07:00",
       "basic_information": {
         "styles": [
-          "Impressionist"
+          "Cut-up/DJ"
         ],
         "labels": [
           {
-            "name": "La Voix De Son Ma\u00eetre",
+            "name": "Shoot To Kill Music",
             "entity_type": "1",
-            "catno": "2C 069-10239",
-            "resource_url": "https://api.discogs.com/labels/63488",
-            "id": 63488,
-            "entity_type_name": "Label"
-          },
-          {
-            "name": "La Voix De Son Ma\u00eetre",
-            "entity_type": "1",
-            "catno": "2C 069-10.239",
-            "resource_url": "https://api.discogs.com/labels/63488",
-            "id": 63488,
+            "catno": "none",
+            "resource_url": "https://api.discogs.com/labels/122891",
+            "id": 122891,
             "entity_type_name": "Label"
           }
         ],
-        "year": 0,
-        "master_url": "https://api.discogs.com/masters/420813",
+        "year": 2008,
+        "master_url": "https://api.discogs.com/masters/294556",
         "artists": [
           {
+            "join": "",
             "name": "TRV$ DJ-AM",
             "anv": "",
             "tracks": "",
             "role": "",
-            "resource_url": "https://api.discogs.com/artists/216140",
-            "id": 216140
+            "resource_url": "https://api.discogs.com/artists/2053420",
+            "id": 2053420
           }
         ],
-        "id": 1287017,
+        "id": 2020891,
         "genres": [
-          "Classical"
+          "Hip Hop",
+          "Rock",
+          "Pop"
         ],
         "thumb": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Fix_Your_Face_Album_Cover.jpg",
         "title": "Fix Your Face",
         "formats": [
           {
             "descriptions": [
-              "LP",
-              "Reissue",
-              "Stereo"
+              "MP3",
+              "Mixed"
             ],
-            "name": "Vinyl",
-            "qty": "1"
+            "text": "160 kbps",
+            "name": "File",
+            "qty": "15"
           }
         ],
         "cover_image": "",
-        "resource_url": "https://api.discogs.com/releases/1287017",
-        "master_id": 420813
+        "resource_url": "https://api.discogs.com/releases/2020891",
+        "master_id": 294556
       },
-      "id": 1287017,
+      "id": 2020891,
       "rating": 0
     }
   ]
