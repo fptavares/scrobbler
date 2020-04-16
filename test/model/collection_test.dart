@@ -252,6 +252,33 @@ Future<void> main() async {
       expect(results.map((album) => album.id), equals([428475133, 32925711]));
     });
 
+    test('search ignores accents and diacritical signs', () async {
+      Collection.innerHttpClient = createPageMockClient(expectedHits: 3);
+
+      // initialize
+      await collection.updateUsername(username);
+      // load all
+      await collection.loadAllAlbums();
+      expect(collection.isFullyLoaded, equals(true));
+
+      // search
+      var results = collection.search('Chloé');
+      expect(results.length, equals(1));
+      expect(results[0].releaseId, 1287017);
+
+      results = collection.search('chloe');
+      expect(results.length, equals(1));
+      expect(results[0].releaseId, 1287017);
+
+      results = collection.search('chlöe');
+      expect(results.length, equals(1));
+      expect(results[0].releaseId, 1287017);
+
+      results = collection.search('čråñbérrîës');
+      expect(results.length, equals(1));
+      expect(results[0].id, 428475133);
+    });
+
     test('loads album details', () async {
       Collection.innerHttpClient =
           MockClient(expectAsync1<Future<Response>, Request>((request) async {

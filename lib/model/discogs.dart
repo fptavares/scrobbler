@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +23,8 @@ abstract class Album {
   String get thumbUrl;
 }
 
+String _normalizeSearchString(String s) => removeDiacritics(s).toLowerCase();
+
 class CollectionAlbum implements Album {
   CollectionAlbum(
       {@required this.id,
@@ -32,9 +35,8 @@ class CollectionAlbum implements Album {
       @required this.year,
       @required this.thumbUrl,
       @required this.rating,
-      @required this.dateAdded}) {
-    searchString = '$artist $title'.toLowerCase();
-  }
+      @required this.dateAdded})
+      : searchString = _normalizeSearchString('$artist $title');
 
   factory CollectionAlbum.fromJson(Map<String, dynamic> json) {
     final info = json['basic_information'] as Map<String, dynamic>;
@@ -67,7 +69,7 @@ class CollectionAlbum implements Album {
   final int year;
   final int rating;
   final String dateAdded;
-  String searchString;
+  final String searchString;
 
   CollectionAlbum copyWith({@required int id}) {
     return CollectionAlbum(
@@ -398,7 +400,7 @@ class Collection extends ChangeNotifier {
   }
 
   List<CollectionAlbum> search(String query) {
-    final queries = query.toLowerCase().split(RegExp(r'\s+'));
+    final queries = _normalizeSearchString(query).split(RegExp(r'\s+'));
 
     return _albumList
         .where((album) => queries.every((q) => album.searchString.contains(q)))
