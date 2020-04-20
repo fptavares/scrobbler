@@ -431,7 +431,14 @@ class Collection extends ChangeNotifier {
     } on FileSystemException catch (e) {
       log.severe('Failed to read the chached file', e);
       // try falling back to direct download
-      content = (await _fetchFromDiscogs(url, headers: _headers)).body;
+      final response = await _fetchFromDiscogs(url, headers: _headers);
+      if (response.statusCode != 200) {
+        throw UIException(
+            'The Discogs service is currently unavailable. Please try again later.',
+            HttpException(
+                'Fallback request to Discogs failed with status code: ${response.statusCode}'));
+      }
+      content = response.body;
     }
 
     return json.decode(content) as Map<String, dynamic>;
@@ -441,9 +448,12 @@ class Collection extends ChangeNotifier {
       {Map<String, String> headers}) async {
     log.fine('Fetching from Discogs: $url');
     final response = await _httpClient.get(url, headers: headers);
-    if (response?.statusCode == 404) {
+    if (response.statusCode == 404) {
       throw UIException(
-          'Oops! Couldn\t find what you\'re looking for on Discogs (404 error).');
+          'Oops! Couldn\'t find what you\'re looking for on Discogs (404 error).');
+    } else if (response.statusCode >= 400) {
+      throw HttpException(
+          'Discogs responded with an error: ${response.statusCode} ${response.body}');
     }
     return response;
   }

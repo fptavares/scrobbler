@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/components/rating.dart';
 
 import '../model/analytics.dart';
 import '../model/discogs.dart';
@@ -52,6 +53,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
           (albums) => showPlaylistOptionsDialog(context, albums))) {
         displaySuccess(context, 'Scrobbled $accepted tracks successfuly.');
       }
+      ReviewRequester.instance().askForReview(context);
     } on Exception catch (e, stackTrace) {
       displayAndLogError(context, log, e, stackTrace);
     }

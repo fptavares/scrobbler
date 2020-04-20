@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'components/home.dart';
 import 'components/onboarding.dart';
 import 'components/playlist.dart';
+import 'components/rating.dart';
 import 'model/analytics.dart';
 import 'model/discogs.dart';
 import 'model/lastfm.dart';
@@ -34,8 +35,10 @@ Future<void> main() async {
   if (isProduction) {
     Logger.root.level = Level.WARNING;
     Logger.root.onRecord.listen((record) {
-      analytics.logException('${record.level.name}: ${record.message}');
-      Crashlytics.instance.recordError(record.message, record.stackTrace);
+      analytics.logException('${record.level.name}: record.message}');
+      if (record.error != null) {
+        Crashlytics.instance.recordError(record.error, record.stackTrace);
+      }
     });
   } else {
     Logger.root.level = Level.ALL; // defaults to Level.INFO
@@ -55,6 +58,10 @@ Future<void> main() async {
     });
   }
 
+  // initialize review requester
+  ReviewRequester.instance().init();
+
+  // create user-agent
   var userAgent = 'Scrobbler';
   try {
     final packageInfo = await PackageInfo.fromPlatform();
