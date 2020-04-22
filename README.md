@@ -1,5 +1,5 @@
 <p align='center'>
-  <a href='#'><img src='https://fptavares.github.io/img/scrobbler.png' alt='' width='360' /></a>
+  <a href='https://fptavares.github.io/scrobbler/'><img src='https://fptavares.github.io/img/scrobbler.png' alt='' width='360' /></a>
 </p>
 
 # Scrobbler
