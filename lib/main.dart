@@ -58,9 +58,6 @@ Future<void> main() async {
     });
   }
 
-  // initialize review requester
-  ReviewRequester.instance().init();
-
   // create user-agent
   var userAgent = 'Scrobbler';
   try {
@@ -115,6 +112,10 @@ class MyApp extends StatelessWidget {
               scrobbler..updateSessionKey(settings.sessionKey),
         ),
         ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
+        Provider<ReviewRequester>(
+          lazy: false,
+          create: (_) => ReviewRequester()..init(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

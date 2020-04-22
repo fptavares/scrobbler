@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
 class ReviewRequester {
-  ReviewRequester._();
+  ReviewRequester({
+    int minDays = 7,
+    int minLaunches = 10,
+  }) : _rateMyApp = RateMyApp(
+          minDays: minDays,
+          minLaunches: minLaunches,
+          remindDays: 7,
+          remindLaunches: 10,
+          googlePlayIdentifier: 'io.github.fptavares.scrobbler',
+          appStoreIdentifier: '1505776204',
+        );
 
-  factory ReviewRequester.instance() => _instance ??= ReviewRequester._();
+  final _log = Logger('ReviewRequester');
 
-  static ReviewRequester _instance;
+  final RateMyApp _rateMyApp;
 
-  final _rateMyApp = RateMyApp(
-    minDays: 7,
-    minLaunches: 10,
-    remindDays: 7,
-    remindLaunches: 10,
-    googlePlayIdentifier: 'io.github.fptavares.scrobbler',
-    appStoreIdentifier: '1505776204',
-  );
-
-  Future<void> init() => _rateMyApp.init();
+  Future<void> init() => _rateMyApp.init().catchError(
+      (e, st) => _log.severe('Failed to initialize rateMyApp', e, st));
 
   void askForReview(BuildContext context) {
-    if (_rateMyApp.shouldOpenDialog) {
-      _rateMyApp.showRateDialog(context, ignoreIOS: false);
+    try {
+      if (_rateMyApp.shouldOpenDialog) {
+        _rateMyApp.showRateDialog(context, ignoreIOS: false);
+      }
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e, stackTrace) {
+      _log.severe('Failed to ask for review', e, stackTrace);
     }
   }
 }

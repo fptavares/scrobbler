@@ -5,10 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler/components/error.dart';
+import 'package:scrobbler/components/rating.dart';
 import 'package:scrobbler/components/scrobble.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../test_albums.dart';
 
@@ -30,6 +32,10 @@ void main() {
           ChangeNotifierProvider<Playlist>.value(
             value: playlist,
           ),
+          Provider<ReviewRequester>(
+            lazy: false,
+            create: (_) => ReviewRequester(minDays: 0, minLaunches: 0)..init(),
+          ),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -41,6 +47,7 @@ void main() {
     }
 
     setUp(() {
+      SharedPreferences.setMockInitialValues(<String, dynamic>{});
       scrobbler = MockScrobbler();
       playlist = MockPlaylist();
       when(playlist.isScrobbling).thenReturn(false);
@@ -223,6 +230,24 @@ void main() {
       verify(playlist.scrobble(scrobbler, collection, any)).called(1);
 
       expect(find.text('no connection'), findsOneWidget);
+    });
+
+    testWidgets('tries to ask for review after scrobbling', (tester) async {
+      when(playlist.isEmpty).thenReturn(false);
+      when(playlist.scrobble(any, any, any))
+          .thenAnswer((_) => Stream.fromIterable([1]));
+
+      await tester.pumpWidget(createButton());
+
+      await tester.tap(find.byIcon(Icons.play_arrow));
+      await tester.pump();
+
+      expect(find.text('Rate this app'), findsOneWidget);
+    });
+
+    testWidgets('catches and ignore errors when trying to ask for review', (tester) async {
+      final review = ReviewRequester(); // not initialized
+      expect(() => review.askForReview(null), returnsNormally); // doesn't throw
     });
   });
 }
