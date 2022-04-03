@@ -78,5 +78,5 @@ dependencies {
 }
 
 // Added for firebase_crashlytics
-apply plugin: 'io.fabric'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'

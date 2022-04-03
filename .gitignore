@@ -18,7 +18,7 @@
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
-#.vscode/
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -62,6 +62,8 @@ GoogleService-Info.plist
 GeneratedPluginRegistrant.java
 google-services.json
 key.properties
+firebase_app_id_file.json
+lib/firebase_options.dart
 
 # no web support for now due a bug handling async main()
 /web/

@@ -12,7 +12,7 @@ import 'playlist.dart';
 
 class AlbumSearch extends SearchDelegate<CollectionAlbum> {
   AlbumSearch() : super(keyboardType: TextInputType.text) {
-    analytics.setCurrentScreen(screenName: 'search');
+    analytics.logSearchScreen();
   }
 
   @override
@@ -67,13 +67,10 @@ class _SearchResultsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final collection = Provider.of<Collection>(context);
     // asynchronously load all albums
-    if (query.isNotEmpty &&
-        collection.isNotFullyLoaded &&
-        collection.isNotLoading) {
+    if (query.isNotEmpty && collection.isNotFullyLoaded && collection.isNotLoading) {
       analytics.logLoadAllForSearch(amount: collection.totalItems);
-      WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(
-          collection.loadAllAlbums(), context, log, trace: 'load_all',
-          error: 'Failed to load the full collection!'));
+      WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(collection.loadAllAlbums(), context, log,
+          trace: 'load_all', error: 'Failed to load the full collection!'));
     }
 
     final albums = collection.search(query);
@@ -96,9 +93,7 @@ class _SearchResultsList extends StatelessWidget {
                   value: collection.loadingNotifier,
                   child: Consumer<LoadingStatus>(
                     builder: (_, loading, __) =>
-                        loading == LoadingStatus.loading
-                            ? const LinearProgressIndicator()
-                            : Container(),
+                        loading == LoadingStatus.loading ? const LinearProgressIndicator() : Container(),
                   ),
                 ),
                 Consumer<Playlist>(
@@ -121,10 +116,8 @@ class _SearchResultsList extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(album.artist),
-                              for (final format in album.formats ?? [])
-                                Text(format.toString()),
-                              if (album.year > 1000)
-                                Text('Released in ${album.year}'),
+                              for (final format in album.formats ?? []) Text(format.toString()),
+                              if (album.year > 1000) Text('Released in ${album.year}'),
                             ],
                           ),
                           trailing: (item != null && item.count > 0)

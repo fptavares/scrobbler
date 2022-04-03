@@ -19,13 +19,12 @@ class ReviewRequester {
 
   final RateMyApp _rateMyApp;
 
-  Future<void> init() => _rateMyApp.init().catchError(
-      (e, st) => _log.severe('Failed to initialize rateMyApp', e, st));
+  Future<void> init() => _rateMyApp.init().catchError((e, st) => _log.severe('Failed to initialize rateMyApp', e, st));
 
   void askForReview(BuildContext context) {
     try {
       if (_rateMyApp.shouldOpenDialog) {
-        _rateMyApp.showRateDialog(context, ignoreIOS: false);
+        _rateMyApp.showRateDialog(context);
       }
       // ignore: avoid_catches_without_on_clauses
     } catch (e, stackTrace) {

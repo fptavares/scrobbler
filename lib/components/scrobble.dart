@@ -26,12 +26,9 @@ class ScrobbleFloatingButton extends StatelessWidget {
     }
 
     return FloatingActionButton(
-      onPressed: playlist.isScrobbling
-          ? null
-          : () => handleScrobble(context, playlist),
+      onPressed: playlist.isScrobbling ? null : () => handleScrobble(context, playlist),
       tooltip: 'Scrobble',
-      backgroundColor:
-          playlist.isScrobbling ? Theme.of(context).primaryColor : null,
+      backgroundColor: playlist.isScrobbling ? Theme.of(context).primaryColor : null,
       child: playlist.isScrobblingPaused
           ? Container()
           : playlist.isScrobbling
@@ -45,13 +42,11 @@ class ScrobbleFloatingButton extends StatelessWidget {
     final collection = Provider.of<Collection>(context, listen: false);
     final review = Provider.of<ReviewRequester>(context, listen: false);
 
-    analytics.logScrobbleOptionsOpen(
-        numberOfAlbums: playlist.numberOfItems,
-        maxCount: playlist.maxItemCount());
+    analytics.logScrobbleOptionsOpen(numberOfAlbums: playlist.numberOfItems, maxCount: playlist.maxItemCount());
 
     try {
-      await for (int accepted in playlist.scrobble(scrobbler, collection,
-          (albums) => showPlaylistOptionsDialog(context, albums))) {
+      await for (int accepted
+          in playlist.scrobble(scrobbler, collection, (albums) => showPlaylistOptionsDialog(context, albums))) {
         displaySuccess(context, 'Scrobbled $accepted tracks successfuly.');
       }
       review.askForReview(context);
@@ -60,8 +55,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
     }
   }
 
-  static Future<ScrobbleOptions> showPlaylistOptionsDialog(
-      BuildContext context, List<AlbumDetails> albums) async {
+  static Future<ScrobbleOptions> showPlaylistOptionsDialog(BuildContext context, List<AlbumDetails> albums) async {
     return showModalBottomSheet<ScrobbleOptions>(
       context: context,
       isScrollControlled: true,
@@ -112,12 +106,9 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final positionStyle = Theme.of(context).textTheme.body2;
-    final titleStyle = Theme.of(context).textTheme.body1;
-    final excludedTitleStyle = Theme.of(context)
-        .textTheme
-        .body1
-        .copyWith(decoration: TextDecoration.lineThrough);
+    final positionStyle = Theme.of(context).textTheme.bodyText2;
+    final titleStyle = Theme.of(context).textTheme.bodyText1;
+    final excludedTitleStyle = Theme.of(context).textTheme.bodyText1.copyWith(decoration: TextDecoration.lineThrough);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -125,8 +116,7 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
       children: <Widget>[
         AppBar(
           leading: const CloseButton(),
-          title: Text(
-              'Scrobbling ${widget.albums.length} album${widget.albums.length == 1 ? '' : 's'}'),
+          title: Text('Scrobbling ${widget.albums.length} album${widget.albums.length == 1 ? '' : 's'}'),
         ),
         Flexible(
           child: ListView.builder(
@@ -149,15 +139,11 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
                       (track) => CheckboxListTile(
                         dense: true,
                         isThreeLine: false,
-                        secondary: Text(track.value.position ?? '',
-                            style: positionStyle),
+                        secondary: Text(track.value.position ?? '', style: positionStyle),
                         title: Text(track.value.title,
-                            style: _getMask(albumIndex, track.key)
-                                ? titleStyle
-                                : excludedTitleStyle),
+                            style: _getMask(albumIndex, track.key) ? titleStyle : excludedTitleStyle),
                         value: _getMask(albumIndex, track.key),
-                        onChanged: (value) =>
-                            _setMask(albumIndex, track.key, value),
+                        onChanged: (value) => _setMask(albumIndex, track.key, value),
                       ),
                     )
                     .toList(),
@@ -188,8 +174,7 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
           ),
           title: Slider(
             value: _timeOffsetIndex.toDouble(),
-            onChanged: (newTime) =>
-                setState(() => _timeOffsetIndex = newTime.round()),
+            onChanged: (newTime) => setState(() => _timeOffsetIndex = newTime.round()),
             min: 0,
             max: (_timeOffsetValues.length - 1).toDouble(),
             divisions: _timeOffsetValues.length - 1,
@@ -224,10 +209,8 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
         offsetInMinutes: offsetInMinutes);
   }
 
-  int _numberOfExclusions() => _includeMask.values.fold(
-      0,
-      (acc, albumMask) =>
-          acc + albumMask.values.where((included) => !included).length);
+  int _numberOfExclusions() =>
+      _includeMask.values.fold(0, (acc, albumMask) => acc + albumMask.values.where((included) => !included).length);
 
   void _setMask(int albumIndex, int trackIndex, bool included) {
     setState(() {

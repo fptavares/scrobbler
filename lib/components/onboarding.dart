@@ -129,7 +129,7 @@ class WelcomePage extends StatelessWidget {
               color: Colors.amberAccent,
               child: Text(
                 'Get started',
-                style: Theme.of(context).textTheme.title,
+                style: Theme.of(context).textTheme.headline6,
               ),
               onPressed: onPressed,
             ),

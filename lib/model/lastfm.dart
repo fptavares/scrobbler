@@ -2,9 +2,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 
 import '../components/error.dart';
@@ -19,15 +19,8 @@ class Scrobbler {
 
   final String userAgent;
 
-  final MetricHttpClient _httpClient = MetricHttpClient(http.Client());
-
   @visibleForTesting
-  http.Client get innerHttpClient => _httpClient.innerClient;
-
-  @visibleForTesting
-  set innerHttpClient(http.Client newClient) {
-    _httpClient.innerClient = newClient;
-  }
+  http.Client httpClient = http.Client();
 
   String _sessionKey;
 
@@ -64,23 +57,18 @@ class Scrobbler {
             : 'Failed to authenticate to Last.fm ($errorCode)!');
       }
     } on SocketException catch (e) {
-      throw UIException(
-          'Failed to communicate to Last.fm. Please try again later.', e);
+      throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
     } on FormatException catch (e) {
-      throw UIException(
-          'Failed to communicate to Last.fm. Please try again later.', e);
+      throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
     }
   }
 
-  Stream<int> scrobbleAlbums(List<AlbumDetails> albums,
-      [ScrobbleOptions options]) async* {
+  Stream<int> scrobbleAlbums(List<AlbumDetails> albums, [ScrobbleOptions options]) async* {
     if (_sessionKey == null) {
-      throw UIException(
-          'Oops! You need to login to Last.fm first with your username and password.');
+      throw UIException('Oops! You need to login to Last.fm first with your username and password.');
     }
     if (albums.isEmpty) {
-      throw UIException(
-          'Your playlist is empty! Try to add some albums to it first.');
+      throw UIException('Your playlist is empty! Try to add some albums to it first.');
     }
 
     final queue = _createScrobbleQueue(albums, options);
@@ -89,8 +77,7 @@ class Scrobbler {
     }
   }
 
-  ScrobbleQueue _createScrobbleQueue(
-      List<AlbumDetails> albums, ScrobbleOptions options) {
+  ScrobbleQueue _createScrobbleQueue(List<AlbumDetails> albums, ScrobbleOptions options) {
     // set default values if options are null
     options ??= const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: 0);
 
@@ -139,13 +126,11 @@ class Scrobbler {
 
         final dynamic accepted = jsonResponse['scrobbles']['@attr']['accepted'];
         final dynamic ignored = jsonResponse['scrobbles']['@attr']['ignored'];
-        log.fine(
-            'Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
+        log.fine('Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
 
         return accepted as int;
       } else {
-        log.info(
-            'Error response from Last.fm (${response.statusCode}): ${response.body}');
+        log.info('Error response from Last.fm (${response.statusCode}): ${response.body}');
         // If that response was not OK, throw an error.
         final errorCode = json.decode(response.body)['error'];
         throw UIException(<int>[4, 9, 14].contains(errorCode)
@@ -153,25 +138,21 @@ class Scrobbler {
             : 'Failed to scrobble to Last.fm ($errorCode)!');
       }
     } on SocketException catch (e) {
-      throw UIException(
-          'Failed to communicate to Last.fm. Please try again later.', e);
+      throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
     } on FormatException catch (e, stackTrace) {
-      log.severe('Failed to parse the Last.fm response: ${response.body}', e,
-          stackTrace);
+      log.severe('Failed to parse the Last.fm response: ${response.body}', e, stackTrace);
 
       if (response?.statusCode == 200) {
         // assume full success in case accepted can't be parsed
         return scrobbles.length;
       } else {
-        throw UIException(
-            'Failed to communicate to Last.fm. Please try again later.', e);
+        throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
       }
     }
   }
 
   Future<http.Response> _postRequest(Map<String, String> params) async {
-    final response = await _httpClient
-        .post('https://ws.audioscrobbler.com/2.0/', body: <String, String>{
+    final response = await httpClient.post(Uri.https('ws.audioscrobbler.com', '2.0/'), body: <String, String>{
       ...params,
       'api_sig': _createAPISignature(params),
       'format': 'json',
@@ -186,8 +167,7 @@ class Scrobbler {
 
   static String _createAPISignature(Map<String, String> params) {
     var sortedParams = '';
-    SplayTreeMap<String, String>.from(params)
-        .forEach((k, v) => sortedParams += '$k$v');
+    SplayTreeMap<String, String>.from(params).forEach((k, v) => sortedParams += '$k$v');
     return md5.convert(utf8.encode('$sortedParams$_sharedSecret')).toString();
   }
 }
@@ -195,18 +175,14 @@ class Scrobbler {
 class ScrobbleQueue {
   ScrobbleQueue(int timeOffset)
       : assert(timeOffset >= 0),
-        timestamp =
-            (DateTime.now().millisecondsSinceEpoch / 1000).floor() - timeOffset;
+        timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor() - timeOffset;
 
-  List<List<Map<String, String>>> batches = <List<Map<String, String>>>[
-    <Map<String, String>>[]
-  ];
+  List<List<Map<String, String>>> batches = <List<Map<String, String>>>[<Map<String, String>>[]];
   int timestamp;
 
   void add(AlbumTrack track, AlbumDetails album) {
-    final splitDuration = (track.duration?.isNotEmpty ?? false)
-        ? track.duration?.split(':')?.map<int>(int.parse)
-        : <int>[1, 0];
+    final splitDuration =
+        (track.duration?.isNotEmpty ?? false) ? track.duration?.split(':')?.map<int>(int.parse) : <int>[1, 0];
     final durationInSeconds = splitDuration.reduce((v, e) => v * 60 + e);
 
     timestamp -= durationInSeconds;
@@ -227,8 +203,7 @@ class ScrobbleQueue {
 }
 
 class ScrobbleOptions {
-  const ScrobbleOptions(
-      {@required this.inclusionMask, @required this.offsetInSeconds});
+  const ScrobbleOptions({@required this.inclusionMask, @required this.offsetInSeconds});
 
   final Map<int, Map<int, bool>> inclusionMask;
   final int offsetInSeconds;

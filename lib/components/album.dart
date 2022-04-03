@@ -8,9 +8,10 @@ import '../model/playlist.dart';
 import 'playlist.dart';
 
 class AlbumButton extends StatelessWidget {
-  const AlbumButton(this.album, {Key key}) : super(key: key);
+  const AlbumButton(this.album, {Key key, this.cacheManager}) : super(key: key);
 
   final CollectionAlbum album;
+  final CacheManager cacheManager;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class AlbumButton extends StatelessWidget {
         key: ValueKey<int>(album.id),
         margin: const EdgeInsets.all(4),
         child: Consumer<Playlist>(
-          child: CachedAlbumImage(album),
+          child: CachedAlbumImage(album, cacheManager: cacheManager),
           builder: (context, playlist, image) {
             final item = playlist.getPlaylistItem(album);
 
@@ -51,9 +52,10 @@ class AlbumButton extends StatelessWidget {
 }
 
 class CachedAlbumImage extends StatelessWidget {
-  const CachedAlbumImage(this.album, {Key key}) : super(key: key);
+  const CachedAlbumImage(this.album, {Key key, this.cacheManager}) : super(key: key);
 
   final Album album;
+  final CacheManager cacheManager;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +77,7 @@ class CachedAlbumImage extends StatelessWidget {
           ),
         ),
       ),
-      errorWidget: (context, url, error) => _DefaultAlbumImage(
+      errorWidget: (context, url, error) => DefaultAlbumImage(
         decoration: _shadowDecoration,
         album: album,
       ),
@@ -93,9 +95,6 @@ class CachedAlbumImage extends StatelessWidget {
       )
     ],
   );
-
-  @visibleForTesting
-  static BaseCacheManager cacheManager;
 }
 
 class AlbumImage extends StatelessWidget {
@@ -118,12 +117,11 @@ class AlbumImage extends StatelessWidget {
 
   @visibleForTesting
   // ignore: prefer_function_declarations_over_variables
-  static Widget Function(ImageProvider) imageBuilder =
-      (image) => Image(image: image);
+  static Widget Function(ImageProvider) imageBuilder = (image) => Image(image: image);
 }
 
-class _DefaultAlbumImage extends StatelessWidget {
-  const _DefaultAlbumImage({
+class DefaultAlbumImage extends StatelessWidget {
+  const DefaultAlbumImage({
     Key key,
     @required this.decoration,
     @required this.album,
@@ -153,7 +151,7 @@ class _DefaultAlbumImage extends StatelessWidget {
                     child: Center(
                       child: Text(
                         album.artist,
-                        style: Theme.of(context).textTheme.title,
+                        style: Theme.of(context).textTheme.headline6,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                       ),
@@ -164,7 +162,7 @@ class _DefaultAlbumImage extends StatelessWidget {
                     child: Center(
                       child: Text(
                         album.title,
-                        style: Theme.of(context).textTheme.subhead,
+                        style: Theme.of(context).textTheme.subtitle1,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                       ),

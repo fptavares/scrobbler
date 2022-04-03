@@ -1,7 +1,7 @@
+import 'package:mockito/mockito.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
-import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import '../test_albums.dart';
@@ -91,8 +91,7 @@ void main() {
       playlist.removeAlbum(testAlbum2);
 
       expect(playlist.numberOfItems, equals(1));
-      expect(playlist.getPlaylistItems().map((i) => i.album.releaseId),
-          [testAlbum1.releaseId]);
+      expect(playlist.getPlaylistItems().map((i) => i.album.releaseId), [testAlbum1.releaseId]);
 
       final item = playlist.getPlaylistItem(testAlbum2);
       expect(item, isNull);
@@ -131,12 +130,11 @@ void main() {
       // create mocks
       final scrobbler = MockScrobbler();
       when(scrobbler.isNotAuthenticated).thenReturn(false);
-      when(scrobbler.scrobbleAlbums(any, any))
-          .thenAnswer((_) => Stream.fromIterable(scrobbleResults));
+      when(scrobbler.scrobbleAlbums(any, any)).thenAnswer((_) => Stream.fromIterable(scrobbleResults));
 
       final collection = MockCollection();
-      when(collection.loadAlbumDetails(any)).thenAnswer(
-          (i) => Future.value(FakeAlbumDetails(i.positionalArguments.first)));
+      when(collection.loadAlbumDetails(any))
+          .thenAnswer((i) => Future.value(FakeAlbumDetails(i.positionalArguments.first)));
 
       // scrobble
       final accepted = await playlist
@@ -160,8 +158,7 @@ void main() {
       scrobble.called(1);
       expect(
         scrobble.captured[0].map((a) => a.releaseId),
-        equals(
-            [testAlbum1.releaseId, testAlbum1.releaseId, testAlbum2.releaseId]),
+        equals([testAlbum1.releaseId, testAlbum1.releaseId, testAlbum2.releaseId]),
       );
       final options = scrobble.captured[1] as ScrobbleOptions;
       expect(

@@ -32,13 +32,14 @@ class EmptyState extends StatelessWidget {
           children: <Widget>[
             Flexible(
               flex: 10,
-              child: Image(image: AssetImage(imagePath),
+              child: Image(
+                image: AssetImage(imagePath),
               ),
             ),
             const Flexible(flex: 1, child: SizedBox(height: 23.0)),
             Text(
               headline,
-              style: theme.textTheme.display1.copyWith(
+              style: theme.textTheme.headline4.copyWith(
                 color: theme.accentColor,
                 fontWeight: FontWeight.w500,
               ),
@@ -47,9 +48,9 @@ class EmptyState extends StatelessWidget {
             Text(
               subhead,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.subhead.copyWith(
-                color: Colors.black54,
-              ),
+              style: Theme.of(context).textTheme.subtitle1.copyWith(
+                    color: Colors.black54,
+                  ),
             ),
           ],
         ),

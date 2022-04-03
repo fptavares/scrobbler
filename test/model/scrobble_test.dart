@@ -13,39 +13,25 @@ String _createScrobbleResponse(int accepted, int ignored) =>
     '{"scrobbles":{"@attr":{"accepted":$accepted,"ignored":$ignored},"scrobble":[${List.generate(accepted, (_) => '{}').join(',')}]}}';
 
 void main() {
-  group('Scrobbler', () {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('Last.fm client', () {
     const userAgent = 'test user-agent';
     const username = 'test-user';
     const password = 'test-password';
     const key = 'd580d57f32848f5dcf574d1ce18d78b2';
     Scrobbler scrobbler;
 
-    TestWidgetsFlutterBinding.ensureInitialized();
-
-    setUpAll(() {
-      // mock platform channel for firebase performance
-      FirebasePerformance.channel.setMockMethodCallHandler((methodCall) async {
-        switch (methodCall.method) {
-          case 'FirebasePerformance#isPerformanceCollectionEnabled':
-            return false;
-          default:
-            return null;
-        }
-      });
-    });
-
     setUp(() {
       scrobbler = Scrobbler(userAgent);
-      scrobbler.innerHttpClient = null;
+      scrobbler.httpClient = null;
     });
 
     test('initializes a Last.fm session', () async {
       // override http client
-      scrobbler.innerHttpClient =
-          MockClient(expectAsync1<Future<Response>, Request>((request) async {
+      scrobbler.httpClient = MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
-        expect(request.url.toString(),
-            equals('https://ws.audioscrobbler.com/2.0/'));
+        expect(request.url.toString(), equals('https://ws.audioscrobbler.com/2.0/'));
 
         expect(request.bodyFields['method'], equals('auth.getMobileSession'));
         expect(request.bodyFields['username'], equals(username));
@@ -63,8 +49,7 @@ void main() {
       expect(returnedKey, equals(key));
     });
 
-    test('submits more than 50 tracks to Last.fm with exclusions but no offset',
-        () async {
+    test('submits more than 50 tracks to Last.fm with exclusions but no offset', () async {
       // set a key
       scrobbler.updateSessionKey('test-session-key');
 
@@ -87,11 +72,9 @@ void main() {
           2 * 60; // 20 times the album minus 3 excluded tracks
 
       // override http client
-      scrobbler.innerHttpClient =
-          MockClient(expectAsync1<Future<Response>, Request>((request) async {
+      scrobbler.httpClient = MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
-        expect(request.url.toString(),
-            equals('https://ws.audioscrobbler.com/2.0/'));
+        expect(request.url.toString(), equals('https://ws.audioscrobbler.com/2.0/'));
         final regexp = RegExp(r'^track\[[1-4]?[0-9]\]$');
         final trackKeys = request.bodyFields.keys.where(regexp.hasMatch);
         final tracks = trackKeys.length;
@@ -102,8 +85,7 @@ void main() {
           expect(key, equals('track[$index]'));
           // expect the timestamp to be in the range from now beck to total duration of playlist
           // 2 second delta to account for the test running on a slower platform
-          expect(int.parse(request.bodyFields['timestamp[$index]']),
-              inInclusiveRange(startTime - 2, endTime + 2));
+          expect(int.parse(request.bodyFields['timestamp[$index]']), inInclusiveRange(startTime - 2, endTime + 2));
 
           index++;
         }
@@ -113,8 +95,7 @@ void main() {
 
       // scrobble
       final acceptedList = await scrobbler
-          .scrobbleAlbums(albums,
-              const ScrobbleOptions(inclusionMask: mask, offsetInSeconds: 0))
+          .scrobbleAlbums(albums, const ScrobbleOptions(inclusionMask: mask, offsetInSeconds: 0))
           .toList();
       expect(acceptedList, equals([50 - 1, 30 - 1 - 3]));
     });
@@ -134,11 +115,9 @@ void main() {
       final startTime = now - offset - testAlbumDetails1DurationInSeconds;
 
       // override http client
-      scrobbler.innerHttpClient =
-          MockClient(expectAsync1<Future<Response>, Request>((request) async {
+      scrobbler.httpClient = MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
-        expect(request.url.toString(),
-            equals('https://ws.audioscrobbler.com/2.0/'));
+        expect(request.url.toString(), equals('https://ws.audioscrobbler.com/2.0/'));
         final regexp = RegExp(r'^track\[[1-4]?[0-9]\]$');
         final trackKeys = request.bodyFields.keys.where(regexp.hasMatch);
         final tracks = trackKeys.length;
@@ -150,20 +129,17 @@ void main() {
 
         // expect first timestamp to be close to the expected end time
         // 2 second delta to account for the test running on a slower platform
-        expect(
-            int.parse(request.bodyFields['timestamp[0]']), closeTo(endTime, 2));
+        expect(int.parse(request.bodyFields['timestamp[0]']), closeTo(endTime, 2));
         // expect last timestamp to be close to the expected start time
         // 2 second delta to account for the test running on a slower platform
-        expect(int.parse(request.bodyFields['timestamp[${tracks - 1}]']),
-            closeTo(startTime, 2));
+        expect(int.parse(request.bodyFields['timestamp[${tracks - 1}]']), closeTo(startTime, 2));
 
         return Response(_createScrobbleResponse(tracks, 0), 200);
       }, count: 1));
 
       // scrobble
       final acceptedList = await scrobbler
-          .scrobbleAlbums(albums,
-              const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: offset))
+          .scrobbleAlbums(albums, const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: offset))
           .toList();
       expect(acceptedList, equals([4]));
     });
@@ -178,41 +154,34 @@ void main() {
     }
 
     test('throws UI exception on server error', () async {
-      scrobbler.innerHttpClient = MockClient((_) async => Response('', 500));
+      scrobbler.httpClient = MockClient((_) async => Response('', 500));
 
       await verifyThrows(() => scrobbler.initializeSession(username, password));
 
       scrobbler.updateSessionKey(key);
-      await verifyThrows(() async =>
-          await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
 
     test('throws UI exception on server error', () async {
-      scrobbler.innerHttpClient =
-          MockClient((_) async => throw const SocketException(''));
+      scrobbler.httpClient = MockClient((_) async => throw const SocketException(''));
 
       await verifyThrows(() => scrobbler.initializeSession(username, password));
 
       scrobbler.updateSessionKey(key);
-      await verifyThrows(() async =>
-          await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
 
     test('throws UI exception if album list is empty', () async {
-      scrobbler.innerHttpClient =
-          MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
+      scrobbler.httpClient = MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       scrobbler.updateSessionKey(key);
-      await verifyThrows(
-          () async => await scrobbler.scrobbleAlbums([]).toList());
+      await verifyThrows(() async => await scrobbler.scrobbleAlbums([]).toList());
     });
 
     test('throws UI exception if session key is empty', () async {
-      scrobbler.innerHttpClient =
-          MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
+      scrobbler.httpClient = MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
-      await verifyThrows(() async =>
-          await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
   });
 }

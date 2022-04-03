@@ -2,9 +2,9 @@ import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-void displayAndLogError(
-    BuildContext context, Logger logger, Object e, StackTrace stackTrace,
-    [String message]) {
+import '../model/analytics.dart';
+
+void displayAndLogError(BuildContext context, Logger logger, Object e, StackTrace stackTrace, [String message]) {
   final log = logger ?? Logger.root;
   final errorMessage = e is UIException ? e.message : message ?? e.toString();
 
@@ -37,10 +37,9 @@ Future<T> handleFutureError<T>(
   String success,
   String trace,
 }) async {
-
   Trace callTrace;
   if (trace != null) {
-    callTrace = FirebasePerformance.instance.newTrace(trace);
+    callTrace = analytics.newTrace(trace);
     callTrace.start();
   }
 

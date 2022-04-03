@@ -18,7 +18,7 @@ import '../test_albums.dart';
 Future<void> main() async {
   SharedPreferences.setMockInitialValues(<String, dynamic>{
     DiscogsSettings.discogsUsernameKey: 'test-user',
-    DiscogsSettings.skippedKey: null,
+    DiscogsSettings.skippedKey: false,
     LastfmSettings.lastfmUsernameKey: 'test-user',
     LastfmSettings.sessionKeyKey: 'test',
   });
@@ -103,17 +103,15 @@ Future<void> main() async {
       expect(find.byType(AccountsForm), findsOneWidget);
     });
 
-    testWidgets('playlist button is disabled when playlist is empty',
-        (tester) async {
+    testWidgets('playlist button is disabled when playlist is empty', (tester) async {
       playlist.clearAlbums();
 
       await tester.pumpWidget(createHome());
 
       expect(
           tester
-              .widget<IconButton>(find.ancestor(
-                  of: find.byIcon(Icons.playlist_play),
-                  matching: find.byType(IconButton)))
+              .widget<IconButton>(
+                  find.ancestor(of: find.byIcon(Icons.playlist_play), matching: find.byType(IconButton)))
               .onPressed,
           isNull);
 
@@ -136,15 +134,12 @@ Future<void> main() async {
       expect(find.text('Playlist test'), findsOneWidget);
     });
 
-    testWidgets('loads more albums when scrolling to the bottom',
-        (tester) async {
-      when(collection.albums).thenReturn(
-          List.generate(20, (index) => testAlbum1.copyWith(id: index)));
+    testWidgets('loads more albums when scrolling to the bottom', (tester) async {
+      when(collection.albums).thenReturn(List.generate(20, (index) => testAlbum1.copyWith(id: index)));
 
       await tester.pumpWidget(createHome());
 
-      await tester.drag(
-          find.byKey(const ValueKey<int>(1)), const Offset(0.0, -1000.0));
+      await tester.drag(find.byKey(const ValueKey<int>(1)), const Offset(0.0, -1000.0));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
@@ -152,23 +147,19 @@ Future<void> main() async {
     });
 
     testWidgets('reloads collection on drag beyond the top', (tester) async {
-      when(collection.albums).thenReturn(
-          List.generate(20, (index) => testAlbum1.copyWith(id: index)));
+      when(collection.albums).thenReturn(List.generate(20, (index) => testAlbum1.copyWith(id: index)));
 
       await tester.pumpWidget(createHome());
 
-      await tester.drag(
-          find.byKey(const ValueKey<int>(0)), const Offset(0.0, 250.0));
+      await tester.drag(find.byKey(const ValueKey<int>(0)), const Offset(0.0, 250.0));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
       verify(collection.reload(emptyCache: true));
     });
 
-    testWidgets('scroll to top when user taps the app bar title',
-        (tester) async {
-      when(collection.albums).thenReturn(
-          List.generate(50, (index) => testAlbum1.copyWith(id: index)));
+    testWidgets('scroll to top when user taps the app bar title', (tester) async {
+      when(collection.albums).thenReturn(List.generate(50, (index) => testAlbum1.copyWith(id: index)));
 
       await tester.pumpWidget(createHome());
 
@@ -208,8 +199,7 @@ Future<void> main() async {
       expect(find.text('My test error message'), findsOneWidget);
     });
 
-    testWidgets('doesn\'t show empty state on error if collection isn\'t empty',
-        (tester) async {
+    testWidgets('doesn\'t show empty state on error if collection isn\'t empty', (tester) async {
       when(collection.hasLoadingError).thenReturn(true);
       when(collection.isEmpty).thenReturn(false);
       when(collection.isNotLoading).thenReturn(true);
@@ -229,6 +219,5 @@ Future<void> main() async {
 // Mock classes
 class MockCollection extends Mock implements Collection {
   @override
-  ValueNotifier<LoadingStatus> get loadingNotifier =>
-      ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
+  ValueNotifier<LoadingStatus> get loadingNotifier => ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
 }

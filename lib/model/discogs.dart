@@ -6,12 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../components/error.dart';
 import '../secrets.dart';
-import 'analytics.dart';
 
 abstract class Album {
   int get releaseId;
@@ -45,10 +42,7 @@ class CollectionAlbum implements Album {
       releaseId: json['id'] as int,
       artist: _oneNameForArtists(info['artists'] as List<dynamic>),
       title: info['title'] as String,
-      formats: (info['formats'] as List<dynamic>)
-              ?.map((format) => AlbumFormat.fromJson(format))
-              ?.toList() ??
-          [],
+      formats: (info['formats'] as List<dynamic>)?.map((format) => AlbumFormat.fromJson(format))?.toList() ?? [],
       year: info['year'] as int,
       thumbUrl: info['thumb'] as String,
       rating: json['rating'] as int,
@@ -93,10 +87,8 @@ class AlbumFormat {
     return AlbumFormat(
       name: json['name'],
       extraText: json['text'],
-      descriptions: (json['descriptions'] as List<dynamic>)
-              ?.map((description) => description as String)
-              ?.toList() ??
-          [],
+      descriptions:
+          (json['descriptions'] as List<dynamic>)?.map((description) => description as String)?.toList() ?? [],
       quantity: int.tryParse(json['qty']) ?? 1,
     );
   }
@@ -167,9 +159,8 @@ class AlbumTrack {
       position: json['position'] as String,
       duration: json['duration'] as String,
       artist: _oneNameForArtists(json['artists'] as List<dynamic>),
-      subTracks: (json['sub_tracks'] as List<dynamic>)
-          ?.map<AlbumTrack>((subTrack) => AlbumTrack.fromJson(subTrack))
-          ?.toList(),
+      subTracks:
+          (json['sub_tracks'] as List<dynamic>)?.map<AlbumTrack>((subTrack) => AlbumTrack.fromJson(subTrack))?.toList(),
     );
   }
 
@@ -183,20 +174,16 @@ class AlbumTrack {
 class Collection extends ChangeNotifier {
   Collection(this.userAgent);
 
-  static final MetricHttpClient _httpClient = MetricHttpClient(http.Client());
+  @visibleForTesting
+  static http.Client fallbackClient = http.Client();
 
   @visibleForTesting
-  static set innerHttpClient(http.Client newClient) {
-    _httpClient.innerClient = newClient;
-  }
-
-  @visibleForTesting
-  static http.Client get innerHttpClient => _httpClient.innerClient;
-
-  static final CacheManager _cache = CacheManager();
-
-  @visibleForTesting
-  static CacheManager get cache => _cache;
+  static CacheManager cache = CacheManager(
+    Config(
+      'scrobblerCache',
+      stalePeriod: const Duration(days: 30),
+    ),
+  );
 
   static final Logger log = Logger('Collection');
 
@@ -273,8 +260,7 @@ class Collection extends ChangeNotifier {
       return;
     }
     if (newUsername == _username) {
-      log.info(
-          'Collection updated with the same username, so didn\'t reload...');
+      log.info('Collection updated with the same username, so didn\'t reload...');
       return;
     }
 
@@ -301,7 +287,7 @@ class Collection extends ChangeNotifier {
     _progress.loading();
     try {
       if (emptyCache) {
-        _cache.emptyCache();
+        cache.emptyCache();
       }
       _clearAndAddAlbums(await _loadCollectionPage(1));
       _nextPage = 2;
@@ -316,8 +302,7 @@ class Collection extends ChangeNotifier {
 
   Future<void> loadMoreAlbums() async {
     if (isLoading) {
-      log.info(
-          'Cannot load more yet because the collection is still loading...');
+      log.info('Cannot load more yet because the collection is still loading...');
       return;
     }
     if (isFullyLoaded) {
@@ -344,8 +329,7 @@ class Collection extends ChangeNotifier {
 
   Future<void> loadAllAlbums() async {
     if (isLoading) {
-      log.info(
-          'Cannot load more yet because the collection is still loading...');
+      log.info('Cannot load more yet because the collection is still loading...');
       return;
     }
     if (isFullyLoaded) {
@@ -356,16 +340,14 @@ class Collection extends ChangeNotifier {
       throw UIException('Cannot load albums because the username is empty.');
     }
     if (_totalPages == null) {
-      throw UIException(
-          'Cannot load all remaining albums before loading the first page.');
+      throw UIException('Cannot load all remaining albums before loading the first page.');
     }
 
     _progress.loading();
     try {
       final pages = await Future.wait<List<CollectionAlbum>>(
         <Future<List<CollectionAlbum>>>[
-          for (int page = _nextPage; page <= _totalPages; page++)
-            _loadCollectionPage(page)
+          for (int page = _nextPage; page <= _totalPages; page++) _loadCollectionPage(page)
         ],
         eagerError: true,
       );
@@ -393,18 +375,13 @@ class Collection extends ChangeNotifier {
     _totalPages = pageInfo['pages'] as int;
     final releases = page['releases'] as List<dynamic>;
 
-    return releases
-        .map((dynamic release) =>
-            CollectionAlbum.fromJson(release as Map<String, dynamic>))
-        .toList();
+    return releases.map((dynamic release) => CollectionAlbum.fromJson(release as Map<String, dynamic>)).toList();
   }
 
   List<CollectionAlbum> search(String query) {
     final queries = _normalizeSearchString(query).split(RegExp(r'\s+'));
 
-    return _albumList
-        .where((album) => queries.every((q) => album.searchString.contains(q)))
-        .toList();
+    return _albumList.where((album) => queries.every((q) => album.searchString.contains(q))).toList();
   }
 
   Future<AlbumDetails> loadAlbumDetails(int releaseId) async {
@@ -418,44 +395,31 @@ class Collection extends ChangeNotifier {
     String content;
 
     try {
-      content = await _cache.get(url, headers: _headers);
+      content = (await cache.getSingleFile(url, headers: _headers)).readAsStringSync();
     } on SocketException catch (e) {
-      throw UIException(
-          'Could not connect to Discogs. Please check your internet connection and try again later.',
-          e);
+      throw UIException('Could not connect to Discogs. Please check your internet connection and try again later.', e);
+    } on HttpExceptionWithStatus catch (e) {
+      // If that response was not OK, throw an error.
+      if (e.statusCode == 404) {
+        throw UIException('Oops! Couldn\'t find what you\'re looking for on Discogs (404 error).', e);
+      } else if (e.statusCode >= 400) {
+        throw UIException('The Discogs service is currently unavailable (${e.statusCode}). Please try again later.', e);
+      }
     } on HttpException catch (e) {
       // If that response was not OK, throw an error.
-      throw UIException(
-          'The Discogs service is currently unavailable. Please try again later.',
-          e);
+      throw UIException('The Discogs service is currently unavailable. Please try again later.', e);
     } on FileSystemException catch (e) {
       log.severe('Failed to read the chached file', e);
       // try falling back to direct download
-      final response = await _fetchFromDiscogs(url, headers: _headers);
+      final response = await fallbackClient.get(Uri.parse(url), headers: _headers);
       if (response.statusCode != 200) {
-        throw UIException(
-            'The Discogs service is currently unavailable. Please try again later.',
-            HttpException(
-                'Fallback request to Discogs failed with status code: ${response.statusCode}'));
+        throw UIException('The Discogs service is currently unavailable. Please try again later.',
+            HttpException('Fallback request to Discogs failed with status code: ${response.statusCode}'));
       }
       content = response.body;
     }
 
     return json.decode(content) as Map<String, dynamic>;
-  }
-
-  static Future<http.Response> _fetchFromDiscogs(String url,
-      {Map<String, String> headers}) async {
-    log.fine('Fetching from Discogs: $url');
-    final response = await _httpClient.get(url, headers: headers);
-    if (response.statusCode == 404) {
-      throw UIException(
-          'Oops! Couldn\'t find what you\'re looking for on Discogs (404 error).');
-    } else if (response.statusCode >= 400) {
-      throw HttpException(
-          'Discogs responded with an error: ${response.statusCode} ${response.body}');
-    }
-    return response;
   }
 
   static const int _pageSize = 99;
@@ -466,8 +430,7 @@ class Collection extends ChangeNotifier {
 enum LoadingStatus { neverLoaded, loading, finished, error }
 
 class _Progress {
-  final ValueNotifier<LoadingStatus> statusNotifier =
-      ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
+  final ValueNotifier<LoadingStatus> statusNotifier = ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
   String errorMessage;
 
   LoadingStatus get status => statusNotifier.value;
@@ -496,30 +459,4 @@ String _oneNameForArtists(List<dynamic> artists) {
     RegExp(r'^(.+) \([0-9]+\)$'),
     (m) => m[1],
   );
-}
-
-@visibleForTesting
-class CacheManager extends BaseCacheManager {
-  CacheManager()
-      : super(key,
-            maxAgeCacheObject: const Duration(days: 30),
-            fileFetcher: fetchFromServer);
-
-  static Future<FileFetcherResponse> fetchFromServer(String url,
-          {Map<String, String> headers}) async =>
-      HttpFileFetcherResponse(
-          await Collection._fetchFromDiscogs(url, headers: headers));
-
-  static const key = 'scrobblerCache';
-
-  @override
-  Future<String> getFilePath() async {
-    final directory = await getTemporaryDirectory();
-    return p.join(directory.path, key);
-  }
-
-  Future<String> get(String url, {Map<String, String> headers}) async {
-    final fileInfo = await getFile(url, headers: headers).first;
-    return fileInfo.file.readAsStringSync();
-  }
 }

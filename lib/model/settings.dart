@@ -49,7 +49,11 @@ class LastfmSettings extends ChangeNotifier {
   }
 
   set sessionKey(String value) {
-    prefs.setString(sessionKeyKey, value);
+    if (value == null) {
+      prefs.remove(sessionKeyKey);
+    } else {
+      prefs.setString(sessionKeyKey, value);
+    }
     notifyListeners();
   }
 
