@@ -3,6 +3,9 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_cache_manager/src/cache_store.dart';
+import 'package:flutter_cache_manager/src/web/web_helper.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:http/http.dart';
 import 'package:scrobbler/components/album.dart';
@@ -24,8 +27,7 @@ Future<void> main() async {
     // and thus considered public domain,
     // the iOS app store doesn't approve their use in app screenshots.
     // So on iOS this will hide them and overlay the explanation text.
-    AlbumImage.imageBuilder = (image) =>
-        AspectRatio(
+    AlbumImage.imageBuilder = (image) => AspectRatio(
           aspectRatio: 1,
           child: Stack(
             fit: StackFit.expand,
@@ -67,7 +69,9 @@ Future<void> main() async {
   });
   final prefs = await SharedPreferences.getInstance();
 
-  Collection.innerHttpClient = StaticCollectionHttpClient();
+  final config = Config('testCache');
+  Collection.cache = CacheManager.custom(config,
+      webHelper: WebHelper(CacheStore(config), HttpFileService(httpClient: StaticCollectionHttpClient())));
   Collection.cache.emptyCache();
 
   runApp(MyApp(prefs, 'ScrobblerDriverTest'));
@@ -82,8 +86,7 @@ class StaticCollectionHttpClient extends BaseClient {
   Future<StreamedResponse> send(BaseRequest request) async {
     if (request.url.path.contains('/collection/folders/0/releases')) {
       return StreamedResponse(
-        Stream<List<int>>.fromIterable(
-            <List<int>>[fakeCollectionData.codeUnits]),
+        Stream<List<int>>.fromIterable(<List<int>>[fakeCollectionData.codeUnits]),
         200,
       );
     } else {
