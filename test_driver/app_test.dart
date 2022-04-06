@@ -1,6 +1,10 @@
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:screenshots/screenshots.dart';
 import 'package:test/test.dart';
+
+// TODO(ftavares): fix screenshots incompatible depedency - import 'package:screenshots/screenshots.dart';
+Future<void> screenshot(_, __, ___) async {}
+
+class Config {}
 
 void main() {
   group('App', () {
@@ -93,15 +97,13 @@ void main() {
       await driver.tap(album1Text);
 
       // wait for scrobble editor
-      await driver.scroll(
-          album1Text, 0, -200, const Duration(milliseconds: 200));
+      await driver.scroll(album1Text, 0, -200, const Duration(milliseconds: 200));
 
       // take screenshot of expanded album
       await screenshot(driver, config, '4.2-finetune');
 
       // set slider to middle value
-      final scrolling = driver.scroll(
-          find.byType('Slider'), 0, 0, const Duration(seconds: 2));
+      final scrolling = driver.scroll(find.byType('Slider'), 0, 0, const Duration(seconds: 2));
 
       // take screenshot of time selection
       await screenshot(driver, config, '4.3-time');
