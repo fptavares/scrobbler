@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({
-    Key key,
-    @required this.imagePath,
-    @required this.headline,
-    @required this.subhead,
+    Key? key,
+    required this.imagePath,
+    required this.headline,
+    required this.subhead,
   }) : super(key: key);
 
   final String imagePath;
@@ -39,8 +39,8 @@ class EmptyState extends StatelessWidget {
             const Flexible(flex: 1, child: SizedBox(height: 23.0)),
             Text(
               headline,
-              style: theme.textTheme.headline4.copyWith(
-                color: theme.accentColor,
+              style: theme.textTheme.headline4!.copyWith(
+                color: theme.colorScheme.secondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -48,7 +48,7 @@ class EmptyState extends StatelessWidget {
             Text(
               subhead,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.subtitle1.copyWith(
+              style: Theme.of(context).textTheme.subtitle1!.copyWith(
                     color: Colors.black54,
                   ),
             ),

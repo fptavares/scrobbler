@@ -12,13 +12,16 @@ import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../mocks/app_review_mock.dart';
+import '../mocks/firebase_mocks.dart';
+import '../mocks/model_mocks.dart';
 import '../test_albums.dart';
 
 void main() {
   group('Scrobble button', () {
-    MockScrobbler scrobbler;
-    MockCollection collection;
-    MockPlaylist playlist;
+    late MockScrobbler scrobbler;
+    late MockCollection collection;
+    late MockPlaylist playlist;
 
     Widget createButton() {
       return MultiProvider(
@@ -32,10 +35,6 @@ void main() {
           ChangeNotifierProvider<Playlist>.value(
             value: playlist,
           ),
-          Provider<ReviewRequester>(
-            lazy: false,
-            create: (_) => ReviewRequester(minDays: 0, minLaunches: 0)..init(),
-          ),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -47,12 +46,15 @@ void main() {
     }
 
     setUp(() {
-      SharedPreferences.setMockInitialValues(<String, dynamic>{});
-      scrobbler = MockScrobbler();
-      playlist = MockPlaylist();
+      replaceFirebaseWithMocks();
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      scrobbler = createMockScrobbler();
+      playlist = createMockPlaylist();
       when(playlist.isScrobbling).thenReturn(false);
       when(playlist.isScrobblingPaused).thenReturn(false);
-      collection = MockCollection();
+      when(playlist.numberOfItems).thenReturn(15);
+      when(playlist.maxItemCount()).thenReturn(1);
+      collection = createMockCollection();
     });
 
     testWidgets('renders if playlist has something', (tester) async {
@@ -78,8 +80,7 @@ void main() {
 
       final scrobbleResults = [10, 5];
 
-      when(playlist.scrobble(any, any, any))
-          .thenAnswer((_) => Stream.fromIterable(scrobbleResults));
+      when(playlist.scrobble(any, any, any)).thenAnswer((_) => Stream.fromIterable(scrobbleResults));
 
       await tester.pumpWidget(createButton());
 
@@ -96,7 +97,7 @@ void main() {
       (tester) async {
         when(playlist.isEmpty).thenReturn(false);
 
-        ScrobbleOptions options;
+        late ScrobbleOptions? options;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -104,11 +105,10 @@ void main() {
               body: Container(),
               floatingActionButton: Builder(
                 builder: (context) => FloatingActionButton(
-                  child: Icon(Icons.play_arrow),
+                  child: const Icon(Icons.play_arrow),
                   onPressed: () async {
-                    options =
-                        await ScrobbleFloatingButton.showPlaylistOptionsDialog(
-                            context, [testAlbumDetails1, testAlbumDetails1]);
+                    options = await ScrobbleFloatingButton.showPlaylistOptionsDialog(
+                        context, [testAlbumDetails1, testAlbumDetails1]);
                   },
                 ),
               ),
@@ -132,13 +132,11 @@ void main() {
         await tester.pump(const Duration(seconds: 1));
 
         // drag up to expose all child tiles
-        await tester.drag(
-            find.text(testAlbumDetails1.title).first, const Offset(0, -300));
+        await tester.drag(find.text(testAlbumDetails1.title).first, const Offset(0, -300));
         await tester.pump();
         await tester.pump(const Duration(seconds: 3));
 
-        expect(find.byType(CheckboxListTile),
-            findsNWidgets(testAlbumDetails1.tracks.length));
+        expect(find.byType(CheckboxListTile), findsNWidgets(testAlbumDetails1.tracks.length));
         expect(find.text(testAlbumDetails1.tracks.first.title), findsOneWidget);
 
         await tester.tap(find.text(testAlbumDetails1.tracks[0].title));
@@ -158,21 +156,20 @@ void main() {
         await tester.tap(find.text('When?'));
         await tester.pump(const Duration(seconds: 2)); // faded in
 
-        expect(find.text(ScrobblePlaylistEditor.whenTooltipMessage),
-            findsOneWidget);
+        expect(find.text(ScrobblePlaylistEditor.whenTooltipMessage), findsOneWidget);
 
         // submit
-        await tester.tap(find.byType(FlatButton));
+        await tester.tap(find.byType(TextButton));
         await tester.pump();
         await tester.pump(const Duration(seconds: 1));
 
         expect(
-            options.inclusionMask,
+            options!.inclusionMask,
             equals({
               0: {0: false, 1: true, 2: false}
             }));
 
-        expect(options.offsetInSeconds, equals(0));
+        expect(options!.offsetInSeconds, equals(0));
 
         // reopen options dialog
         await tester.tap(find.byIcon(Icons.play_arrow));
@@ -186,28 +183,23 @@ void main() {
         await tester.pump();
 
         // submit
-        await tester.tap(find.byType(FlatButton));
+        await tester.tap(find.byType(TextButton));
         await tester.pump();
         await tester.pump(const Duration(seconds: 1));
 
-        expect(options.inclusionMask, equals({}));
-        expect(options.offsetInSeconds, equals(60 * 60));
+        expect(options!.inclusionMask, equals({}));
+        expect(options!.offsetInSeconds, equals(60 * 60));
       },
     );
 
-    testWidgets('doesn\'t allow tap if playlist is already scrobbling',
-        (tester) async {
+    testWidgets('doesn\'t allow tap if playlist is already scrobbling', (tester) async {
       when(playlist.isEmpty).thenReturn(false);
       when(playlist.isScrobbling).thenReturn(true);
 
       await tester.pumpWidget(createButton());
 
       expect(find.byIcon(Icons.play_arrow), findsNothing);
-      expect(
-          tester
-              .widget<FloatingActionButton>(find.byType(FloatingActionButton))
-              .onPressed,
-          isNull);
+      expect(tester.widget<FloatingActionButton>(find.byType(FloatingActionButton)).onPressed, isNull);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       await tester.tap(find.byType(FloatingActionButton));
@@ -233,28 +225,38 @@ void main() {
     });
 
     testWidgets('tries to ask for review after scrobbling', (tester) async {
+      final review = createMockAppReview();
+      ReviewRequester.appReview = review;
       when(playlist.isEmpty).thenReturn(false);
-      when(playlist.scrobble(any, any, any))
-          .thenAnswer((_) => Stream.fromIterable([1]));
+      when(playlist.scrobble(any, any, any)).thenAnswer((_) => Stream.fromIterable([1]));
 
       await tester.pumpWidget(createButton());
 
       await tester.tap(find.byIcon(Icons.play_arrow));
       await tester.pump();
 
-      expect(find.text('Rate this app'), findsOneWidget);
+      verify(review.requestReview());
+    });
+
+    testWidgets('does not ask for review after failed scrobbling', (tester) async {
+      final review = createMockAppReview();
+      ReviewRequester.appReview = review;
+      when(playlist.isEmpty).thenReturn(false);
+      when(playlist.scrobble(any, any, any)).thenAnswer((_) => Stream.fromIterable([0]));
+
+      await tester.pumpWidget(createButton());
+
+      await tester.tap(find.byIcon(Icons.play_arrow));
+      await tester.pump();
+
+      verifyNever(review.requestReview());
     });
 
     testWidgets('catches and ignore errors when trying to ask for review', (tester) async {
-      final review = ReviewRequester(); // not initialized
-      expect(() => review.askForReview(null), returnsNormally); // doesn't throw
+      final review = createMockAppReview();
+      ReviewRequester.appReview = review;
+      when(review.requestReview()).thenThrow(Exception('boom'));
+      expect(ReviewRequester.instance.tryToAskForAppReview, returnsNormally); // doesn't throw
     });
   });
 }
-
-// Mock classes
-class MockCollection extends Mock implements Collection {}
-
-class MockScrobbler extends Mock implements Scrobbler {}
-
-class MockPlaylist extends Mock implements Playlist {}

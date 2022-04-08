@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons screenshots clean
+.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons screenshots mocks clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
 ASSETS = $(wildcard assets/**)
@@ -45,9 +45,8 @@ ios: test
 appStoreRelease: test
 	cd ios && fastlane release
 
-# no-shrink to workaround https://github.com/flutter/flutter/issues/47635
 android: test
-	flutter build appbundle --release --no-shrink
+	flutter build appbundle --release
 
 playStoreRelease: android
 	cd android && fastlane release
@@ -56,6 +55,9 @@ screenshots:
 	screenshots \
 	&& cd ios/fastlane/screenshots/en-US \
 	&& fastlane frameit
+
+mocks:
+	flutter pub run build_runner build
 
 clean:
 	flutter clean

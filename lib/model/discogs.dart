@@ -17,22 +17,22 @@ abstract class Album {
 
   String get title;
 
-  String get thumbUrl;
+  String? get thumbUrl;
 }
 
 String _normalizeSearchString(String s) => removeDiacritics(s).toLowerCase();
 
 class CollectionAlbum implements Album {
   CollectionAlbum(
-      {@required this.id,
-      @required this.releaseId,
-      @required this.artist,
-      @required this.title,
-      @required this.formats,
-      @required this.year,
-      @required this.thumbUrl,
-      @required this.rating,
-      @required this.dateAdded})
+      {required this.id,
+      required this.releaseId,
+      required this.artist,
+      required this.title,
+      required this.formats,
+      required this.year,
+      required this.thumbUrl,
+      required this.rating,
+      required this.dateAdded})
       : searchString = _normalizeSearchString('$artist $title');
 
   factory CollectionAlbum.fromJson(Map<String, dynamic> json) {
@@ -40,13 +40,13 @@ class CollectionAlbum implements Album {
     return CollectionAlbum(
       id: json['instance_id'] as int,
       releaseId: json['id'] as int,
-      artist: _oneNameForArtists(info['artists'] as List<dynamic>),
+      artist: _oneNameForArtists(info['artists'] as List<dynamic>?),
       title: info['title'] as String,
-      formats: (info['formats'] as List<dynamic>)?.map((format) => AlbumFormat.fromJson(format))?.toList() ?? [],
+      formats: (info['formats'] as List<dynamic>?)?.map((format) => AlbumFormat.fromJson(format)).toList() ?? [],
       year: info['year'] as int,
-      thumbUrl: info['thumb'] as String,
-      rating: json['rating'] as int,
-      dateAdded: json['date_added'] as String,
+      thumbUrl: info['thumb'] as String?,
+      rating: json['rating'] as int?,
+      dateAdded: json['date_added'] as String?,
     );
   }
 
@@ -58,14 +58,14 @@ class CollectionAlbum implements Album {
   @override
   final String title;
   @override
-  final String thumbUrl;
+  final String? thumbUrl;
   final List<AlbumFormat> formats;
   final int year;
-  final int rating;
-  final String dateAdded;
+  final int? rating;
+  final String? dateAdded;
   final String searchString;
 
-  CollectionAlbum copyWith({@required int id}) {
+  CollectionAlbum copyWith({required int id}) {
     return CollectionAlbum(
       id: id,
       releaseId: releaseId,
@@ -81,21 +81,21 @@ class CollectionAlbum implements Album {
 }
 
 class AlbumFormat {
-  AlbumFormat({this.name, this.extraText, this.descriptions, this.quantity});
+  AlbumFormat({required this.name, this.extraText, this.descriptions, required this.quantity});
 
   factory AlbumFormat.fromJson(Map<String, dynamic> json) {
     return AlbumFormat(
       name: json['name'],
       extraText: json['text'],
       descriptions:
-          (json['descriptions'] as List<dynamic>)?.map((description) => description as String)?.toList() ?? [],
+          (json['descriptions'] as List<dynamic>?)?.map((description) => description as String).toList() ?? [],
       quantity: int.tryParse(json['qty']) ?? 1,
     );
   }
 
   final String name;
-  final String extraText;
-  final List<String> descriptions;
+  final String? extraText;
+  final List<String>? descriptions;
   final int quantity;
 
   @override
@@ -105,7 +105,7 @@ class AlbumFormat {
       string += ' $extraText';
     }
     if (descriptions?.isNotEmpty ?? false) {
-      string += ' (${descriptions.join(', ')})';
+      string += ' (${descriptions!.join(', ')})';
     }
     return string;
   }
@@ -113,19 +113,19 @@ class AlbumFormat {
 
 class AlbumDetails implements Album {
   AlbumDetails({
-    this.releaseId,
-    @required this.artist,
-    @required this.title,
-    @required this.thumbUrl,
-    @required this.tracks,
+    required this.releaseId,
+    required this.artist,
+    required this.title,
+    required this.thumbUrl,
+    required this.tracks,
   });
 
   factory AlbumDetails.fromJson(Map<String, dynamic> json) {
     return AlbumDetails(
       releaseId: json['id'] as int,
-      artist: _oneNameForArtists(json['artists'] as List<dynamic>),
+      artist: _oneNameForArtists(json['artists'] as List<dynamic>?),
       title: json['title'] as String,
-      thumbUrl: json['thumb'] as String,
+      thumbUrl: json['thumb'] as String?,
       tracks: (json['tracklist'] as List<dynamic>)
           .where((track) => track['type_'] != 'heading')
           .map<AlbumTrack>((track) => AlbumTrack.fromJson(track))
@@ -140,13 +140,13 @@ class AlbumDetails implements Album {
   @override
   final String title;
   @override
-  final String thumbUrl;
+  final String? thumbUrl;
   final List<AlbumTrack> tracks;
 }
 
 class AlbumTrack {
   AlbumTrack({
-    @required this.title,
+    required this.title,
     this.position,
     this.duration,
     this.artist,
@@ -156,19 +156,19 @@ class AlbumTrack {
   factory AlbumTrack.fromJson(Map<String, dynamic> json) {
     return AlbumTrack(
       title: json['title'] as String,
-      position: json['position'] as String,
-      duration: json['duration'] as String,
-      artist: _oneNameForArtists(json['artists'] as List<dynamic>),
+      position: json['position'] as String?,
+      duration: json['duration'] as String?,
+      artist: _oneNameForArtists(json['artists'] as List<dynamic>?),
       subTracks:
-          (json['sub_tracks'] as List<dynamic>)?.map<AlbumTrack>((subTrack) => AlbumTrack.fromJson(subTrack))?.toList(),
+          (json['sub_tracks'] as List<dynamic>?)?.map<AlbumTrack>((subTrack) => AlbumTrack.fromJson(subTrack)).toList(),
     );
   }
 
   final String title;
-  final String position;
-  final String duration;
-  final String artist;
-  final List<AlbumTrack> subTracks;
+  final String? position;
+  final String? duration;
+  final String? artist;
+  final List<AlbumTrack>? subTracks;
 }
 
 class Collection extends ChangeNotifier {
@@ -189,14 +189,14 @@ class Collection extends ChangeNotifier {
 
   final String userAgent;
 
-  String _username;
+  String? _username;
   final List<CollectionAlbum> _albumList = <CollectionAlbum>[];
 
   final _Progress _progress = _Progress();
 
   int _nextPage = 1;
-  int _totalItems;
-  int _totalPages;
+  int _totalItems = 0;
+  int _totalPages = 0;
 
   ValueNotifier<LoadingStatus> get loadingNotifier => _progress.statusNotifier;
 
@@ -206,7 +206,7 @@ class Collection extends ChangeNotifier {
 
   bool get hasLoadingError => _progress.status == LoadingStatus.error;
 
-  String get errorMessage => _progress.errorMessage;
+  String? get errorMessage => _progress.errorMessage;
 
   bool get isEmpty => _albumList.isEmpty;
 
@@ -224,7 +224,7 @@ class Collection extends ChangeNotifier {
 
   int get nextPage => _nextPage;
 
-  bool get hasMorePages => _totalPages != null && _nextPage <= _totalPages;
+  bool get hasMorePages => _nextPage <= _totalPages;
 
   List<CollectionAlbum> get albums => _albumList;
 
@@ -236,8 +236,8 @@ class Collection extends ChangeNotifier {
   void _reset() {
     _albumList.clear();
     _nextPage = 1;
-    _totalItems = null;
-    _totalPages = null;
+    _totalItems = 0;
+    _totalPages = 0;
     log.fine('Reset collection.');
     notifyListeners();
   }
@@ -254,7 +254,7 @@ class Collection extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateUsername(String newUsername) async {
+  Future<void> updateUsername(String? newUsername) async {
     if (newUsername == null || newUsername.isEmpty) {
       log.warning('Cannot update username because the new username is empty.');
       return;
@@ -339,7 +339,7 @@ class Collection extends ChangeNotifier {
     if (_username == null) {
       throw UIException('Cannot load albums because the username is empty.');
     }
-    if (_totalPages == null) {
+    if (_totalPages == 0) {
       throw UIException('Cannot load all remaining albums before loading the first page.');
     }
 
@@ -392,7 +392,7 @@ class Collection extends ChangeNotifier {
 
   Future<Map<String, dynamic>> _get(String apiPath) async {
     final url = 'https://api.discogs.com$apiPath';
-    String content;
+    late String content;
 
     try {
       content = (await cache.getSingleFile(url, headers: _headers)).readAsStringSync();
@@ -419,7 +419,7 @@ class Collection extends ChangeNotifier {
       content = response.body;
     }
 
-    return json.decode(content) as Map<String, dynamic>;
+    return json.decode(content);
   }
 
   static const int _pageSize = 99;
@@ -431,7 +431,7 @@ enum LoadingStatus { neverLoaded, loading, finished, error }
 
 class _Progress {
   final ValueNotifier<LoadingStatus> statusNotifier = ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
-  String errorMessage;
+  String? errorMessage;
 
   LoadingStatus get status => statusNotifier.value;
 
@@ -451,12 +451,12 @@ class _Progress {
   }
 }
 
-String _oneNameForArtists(List<dynamic> artists) {
+String _oneNameForArtists(List<dynamic>? artists) {
   if (artists?.isEmpty ?? true) {
-    return null;
+    return '(unknown)';
   }
-  return (artists[0]['name'] as String).replaceAllMapped(
+  return (artists![0]['name'] as String).replaceAllMapped(
     RegExp(r'^(.+) \([0-9]+\)$'),
-    (m) => m[1],
+    (m) => m[1]!,
   );
 }

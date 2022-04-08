@@ -69,16 +69,13 @@ class CollectionLoadingStatus extends StatelessWidget {
             height: 80,
             child: Center(
               child: collection.isLoading
-                  ? CircularProgressIndicator(
-                      backgroundColor: Theme.of(context).primaryColor)
+                  ? CircularProgressIndicator(backgroundColor: Theme.of(context).primaryColor)
                   : collection.isNotEmpty && collection.totalItems > 9
                       ? Text(
                           collection.isNotFullyLoaded
                               ? 'Showing ${collection.albums.length} of ${collection.totalItems} albums'
                               : '\u2014 and that is ${collection.totalItems} albums.',
-                          style: TextStyle(
-                              color: Theme.of(context).hintColor,
-                              fontStyle: FontStyle.italic),
+                          style: TextStyle(color: Theme.of(context).hintColor, fontStyle: FontStyle.italic),
                         )
                       : Container(),
             ),

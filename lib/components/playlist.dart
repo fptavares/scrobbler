@@ -45,14 +45,13 @@ class PlaylistPage extends StatelessWidget {
   @visibleForTesting
   static const emptyHeadlineMessage = 'The sound of silence';
   @visibleForTesting
-  static const emptySubheadMessage =
-      'There is nothing in your playlist at the moment';
+  static const emptySubheadMessage = 'There is nothing in your playlist at the moment';
 }
 
 class _PlaylistList extends StatelessWidget {
   const _PlaylistList({
-    Key key,
-    @required this.playlist,
+    Key? key,
+    required this.playlist,
   }) : super(key: key);
 
   final Playlist playlist;
@@ -71,7 +70,7 @@ class _PlaylistList extends StatelessWidget {
           onDismissed: (_) => playlist.removeAlbum(item.album),
           background: Container(
             color: Colors.red,
-            child: Icon(Icons.delete),
+            child: const Icon(Icons.delete),
           ),
           child: ListTile(
             leading: CachedAlbumImage(item.album),
@@ -95,8 +94,8 @@ class _PlaylistList extends StatelessWidget {
 
 class PlaylistCountIndicator extends StatelessWidget {
   const PlaylistCountIndicator({
-    Key key,
-    @required this.item,
+    Key? key,
+    required this.item,
   }) : super(key: key);
 
   final PlaylistItem item;
@@ -107,14 +106,14 @@ class PlaylistCountIndicator extends StatelessWidget {
       value: item,
       child: ClipOval(
         child: Container(
-          color: Theme.of(context).accentColor, //Color(0xFFCF5C36),
+          color: Theme.of(context).colorScheme.secondary, //Color(0xFFCF5C36),
           height: 32.0, // height of the button
           width: 32.0, // width of the button
           child: Center(
             child: Consumer<int>(
               builder: (_, count, __) => Text(
                 count.toString(),
-                style: TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
           ),

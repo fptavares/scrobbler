@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../model/analytics.dart';
 import '../model/discogs.dart';
@@ -13,7 +13,7 @@ import 'scrobble.dart';
 import 'search.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   final Logger log = Logger('HomePage');
 
@@ -38,14 +38,14 @@ class HomePage extends StatelessWidget {
         child: ValueListenableProvider<LoadingStatus>.value(
           value: collection.loadingNotifier,
           child: RefreshIndicator(
+            //backgroundColor: Theme.of(context).colorScheme.secondary,
             onRefresh: () {
               if (collection.isLoading) {
                 return Future.value(null);
               }
               analytics.logPullToRefresh();
 
-              return handleFutureError(
-                  collection.reload(emptyCache: true), context, log,
+              return handleFutureError(collection.reload(emptyCache: true), context, log,
                   error: 'Failed to reload collection!', trace: 'reload');
             },
             child: const HomeBody(),
@@ -93,7 +93,7 @@ class HomeAppBar extends StatelessWidget {
           StretchMode.fadeTitle,
         ],
         title: GestureDetector(
-          onTap: () => PrimaryScrollController.of(context)
+          onTap: () => PrimaryScrollController.of(context)!
               .animateTo(
                 0,
                 duration: const Duration(milliseconds: 500),
@@ -106,8 +106,8 @@ class HomeAppBar extends StatelessWidget {
               builder: (_, status, __) => SvgPicture.asset(
                 'assets/logo.svg',
                 color: status == LoadingStatus.loading
-                    ? Theme.of(context).accentColor.withAlpha(128)
-                    : Theme.of(context).accentColor,
+                    ? Theme.of(context).colorScheme.secondary.withAlpha(128)
+                    : Theme.of(context).colorScheme.secondary,
                 width: 38,
                 excludeFromSemantics: true,
               ),
@@ -124,7 +124,7 @@ class HomeAppBar extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Expanded(
                   flex: 1,
                   child: Text('scrobbler.',
@@ -135,8 +135,8 @@ class HomeAppBar extends StatelessWidget {
                         fontSize: 24.0,
                       )),
                 ),
-                const SizedBox(width: 70),
-                const Expanded(
+                SizedBox(width: 70),
+                Expanded(
                   flex: 1,
                   child: Text(''),
                 ),
@@ -150,9 +150,7 @@ class HomeAppBar extends StatelessWidget {
           builder: (context, playlist, _) => IconButton(
             icon: const Icon(Icons.playlist_play),
             tooltip: 'Playlist',
-            onPressed: playlist.isNotEmpty
-                ? () => Navigator.pushNamed(context, '/playlist')
-                : null,
+            onPressed: playlist.isNotEmpty ? () => Navigator.pushNamed(context, '/playlist') : null,
           ),
         ),
         Consumer<Collection>(

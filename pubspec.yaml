@@ -14,41 +14,38 @@ description: The Record Scrobbler Flutter application.
 version: 1.3.3+14
 
 environment:
-  sdk: ">=2.3.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  flutter:
-    sdk: flutter
-  crypto: ^3.0.1
-  http: ^0.13.4
-  provider: ^6.0.2
-  flutter_svg: ^1.0.3
-  shared_preferences: ^2.0.13
-  package_info: ^2.0.2
-  logging: ^1.0.2
   cached_network_image: ^3.2.0
-  flutter_cache_manager: ^3.3.0
+  crypto: ^3.0.1
   diacritic: ^0.1.1
-  rate_my_app: ^1.1.2
-  firebase_core: ^1.13.1
   firebase_analytics: ^9.1.2
+  firebase_core: ^1.13.1
   firebase_crashlytics: ^2.5.3
   firebase_performance: ^0.8.0+7
+  flutter:
+    sdk: flutter
+  flutter_cache_manager: ^3.3.0
+  flutter_svg: ^1.0.3
+  http: ^0.13.4
+  in_app_review: ^2.0.4
+  logging: ^1.0.2
+  package_info: ^2.0.2
+  provider: ^6.0.2
+  shared_preferences: ^2.0.13
 
 dev_dependencies:
-  test:
-  mockito: ^5.1.0
   build_runner: ^2.1.8
+  effective_dart:
+  flutter_launcher_icons:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_launcher_icons:
-  effective_dart:
+  mockito: ^5.1.0
   #screenshots:
-  #path_provider_platform_interface: ^1.0.1
-  #plugin_platform_interface: ^1.0.2
-  #file: ^5.1.0
+  test:
 
 flutter_icons:
   android: true

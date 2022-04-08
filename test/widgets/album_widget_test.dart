@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -12,21 +13,25 @@ import 'package:scrobbler/components/album.dart';
 import 'package:scrobbler/components/playlist.dart';
 import 'package:scrobbler/model/playlist.dart';
 
+import '../mocks/cache_mocks.dart';
 import '../test_albums.dart';
 
 Future<void> main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  // create image file on in-memory file system for testing
-  final data = await rootBundle.load('assets/record_sleeve.png');
-  final tempDir = await MemoryFileSystem().systemTempDirectory.createTemp('images');
-  final testImageFile = tempDir.childFile('test.png');
-  testImageFile.writeAsBytesSync(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+  late final File testImageFile;
 
   group('Album button', () {
+    setUpAll(() async {
+      // create image file on in-memory file system for testing
+      final data = await rootBundle.load('assets/record_sleeve.png');
+      final tempDir = await MemoryFileSystem().systemTempDirectory.createTemp('images');
+      testImageFile = tempDir.childFile('test.png');
+      testImageFile.writeAsBytesSync(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+    });
+
     Future<Playlist> pumpAlbumButton(WidgetTester tester, {bool imageFound = true}) async {
       // create mock cache manager
-      final cache = MockCacheManager();
+      final cache = createMockCacheManager();
 
       if (imageFound) {
         when(cache.getFileStream(any,
@@ -36,10 +41,11 @@ Future<void> main() async {
       } else {
         when(cache.getFileStream(any,
                 key: anyNamed('key'), headers: anyNamed('headers'), withProgress: anyNamed('withProgress')))
-            .thenAnswer((_) => Stream.error(const HttpExceptionWithStatus(404, '')));
+            .thenAnswer((_) => Stream.error(const HttpException('404')));
       }
 
       final playlist = Playlist();
+
       // Build our app and trigger a frame.
       await tester.pumpWidget(MaterialApp(
         home: ChangeNotifierProvider<Playlist>.value(
@@ -47,8 +53,24 @@ Future<void> main() async {
           child: AlbumButton(testAlbum1, cacheManager: cache),
         ),
       ));
+
       return playlist;
     }
+
+    testWidgets('shows a default image if the album cover cannot be found', (tester) async {
+      await pumpAlbumButton(tester, imageFound: false);
+
+      // first shows progress indicator
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.pump();
+
+      // then loads and displays default image
+      expect(find.byKey(ValueKey<int>(testAlbum1.id)), findsOneWidget);
+      expect(find.byType(DefaultAlbumImage), findsOneWidget);
+      // and album data is rendered on top
+      expect(find.text(testAlbum1.artist), findsOneWidget);
+      expect(find.text(testAlbum1.title), findsOneWidget);
+    });
 
     testWidgets('renders properly', (tester) async {
       await pumpAlbumButton(tester);
@@ -87,7 +109,7 @@ Future<void> main() async {
       await tester.pump();
       // Expect playlist to still have one item
       expect(playlist.numberOfItems, equals(1));
-      expect(playlist.getPlaylistItem(testAlbum1).count, equals(2));
+      expect(playlist.getPlaylistItem(testAlbum1)!.count, equals(2));
       // Expect to find the indicator on screen
       expect(find.byType(Text), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
@@ -117,24 +139,5 @@ Future<void> main() async {
       expect(find.byType(PlaylistCountIndicator), findsNothing);
       expect(find.byType(Text), findsNothing);
     });
-
-    testWidgets('shows a default image if the album cover cannot be found', (tester) async {
-      await pumpAlbumButton(tester, imageFound: false);
-
-      // first shows progress indicator
-      //expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      //expect(find.byType(Image), findsNothing);
-      await tester.pump(const Duration(seconds: 5));
-      await tester.pump();
-
-      // then loads and displays default image
-      expect(find.byKey(ValueKey<int>(testAlbum1.id)), findsOneWidget);
-      expect(find.byType(Image), findsOneWidget);
-      // and album data is rendered on top
-      expect(find.text(testAlbum1.artist), findsOneWidget);
-      expect(find.text(testAlbum1.title), findsOneWidget);
-    });
   });
 }
-
-class MockCacheManager extends Mock implements CacheManager {}

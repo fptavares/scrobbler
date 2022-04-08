@@ -9,7 +9,6 @@ import 'package:logging/logging.dart';
 
 import '../components/error.dart';
 import '../secrets.dart';
-import 'analytics.dart';
 import 'discogs.dart';
 
 class Scrobbler {
@@ -22,11 +21,11 @@ class Scrobbler {
   @visibleForTesting
   http.Client httpClient = http.Client();
 
-  String _sessionKey;
+  String? _sessionKey;
 
   bool get isNotAuthenticated => _sessionKey == null;
 
-  void updateSessionKey(String value) {
+  void updateSessionKey(String? value) {
     _sessionKey = value;
     log.info('Updated session key to: $value');
   }
@@ -47,7 +46,7 @@ class Scrobbler {
         _sessionKey = jsonResponse['session']['key'] as String;
         log.info('Received new Last.fm session key: $_sessionKey');
 
-        return _sessionKey;
+        return _sessionKey!;
       } else {
         log.info('Error response (${response.statusCode}): ${response.body}');
         // If that response was not OK, throw an error.
@@ -63,7 +62,7 @@ class Scrobbler {
     }
   }
 
-  Stream<int> scrobbleAlbums(List<AlbumDetails> albums, [ScrobbleOptions options]) async* {
+  Stream<int> scrobbleAlbums(List<AlbumDetails> albums, [ScrobbleOptions? options]) async* {
     if (_sessionKey == null) {
       throw UIException('Oops! You need to login to Last.fm first with your username and password.');
     }
@@ -77,7 +76,7 @@ class Scrobbler {
     }
   }
 
-  ScrobbleQueue _createScrobbleQueue(List<AlbumDetails> albums, ScrobbleOptions options) {
+  ScrobbleQueue _createScrobbleQueue(List<AlbumDetails> albums, ScrobbleOptions? options) {
     // set default values if options are null
     options ??= const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: 0);
 
@@ -96,7 +95,7 @@ class Scrobbler {
         }
 
         if (track.subTracks?.isNotEmpty ?? false) {
-          for (final subTrack in track.subTracks.reversed) {
+          for (final subTrack in track.subTracks!.reversed) {
             queue.add(subTrack, album);
           }
         } else {
@@ -112,12 +111,12 @@ class Scrobbler {
       return 0;
     }
     log.info('Posting ${scrobbles.length} tracks to Last.fm...');
-    http.Response response;
+    http.Response? response;
     try {
       response = await _postRequest(<String, String>{
         'method': 'track.scrobble',
         'api_key': _apiKey,
-        'sk': _sessionKey,
+        'sk': _sessionKey!,
         ...scrobbles.reduce((v, e) => <String, String>{...v, ...e}),
       });
 
@@ -140,9 +139,9 @@ class Scrobbler {
     } on SocketException catch (e) {
       throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
     } on FormatException catch (e, stackTrace) {
-      log.severe('Failed to parse the Last.fm response: ${response.body}', e, stackTrace);
+      log.severe('Failed to parse the Last.fm response: ${response!.body}', e, stackTrace);
 
-      if (response?.statusCode == 200) {
+      if (response.statusCode == 200) {
         // assume full success in case accepted can't be parsed
         return scrobbles.length;
       } else {
@@ -182,7 +181,7 @@ class ScrobbleQueue {
 
   void add(AlbumTrack track, AlbumDetails album) {
     final splitDuration =
-        (track.duration?.isNotEmpty ?? false) ? track.duration?.split(':')?.map<int>(int.parse) : <int>[1, 0];
+        ((track.duration?.isNotEmpty ?? false) ? track.duration?.split(':').map<int>(int.parse) : <int>[1, 0])!;
     final durationInSeconds = splitDuration.reduce((v, e) => v * 60 + e);
 
     timestamp -= durationInSeconds;
@@ -194,7 +193,7 @@ class ScrobbleQueue {
     }
 
     batches.last.add(<String, String>{
-      'artist[$index]': track.artist ?? album.artist ?? '(unknown)',
+      'artist[$index]': track.artist ?? album.artist,
       'track[$index]': track.title,
       'album[$index]': album.title,
       'timestamp[$index]': timestamp.toString(),
@@ -203,8 +202,8 @@ class ScrobbleQueue {
 }
 
 class ScrobbleOptions {
-  const ScrobbleOptions({@required this.inclusionMask, @required this.offsetInSeconds});
+  const ScrobbleOptions({required this.inclusionMask, required this.offsetInSeconds});
 
-  final Map<int, Map<int, bool>> inclusionMask;
+  final Map<int, Map<int, bool?>> inclusionMask;
   final int offsetInSeconds;
 }

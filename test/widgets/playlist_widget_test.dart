@@ -9,7 +9,7 @@ import '../test_albums.dart';
 
 void main() {
   group('Playlist page', () {
-    Playlist playlist;
+    late Playlist playlist;
 
     Widget createPlaylist() {
       return ChangeNotifierProvider<Playlist>.value(
@@ -84,8 +84,7 @@ void main() {
       await tester.pumpWidget(createPlaylist());
 
       final lastItemCount = find.byType(PlaylistCountIndicator).last;
-      Finder lastItemCountWith(int count) =>
-          find.descendant(of: lastItemCount, matching: find.text('$count'));
+      Finder lastItemCountWith(int count) => find.descendant(of: lastItemCount, matching: find.text('$count'));
 
       expect(lastItemCountWith(2), findsOneWidget);
 
@@ -170,8 +169,7 @@ void main() {
       expect(playlist.numberOfItems, equals(2));
 
       final firstItemCount = find.byType(PlaylistCountIndicator).first;
-      Finder firstItemCountWith(int count) =>
-          find.descendant(of: firstItemCount, matching: find.text('$count'));
+      Finder firstItemCountWith(int count) => find.descendant(of: firstItemCount, matching: find.text('$count'));
 
       expect(firstItemCountWith(1), findsOneWidget);
 

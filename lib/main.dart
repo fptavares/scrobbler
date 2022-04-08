@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info/package_info.dart';
@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'components/home.dart';
 import 'components/onboarding.dart';
 import 'components/playlist.dart';
-import 'components/rating.dart';
 import 'firebase_options.dart';
 import 'model/analytics.dart';
 import 'model/discogs.dart';
@@ -30,15 +29,17 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    // Pass all uncaught errors from the framework to Crashlytics.
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-    Isolate.current.addErrorListener(RawReceivePort((pair) async {
-      final List<dynamic> errorAndStacktrace = pair;
-      await FirebaseCrashlytics.instance.recordError(
-        errorAndStacktrace.first,
-        errorAndStacktrace.last,
-      );
-    }).sendPort);
+    if (!kIsWeb) {
+      // Pass all uncaught errors from the framework to Crashlytics.
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+      Isolate.current.addErrorListener(RawReceivePort((pair) async {
+        final List<dynamic> errorAndStacktrace = pair;
+        await FirebaseCrashlytics.instance.recordError(
+          errorAndStacktrace.first,
+          errorAndStacktrace.last,
+        );
+      }).sendPort);
+    }
 
     // initialize logger
     const isProduction = bool.fromEnvironment('dart.vm.product');
@@ -83,12 +84,12 @@ Future<void> main() async {
     final prefs = await SharedPreferences.getInstance();
 
     // run app
-    runApp(MyApp(prefs, userAgent));
+    runApp(ScrobblerApp(prefs, userAgent));
   }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp(this.prefs, this.userAgent);
+class ScrobblerApp extends StatelessWidget {
+  const ScrobblerApp(this.prefs, this.userAgent);
 
   final SharedPreferences prefs;
   final String userAgent;
@@ -96,6 +97,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     analytics.logAppOpen();
+
+    final theme = ThemeData();
+
+    const primaryColor = Color(0xFF2a241a);
+    const secondaryColor = Colors.amber;
+    const disabledColor = Colors.white30;
 
     return MultiProvider(
       providers: [
@@ -105,30 +112,34 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<LastfmSettings>(
           create: (_) => LastfmSettings(prefs),
         ),
-        ChangeNotifierProxyProvider<DiscogsSettings, Collection>(
+        ChangeNotifierProxyProvider<DiscogsSettings, Collection?>(
             create: (_) => Collection(userAgent),
             update: (_, settings, collection) => collection
-              ..updateUsername(settings.username).catchError(
+              ?..updateUsername(settings.username).catchError(
                   (e, stackTrace) => Logger.root.warning('Exception while updating username.', e, stackTrace))),
-        ProxyProvider<LastfmSettings, Scrobbler>(
+        ProxyProvider<LastfmSettings, Scrobbler?>(
           lazy: false,
           create: (_) => Scrobbler(userAgent),
-          update: (_, settings, scrobbler) => scrobbler..updateSessionKey(settings.sessionKey),
+          update: (_, settings, scrobbler) => scrobbler?..updateSessionKey(settings.sessionKey),
         ),
         ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
-        Provider<ReviewRequester>(
-          lazy: false,
-          create: (_) => ReviewRequester()..init(),
-        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Record Scrobbler',
-        theme: ThemeData(
-          primarySwatch: Colors.amber,
-          primaryColor: const Color(0xFF2a241a),
-          disabledColor: Colors.white30,
-        ),
+        theme: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: primaryColor,
+              secondary: secondaryColor,
+            ),
+            primaryColor: primaryColor,
+            disabledColor: disabledColor,
+            progressIndicatorTheme: const ProgressIndicatorThemeData(
+              circularTrackColor: primaryColor,
+              color: secondaryColor,
+              linearTrackColor: disabledColor,
+              refreshBackgroundColor: secondaryColor,
+            )),
         home: StartPage(),
         routes: <String, WidgetBuilder>{
           '/playlist': (_) => PlaylistPage(),

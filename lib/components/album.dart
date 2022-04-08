@@ -8,10 +8,10 @@ import '../model/playlist.dart';
 import 'playlist.dart';
 
 class AlbumButton extends StatelessWidget {
-  const AlbumButton(this.album, {Key key, this.cacheManager}) : super(key: key);
+  const AlbumButton(this.album, {Key? key, this.cacheManager}) : super(key: key);
 
   final CollectionAlbum album;
-  final CacheManager cacheManager;
+  final CacheManager? cacheManager;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class AlbumButton extends StatelessWidget {
                 message: '${album.title} by ${album.artist}',
                 child: Stack(
                   children: <Widget>[
-                    image,
+                    image!,
                     if (item != null && item.count > 0)
                       Positioned(
                         top: 3.0,
@@ -52,15 +52,22 @@ class AlbumButton extends StatelessWidget {
 }
 
 class CachedAlbumImage extends StatelessWidget {
-  const CachedAlbumImage(this.album, {Key key, this.cacheManager}) : super(key: key);
+  const CachedAlbumImage(this.album, {Key? key, this.cacheManager}) : super(key: key);
 
   final Album album;
-  final CacheManager cacheManager;
+  final CacheManager? cacheManager;
 
   @override
   Widget build(BuildContext context) {
+    if (album.thumbUrl?.isEmpty ?? true) {
+      return DefaultAlbumImage(
+        decoration: _shadowDecoration,
+        album: album,
+      );
+    }
+
     return CachedNetworkImage(
-      imageUrl: album.thumbUrl,
+      imageUrl: album.thumbUrl ?? '',
       imageBuilder: (context, image) => AlbumImage(
         decoration: _shadowDecoration,
         image: image,
@@ -99,9 +106,9 @@ class CachedAlbumImage extends StatelessWidget {
 
 class AlbumImage extends StatelessWidget {
   const AlbumImage({
-    Key key,
-    @required this.decoration,
-    @required this.image,
+    Key? key,
+    required this.decoration,
+    required this.image,
   }) : super(key: key);
 
   final Decoration decoration;
@@ -122,9 +129,9 @@ class AlbumImage extends StatelessWidget {
 
 class DefaultAlbumImage extends StatelessWidget {
   const DefaultAlbumImage({
-    Key key,
-    @required this.decoration,
-    @required this.album,
+    Key? key,
+    required this.decoration,
+    required this.album,
   }) : super(key: key);
 
   final BoxDecoration decoration;

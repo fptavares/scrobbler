@@ -7,21 +7,18 @@ import 'package:scrobbler/components/onboarding.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  SharedPreferences.setMockInitialValues(<String, dynamic>{
-    DiscogsSettings.discogsUsernameKey: null,
-    DiscogsSettings.skippedKey: null,
-    LastfmSettings.lastfmUsernameKey: null,
-    LastfmSettings.sessionKeyKey: null,
-  });
+import '../mocks/firebase_mocks.dart';
 
+void main() {
   final skipButton = find.text('Skip');
   final startButton = find.text('Get started');
 
   group('Onboarding page', () {
-    DiscogsSettings discogsSettings;
+    late DiscogsSettings discogsSettings;
 
     Future<Widget> createOnboarding() async {
+      replaceFirebaseWithMocks();
+      SharedPreferences.setMockInitialValues(<String, Object>{});
       final prefs = await SharedPreferences.getInstance();
       discogsSettings = DiscogsSettings(prefs);
       final lastfmSettings = LastfmSettings(prefs);

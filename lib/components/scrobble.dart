@@ -12,7 +12,7 @@ import 'rating.dart';
 
 class ScrobbleFloatingButton extends StatelessWidget {
   ScrobbleFloatingButton({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final Logger log = Logger('ScrobbleFloatingButton');
@@ -29,33 +29,37 @@ class ScrobbleFloatingButton extends StatelessWidget {
       onPressed: playlist.isScrobbling ? null : () => handleScrobble(context, playlist),
       tooltip: 'Scrobble',
       backgroundColor: playlist.isScrobbling ? Theme.of(context).primaryColor : null,
+      foregroundColor: Theme.of(context).primaryColor,
       child: playlist.isScrobblingPaused
           ? Container()
           : playlist.isScrobbling
               ? const CircularProgressIndicator()
-              : Icon(Icons.play_arrow),
+              : const Icon(Icons.play_arrow),
     );
   }
 
   Future<void> handleScrobble(BuildContext context, Playlist playlist) async {
     final scrobbler = Provider.of<Scrobbler>(context, listen: false);
     final collection = Provider.of<Collection>(context, listen: false);
-    final review = Provider.of<ReviewRequester>(context, listen: false);
 
     analytics.logScrobbleOptionsOpen(numberOfAlbums: playlist.numberOfItems, maxCount: playlist.maxItemCount());
 
     try {
+      var successful = false;
       await for (int accepted
           in playlist.scrobble(scrobbler, collection, (albums) => showPlaylistOptionsDialog(context, albums))) {
         displaySuccess(context, 'Scrobbled $accepted tracks successfuly.');
+        successful |= accepted > 0;
       }
-      review.askForReview(context);
+      if (successful) {
+        ReviewRequester.instance.tryToAskForAppReview();
+      }
     } on Exception catch (e, stackTrace) {
       displayAndLogError(context, log, e, stackTrace);
     }
   }
 
-  static Future<ScrobbleOptions> showPlaylistOptionsDialog(BuildContext context, List<AlbumDetails> albums) async {
+  static Future<ScrobbleOptions?> showPlaylistOptionsDialog(BuildContext context, List<AlbumDetails> albums) async {
     return showModalBottomSheet<ScrobbleOptions>(
       context: context,
       isScrollControlled: true,
@@ -83,9 +87,9 @@ class ScrobbleFloatingButton extends StatelessWidget {
 
 class ScrobblePlaylistEditor extends StatefulWidget {
   const ScrobblePlaylistEditor({
-    Key key,
-    @required this.albums,
-    @required this.scrollController,
+    Key? key,
+    required this.albums,
+    required this.scrollController,
   }) : super(key: key);
 
   final List<AlbumDetails> albums;
@@ -99,7 +103,7 @@ class ScrobblePlaylistEditor extends StatefulWidget {
 }
 
 class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
-  final Map<int, Map<int, bool>> _includeMask = {};
+  final Map<int, Map<int, bool?>> _includeMask = {};
   int _timeOffsetIndex = 0;
 
   final _whenToolTipKey = GlobalKey();
@@ -108,7 +112,7 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
   Widget build(BuildContext context) {
     final positionStyle = Theme.of(context).textTheme.bodyText2;
     final titleStyle = Theme.of(context).textTheme.bodyText1;
-    final excludedTitleStyle = Theme.of(context).textTheme.bodyText1.copyWith(decoration: TextDecoration.lineThrough);
+    final excludedTitleStyle = Theme.of(context).textTheme.bodyText1!.copyWith(decoration: TextDecoration.lineThrough);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -182,8 +186,10 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
           ),
         ),
         ListTile(
-          title: FlatButton(
-            color: Theme.of(context).accentColor,
+          title: TextButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
+            ),
             child: const Text('Submit'),
             onPressed: () => _handleSubmit(context),
           ),
@@ -210,12 +216,12 @@ class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
   }
 
   int _numberOfExclusions() =>
-      _includeMask.values.fold(0, (acc, albumMask) => acc + albumMask.values.where((included) => !included).length);
+      _includeMask.values.fold(0, (acc, albumMask) => acc + albumMask.values.where((included) => !included!).length);
 
-  void _setMask(int albumIndex, int trackIndex, bool included) {
+  void _setMask(int albumIndex, int trackIndex, bool? included) {
     setState(() {
       _includeMask[albumIndex] ??= {};
-      _includeMask[albumIndex][trackIndex] = included;
+      _includeMask[albumIndex]![trackIndex] = included;
     });
   }
 

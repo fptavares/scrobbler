@@ -4,23 +4,23 @@ import 'package:file/file.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/secrets.dart';
 
-import 'collection_test.mocks.dart';
+import '../mocks/cache_mocks.dart';
 import 'collection_test_data.dart';
 
 const userAgent = 'test user-agent';
 const username = 'test_user';
 
-@GenerateMocks([CacheManager, File, http.Client])
 Future<void> main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Collection collection;
+  late Collection collection;
+  late MockCacheManager cache;
+  final fallbackClient = MockClient();
 
   void initializeCollectionMockCache() {
     final pages = [
@@ -29,34 +29,26 @@ Future<void> main() async {
       jsonForCollectionLastPageWithOneAlbum,
     ];
 
-    final collectionFile = MockFile();
-    when(collectionFile.readAsStringSync()).thenAnswer((_) => pages.removeAt(0));
+    final collectionFile = createMockFile(() => pages.removeAt(0));
+    final albumFile = createMockFile(() => jsonForRelease);
+    final albumWithSubtracksFile = createMockFile(() => jsonForReleaseWithSubtracks);
 
-    final albumFile = MockFile();
-    when(albumFile.readAsStringSync()).thenReturn(jsonForRelease);
-
-    final albumWithSubtracksFile = MockFile();
-    when(albumWithSubtracksFile.readAsStringSync()).thenReturn(jsonForReleaseWithSubtracks);
-
-    final cache = MockCacheManager();
-    when(cache.getSingleFile('https://api.discogs.com/releases/249504', headers: anyNamed('headers')))
-        .thenAnswer((_) => Future<File>.value(albumFile));
-    when(cache.getSingleFile('https://api.discogs.com/releases/1287017', headers: anyNamed('headers')))
-        .thenAnswer((_) => Future<File>.value(albumWithSubtracksFile));
-    when(cache.getSingleFile(argThat(contains('/collection/folders/0/releases')), headers: anyNamed('headers')))
-        .thenAnswer((_) {
-      expect(collection.isLoading, isTrue);
-      expect(collection.isNotLoading, isFalse);
-      return Future<File>.value(collectionFile);
+    cache = createMockCacheManager({
+      equals('https://api.discogs.com/releases/249504'): (_) => Future<File>.value(albumFile),
+      equals('https://api.discogs.com/releases/1287017'): (_) => Future<File>.value(albumWithSubtracksFile),
+      contains('/collection/folders/0/releases'): (_) {
+        expect(collection.isLoading, isTrue);
+        expect(collection.isNotLoading, isFalse);
+        return Future<File>.value(collectionFile);
+      }
     });
-    when(cache.emptyCache()).thenReturn(null);
+    when(cache.emptyCache()).thenAnswer((_) => Future.value(null));
 
     Collection.cache = cache;
-
-    Collection.fallbackClient = MockClient();
+    Collection.fallbackClient = fallbackClient;
   }
 
-  void verifyHeaders(Map<String, String> headers) {
+  void verifyHeaders(Map<String, String>? headers) {
     expect(
         headers,
         allOf([
@@ -70,7 +62,7 @@ Future<void> main() async {
   }
 
   void verifyCollectionRequests(List<int> expectedPageNumbers) {
-    final args = verify(Collection.cache.getSingleFile(captureAny, headers: captureAnyNamed('headers'))).captured;
+    final args = verify(cache.getSingleFile(captureAny, headers: captureAnyNamed('headers'))).captured;
     for (var i = 0; i < expectedPageNumbers.length; i++) {
       expect(
           args[i * 2],
@@ -92,13 +84,13 @@ Future<void> main() async {
   }
 
   void verifyAlbumRequest(int albumId) {
-    final args = verify(Collection.cache.getSingleFile(captureAny, headers: captureAnyNamed('headers'))).captured;
+    final args = verify(cache.getSingleFile(captureAny, headers: captureAnyNamed('headers'))).captured;
     expect(args[0], equals('https://api.discogs.com/releases/$albumId'));
     verifyHeaders(args[1]);
   }
 
   void setExceptionForMock(Exception exception) {
-    when(Collection.cache.getSingleFile(any, headers: anyNamed('headers'))).thenThrow(exception);
+    when(cache.getSingleFile(any, headers: anyNamed('headers'))).thenThrow(exception);
   }
 
   Future<T> verifyThrows<T extends Exception>(Future<dynamic> function()) async {
@@ -107,7 +99,7 @@ Future<void> main() async {
       fail('Exception not thrown on: $function');
     } on Exception catch (e) {
       expect(e, isA<T>());
-      return e;
+      return Future.value(e as T);
     }
   }
 
@@ -311,13 +303,13 @@ Future<void> main() async {
       expect(album.releaseId, equals(1287017));
       expect(album.tracks[2].title, equals('Rapsodie Espagnole'));
 
-      final track3sub = album.tracks[2].subTracks;
+      final track3sub = album.tracks[2].subTracks!;
       expect(track3sub.length, 4);
       expect(track3sub[3].title, 'Feria');
       expect(track3sub[3].duration, equals('6:25'));
       expect(track3sub[3].position, equals('B3'));
 
-      expect(album.tracks[3].subTracks.length, 3);
+      expect(album.tracks[3].subTracks!.length, 3);
 
       expect(album.tracks.length, equals(4));
 
@@ -432,9 +424,9 @@ Future<void> main() async {
     test('bypasses the cache manager on file system error', () async {
       setExceptionForMock(const FileSystemException(''));
 
-      when(Collection.fallbackClient.get(any, headers: anyNamed('headers'))).thenAnswer((_) => Future.value(
-          http.Response(jsonForCollectionPageOneWithTwoAlbums, 200,
-              headers: {HttpHeaders.contentTypeHeader: 'application/json'})));
+      when(fallbackClient.get(any, headers: anyNamed('headers'))).thenAnswer((_) => Future.value(http.Response(
+          jsonForCollectionPageOneWithTwoAlbums, 200,
+          headers: {HttpHeaders.contentTypeHeader: 'application/json'})));
 
       await collection.updateUsername(username);
       expect(collection.isLoading, isFalse);
@@ -446,20 +438,20 @@ Future<void> main() async {
       expect(collection.hasLoadingError, isFalse);
       expect(collection.albums.length, 2);
 
-      final cacheCalls = verify(Collection.cache.getSingleFile(captureAny, headers: captureAnyNamed('headers')));
+      final cacheCalls = verify(cache.getSingleFile(captureAny, headers: captureAnyNamed('headers')));
       cacheCalls.called(2);
-      final fallbackCalls = verify(Collection.fallbackClient.get(captureAny, headers: captureAnyNamed('headers')));
+      final fallbackCalls = verify(fallbackClient.get(captureAny, headers: captureAnyNamed('headers')));
       fallbackCalls.called(2);
       expect(cacheCalls.captured.map((e) => e.toString()), equals(fallbackCalls.captured.map((e) => e.toString())));
 
-      when(Collection.fallbackClient.get(any, headers: anyNamed('headers'))).thenAnswer((_) => Future.value(
+      when(fallbackClient.get(any, headers: anyNamed('headers'))).thenAnswer((_) => Future.value(
           http.Response(jsonForRelease, 200, headers: {HttpHeaders.contentTypeHeader: 'application/json'})));
 
       final album = await collection.loadAlbumDetails(249504);
       expect(album, isNotNull);
 
-      verify(Collection.cache.getSingleFile(any, headers: anyNamed('headers')));
-      verify(Collection.fallbackClient.get(any, headers: anyNamed('headers')));
+      verify(cache.getSingleFile(any, headers: anyNamed('headers')));
+      verify(fallbackClient.get(any, headers: anyNamed('headers')));
 
       // reset mock cache
       initializeCollectionMockCache();
@@ -469,8 +461,8 @@ Future<void> main() async {
       expect(collection.hasLoadingError, isFalse);
       expect(collection.albums.length, 2);
 
-      verify(Collection.cache.getSingleFile(any, headers: anyNamed('headers')));
-      verifyNever(Collection.fallbackClient.get(any, headers: anyNamed('headers')));
+      verify(cache.getSingleFile(any, headers: anyNamed('headers')));
+      verifyNever(fallbackClient.get(any, headers: anyNamed('headers')));
     });
 
     test('doesn\'t try to load collection if username is empty', () async {

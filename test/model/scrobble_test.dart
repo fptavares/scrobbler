@@ -1,11 +1,10 @@
 import 'dart:io';
 
-import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:scrobbler/components/error.dart';
-import 'package:scrobbler/model/lastfm.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
+import 'package:scrobbler/components/error.dart';
+import 'package:scrobbler/model/lastfm.dart';
 
 import '../test_albums.dart';
 
@@ -20,11 +19,10 @@ void main() {
     const username = 'test-user';
     const password = 'test-password';
     const key = 'd580d57f32848f5dcf574d1ce18d78b2';
-    Scrobbler scrobbler;
+    late Scrobbler scrobbler;
 
     setUp(() {
       scrobbler = Scrobbler(userAgent);
-      scrobbler.httpClient = null;
     });
 
     test('initializes a Last.fm session', () async {
@@ -85,7 +83,7 @@ void main() {
           expect(key, equals('track[$index]'));
           // expect the timestamp to be in the range from now beck to total duration of playlist
           // 2 second delta to account for the test running on a slower platform
-          expect(int.parse(request.bodyFields['timestamp[$index]']), inInclusiveRange(startTime - 2, endTime + 2));
+          expect(int.parse(request.bodyFields['timestamp[$index]']!), inInclusiveRange(startTime - 2, endTime + 2));
 
           index++;
         }
@@ -129,10 +127,10 @@ void main() {
 
         // expect first timestamp to be close to the expected end time
         // 2 second delta to account for the test running on a slower platform
-        expect(int.parse(request.bodyFields['timestamp[0]']), closeTo(endTime, 2));
+        expect(int.parse(request.bodyFields['timestamp[0]']!), closeTo(endTime, 2));
         // expect last timestamp to be close to the expected start time
         // 2 second delta to account for the test running on a slower platform
-        expect(int.parse(request.bodyFields['timestamp[${tracks - 1}]']), closeTo(startTime, 2));
+        expect(int.parse(request.bodyFields['timestamp[${tracks - 1}]']!), closeTo(startTime, 2));
 
         return Response(_createScrobbleResponse(tracks, 0), 200);
       }, count: 1));

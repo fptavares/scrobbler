@@ -10,7 +10,7 @@ import 'emtpy.dart';
 import 'error.dart';
 import 'playlist.dart';
 
-class AlbumSearch extends SearchDelegate<CollectionAlbum> {
+class AlbumSearch extends SearchDelegate<CollectionAlbum?> {
   AlbumSearch() : super(keyboardType: TextInputType.text) {
     analytics.logSearchScreen();
   }
@@ -19,7 +19,7 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: const Icon(Icons.clear),
         tooltip: 'Clear',
         onPressed: () {
           query = '';
@@ -55,8 +55,8 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum> {
 
 class _SearchResultsList extends StatelessWidget {
   _SearchResultsList({
-    Key key,
-    @required this.query,
+    Key? key,
+    required this.query,
   }) : super(key: key);
 
   final Logger log = Logger('AlbumSearch');
@@ -69,7 +69,7 @@ class _SearchResultsList extends StatelessWidget {
     // asynchronously load all albums
     if (query.isNotEmpty && collection.isNotFullyLoaded && collection.isNotLoading) {
       analytics.logLoadAllForSearch(amount: collection.totalItems);
-      WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(collection.loadAllAlbums(), context, log,
+      WidgetsBinding.instance!.addPostFrameCallback((_) => handleFutureError(collection.loadAllAlbums(), context, log,
           trace: 'load_all', error: 'Failed to load the full collection!'));
     }
 
@@ -116,7 +116,7 @@ class _SearchResultsList extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(album.artist),
-                              for (final format in album.formats ?? []) Text(format.toString()),
+                              for (final format in album.formats) Text(format.toString()),
                               if (album.year > 1000) Text('Released in ${album.year}'),
                             ],
                           ),

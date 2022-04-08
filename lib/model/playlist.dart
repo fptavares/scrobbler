@@ -27,26 +27,17 @@ class Playlist extends ChangeNotifier {
   }
 
   Future<List<AlbumDetails>> _getAlbumsDetails(Collection collection) async {
-    final albums = await Future.wait<AlbumDetails>(
-        _itemById.keys.map(collection.loadAlbumDetails));
-    return albums
-        .expand((album) =>
-            List<AlbumDetails>.filled(_itemById[album.releaseId].count, album))
-        .toList();
+    final albums = await Future.wait<AlbumDetails>(_itemById.keys.map(collection.loadAlbumDetails));
+    return albums.expand((album) => List<AlbumDetails>.filled(_itemById[album.releaseId]!.count, album)).toList();
   }
 
-  Stream<int> scrobble(
-      Scrobbler scrobbler,
-      Collection collection,
-      Future<ScrobbleOptions> requestOptions(
-          List<AlbumDetails> albums)) async* {
+  Stream<int> scrobble(Scrobbler scrobbler, Collection collection,
+      Future<ScrobbleOptions?> requestOptions(List<AlbumDetails> albums)) async* {
     if (scrobbler.isNotAuthenticated) {
-      throw UIException(
-          'Oops! You need to login to Last.fm first with your username and password.');
+      throw UIException('Oops! You need to login to Last.fm first with your username and password.');
     }
     if (isScrobbling) {
-      throw UIException(
-          'Cannot scrobble again until the previous request is complete.');
+      throw UIException('Cannot scrobble again until the previous request is complete.');
     }
     _status = ScrobblingStatus.active;
     notifyListeners();
@@ -75,8 +66,7 @@ class Playlist extends ChangeNotifier {
   }
 
   void addAlbum(CollectionAlbum album) {
-    _itemById.update(album.releaseId, (current) => current..increase(),
-        ifAbsent: () => PlaylistItem(album));
+    _itemById.update(album.releaseId, (current) => current..increase(), ifAbsent: () => PlaylistItem(album));
     notifyListeners();
   }
 
@@ -90,7 +80,7 @@ class Playlist extends ChangeNotifier {
     notifyListeners();
   }
 
-  PlaylistItem getPlaylistItem(CollectionAlbum album) {
+  PlaylistItem? getPlaylistItem(CollectionAlbum album) {
     return isScrobbling ? null : _itemById[album.releaseId];
   }
 

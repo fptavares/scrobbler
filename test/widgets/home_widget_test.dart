@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,10 +12,12 @@ import 'package:scrobbler/model/playlist.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../mocks/firebase_mocks.dart';
+import '../mocks/model_mocks.dart';
 import '../test_albums.dart';
 
 Future<void> main() async {
-  SharedPreferences.setMockInitialValues(<String, dynamic>{
+  SharedPreferences.setMockInitialValues(<String, Object>{
     DiscogsSettings.discogsUsernameKey: 'test-user',
     DiscogsSettings.skippedKey: false,
     LastfmSettings.lastfmUsernameKey: 'test-user',
@@ -25,8 +26,8 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
 
   group('Home page', () {
-    MockCollection collection;
-    Playlist playlist;
+    late MockCollection collection;
+    late Playlist playlist;
 
     Widget createHome() {
       return MultiProvider(
@@ -52,10 +53,13 @@ Future<void> main() async {
     }
 
     setUp(() {
+      replaceFirebaseWithMocks();
+
       playlist = Playlist();
-      collection = MockCollection();
+      collection = createMockCollection();
 
       // mock album list
+      when(collection.loadingNotifier).thenReturn(ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded));
       when(collection.albums).thenReturn([testAlbum1, testAlbum2]);
       when(collection.isUserEmpty).thenReturn(false);
       when(collection.isEmpty).thenReturn(false);
@@ -65,6 +69,7 @@ Future<void> main() async {
       when(collection.isLoading).thenReturn(false);
       when(collection.hasMorePages).thenReturn(true);
       when(collection.totalItems).thenReturn(50);
+      when(collection.nextPage).thenReturn(2);
     });
 
     testWidgets('renders properly', (tester) async {
@@ -209,15 +214,8 @@ Future<void> main() async {
       await tester.pumpWidget(createHome());
 
       expect(find.byType(EmptyState), findsNothing);
-      expect(find.byType(Image), findsNothing);
       expect(find.text('Whoops!'), findsNothing);
       expect(find.text('My test error message'), findsNothing);
     });
   });
-}
-
-// Mock classes
-class MockCollection extends Mock implements Collection {
-  @override
-  ValueNotifier<LoadingStatus> get loadingNotifier => ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
 }

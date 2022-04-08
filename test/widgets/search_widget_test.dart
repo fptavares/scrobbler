@@ -10,20 +10,21 @@ import 'package:scrobbler/components/search.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/playlist.dart';
 
+import '../mocks/firebase_mocks.dart';
+import '../mocks/model_mocks.dart';
 import '../test_albums.dart';
 
 void main() {
   group('Search page', () {
-    MockCollection collection;
-    Playlist playlist;
+    late MockCollection collection;
+    late Playlist playlist;
 
     Future<Widget> createAppBar() async {
       return MultiProvider(
         providers: [
           ChangeNotifierProvider<Collection>.value(value: collection),
           ChangeNotifierProvider<Playlist>.value(value: playlist),
-          ValueListenableProvider<LoadingStatus>.value(
-              value: collection.loadingNotifier),
+          ValueListenableProvider<LoadingStatus>.value(value: collection.loadingNotifier),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -47,19 +48,21 @@ void main() {
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
 
       final textField = tester.widget<TextField>(find.byType(TextField));
-      expect(textField.focusNode.hasFocus, isTrue);
+      expect(textField.focusNode!.hasFocus, isTrue);
     }
 
     setUp(() {
+      replaceFirebaseWithMocks();
       playlist = Playlist();
-      collection = MockCollection();
+      collection = createMockCollection();
+      when(collection.loadingNotifier).thenReturn(ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded));
       when(collection.isNotEmpty).thenReturn(true);
       when(collection.isNotFullyLoaded).thenReturn(true);
       when(collection.isNotLoading).thenReturn(true);
+      when(collection.totalItems).thenReturn(2);
     });
 
-    testWidgets('renders and lists all currently loaded albums',
-        (tester) async {
+    testWidgets('renders and lists all currently loaded albums', (tester) async {
       // mock search results
       when(collection.search(any)).thenReturn([testAlbum1, testAlbum2]);
 
@@ -258,13 +261,13 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'radio');
       await tester.pump();
-      expect(textField.controller.text, equals('radio'));
+      expect(textField.controller!.text, equals('radio'));
       verify(collection.search('radio')).called(1);
 
       await tester.tap(find.byTooltip('Clear'));
       await tester.pump();
-      expect(textField.controller.text, equals(''));
-      expect(textField.focusNode.hasFocus, isTrue);
+      expect(textField.controller!.text, equals(''));
+      expect(textField.focusNode!.hasFocus, isTrue);
       verify(collection.search('')).called(1);
 
       expect(find.byType(ListTile), findsOneWidget);
@@ -287,11 +290,4 @@ void main() {
       expect(find.byType(HomeAppBar), findsOneWidget);
     });
   });
-}
-
-// Mock classes
-class MockCollection extends Mock implements Collection {
-  @override
-  ValueNotifier<LoadingStatus> get loadingNotifier =>
-      ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded);
 }

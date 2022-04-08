@@ -20,7 +20,7 @@ class OnboardingPage extends StatelessWidget {
         backgroundColor: Colors.white30,
         child: const Text('Skip'),
         onPressed: () {
-          analytics.logSkippedOnboarding(fromPage: controller.page);
+          analytics.logSkippedOnboarding(fromPage: controller.page!);
 
           final settings = Provider.of<DiscogsSettings>(context, listen: false);
           settings.skipped = true;
@@ -52,8 +52,8 @@ class OnboardingPage extends StatelessWidget {
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({
-    Key key,
-    @required this.onPressed,
+    Key? key,
+    required this.onPressed,
   }) : super(key: key);
 
   final void Function() onPressed;
@@ -125,8 +125,10 @@ class WelcomePage extends StatelessWidget {
         Expanded(
           flex: 2,
           child: Center(
-            child: FlatButton(
-              color: Colors.amberAccent,
+            child: TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
+              ),
               child: Text(
                 'Get started',
                 style: Theme.of(context).textTheme.headline6,

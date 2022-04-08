@@ -67,3 +67,6 @@ lib/firebase_options.dart
 
 # no web support for now due a bug handling async main()
 /web/
+
+# ignore generated mocks
+**/*.mocks.dart

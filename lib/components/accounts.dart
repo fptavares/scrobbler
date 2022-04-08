@@ -17,12 +17,9 @@ class AccountsForm extends StatefulWidget {
   static const lastfmUsernameFieldKey = Key('lastfm_username');
   static const lastfmPasswordFieldKey = Key('lastfm_password');
 
-  static const discogsInvalidUsernameMessage =
-      'Please enter your Discogs username';
-  static const lastfmInvalidUsernameMessage =
-      'Please enter your Last.fm username';
-  static const lastfmInvalidPasswordMessage =
-      'Please enter your Last.fm password';
+  static const discogsInvalidUsernameMessage = 'Please enter your Discogs username';
+  static const lastfmInvalidUsernameMessage = 'Please enter your Last.fm username';
+  static const lastfmInvalidPasswordMessage = 'Please enter your Last.fm password';
 
   static const saveSuccessMessage = 'Saved new account information.';
 }
@@ -32,14 +29,13 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
 
   final Logger log = Logger('AccountsForm');
 
-  String _discogsUsername;
-  String _lastfmUsername;
-  String _lastfmPassword;
+  String? _discogsUsername;
+  String? _lastfmUsername;
+  String? _lastfmPassword;
 
   bool _isSaving = false;
 
-  final TextEditingController _lastfmUsernameController =
-      TextEditingController();
+  final TextEditingController _lastfmUsernameController = TextEditingController();
 
   @override
   void initState() {
@@ -61,7 +57,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
       formKey: _formKey,
       child: Consumer2<DiscogsSettings, LastfmSettings>(
         builder: (_, discogs, lastfm, __) {
-          _lastfmUsernameController.text = lastfm.username; // initial value
+          _lastfmUsernameController.text = lastfm.username ?? ''; // initial value
 
           return IntrinsicHeight(
             child: Column(
@@ -79,9 +75,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                       ),
                       TextFormField(
                         key: AccountsForm.discogsUsernameFieldKey,
-                        validator: (value) => value.isEmpty
-                            ? AccountsForm.discogsInvalidUsernameMessage
-                            : null,
+                        validator: (value) => value!.isEmpty ? AccountsForm.discogsInvalidUsernameMessage : null,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           labelText: 'Discogs Username',
@@ -105,24 +99,18 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                       TextFormField(
                         key: AccountsForm.lastfmUsernameFieldKey,
                         controller: _lastfmUsernameController,
-                        validator: (value) => value.isEmpty
-                            ? AccountsForm.lastfmInvalidUsernameMessage
-                            : null,
+                        validator: (value) => value!.isEmpty ? AccountsForm.lastfmInvalidUsernameMessage : null,
                         keyboardType: TextInputType.emailAddress,
-                        decoration:
-                            const InputDecoration(labelText: 'Last.fm Username'),
+                        decoration: const InputDecoration(labelText: 'Last.fm Username'),
                         onSaved: (value) => _lastfmUsername = value,
                       ),
                       TextFormField(
                         key: AccountsForm.lastfmPasswordFieldKey,
                         obscureText: true,
-                        validator: (value) => (value.isEmpty &&
-                                _lastfmUsernameController.text !=
-                                    lastfm.username)
+                        validator: (value) => (value!.isEmpty && _lastfmUsernameController.text != lastfm.username)
                             ? AccountsForm.lastfmInvalidPasswordMessage
                             : null,
-                        decoration:
-                            const InputDecoration(labelText: 'Last.fm Password'),
+                        decoration: const InputDecoration(labelText: 'Last.fm Password'),
                         initialValue: _lastfmPassword,
                         onSaved: (value) => _lastfmPassword = value,
                       ),
@@ -134,12 +122,12 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                 Expanded(
                   flex: 2,
                   child: Center(
-                    child: FlatButton(
-                      color: Colors.amberAccent,
+                    child: TextButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
+                      ),
                       child: const Text('Save accounts'),
-                      onPressed: _isSaving
-                          ? null
-                          : () async => await _handleSave(discogs, lastfm),
+                      onPressed: _isSaving ? null : () async => await _handleSave(discogs, lastfm),
                     ),
                   ),
                 ),
@@ -151,9 +139,8 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
     );
   }
 
-  Future<void> _handleSave(
-      DiscogsSettings discogs, LastfmSettings lastfm) async {
-    final form = _formKey.currentState;
+  Future<void> _handleSave(DiscogsSettings discogs, LastfmSettings lastfm) async {
+    final form = _formKey.currentState!;
     // Validate returns true if the form is valid, otherwise false.
     if (form.validate()) {
       setState(() => _isSaving = true);
@@ -173,11 +160,8 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
         final scrobbler = Provider.of<Scrobbler>(context, listen: false);
 
         lastfm.sessionKey = await handleFutureError(
-            scrobbler.initializeSession(_lastfmUsername, _lastfmPassword),
-            context,
-            log,
-            success: AccountsForm.saveSuccessMessage,
-            trace: 'init_lastfm_session');
+            scrobbler.initializeSession(_lastfmUsername!, _lastfmPassword!), context, log,
+            success: AccountsForm.saveSuccessMessage, trace: 'init_lastfm_session');
       } else {
         displaySuccess(context, AccountsForm.saveSuccessMessage);
       }
@@ -188,10 +172,10 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
 }
 
 class FullHeightForm extends StatelessWidget {
-  const FullHeightForm({Key key, this.child, this.formKey}) : super(key: key);
+  const FullHeightForm({Key? key, this.child, this.formKey}) : super(key: key);
 
-  final Widget child;
-  final Key formKey;
+  final Widget? child;
+  final Key? formKey;
 
   @override
   Widget build(BuildContext context) {

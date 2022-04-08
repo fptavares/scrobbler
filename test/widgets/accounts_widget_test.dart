@@ -1,16 +1,16 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler/components/accounts.dart';
-import 'package:scrobbler/model/analytics.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final Map<String, dynamic> _prefsInitialValues = <String, dynamic>{
+import '../mocks/firebase_mocks.dart';
+import '../mocks/model_mocks.dart';
+
+final _prefsInitialValues = <String, Object>{
   DiscogsSettings.discogsUsernameKey: 'd-test-user',
   DiscogsSettings.skippedKey: false,
   LastfmSettings.lastfmUsernameKey: 'l-test-user',
@@ -18,12 +18,11 @@ final Map<String, dynamic> _prefsInitialValues = <String, dynamic>{
 };
 
 void main() {
-  SharedPreferences prefs;
-  MockScrobbler scrobbler;
+  late SharedPreferences prefs;
+  late MockScrobbler scrobbler;
 
   setUpAll(() async {
-    ScrobblerAnalytics.analytics = MockFirebaseAnalytics();
-    ScrobblerAnalytics.performance = MockFirebasePerformance();
+    replaceFirebaseWithMocks();
     SharedPreferences.setMockInitialValues(_prefsInitialValues);
     prefs = await SharedPreferences.getInstance();
     scrobbler = MockScrobbler();
@@ -57,20 +56,20 @@ void main() {
     await tester.enterText(find.byKey(AccountsForm.lastfmUsernameFieldKey), lastfmUsername);
     await tester.enterText(find.byKey(AccountsForm.lastfmPasswordFieldKey), lastfmPassword);
 
-    expect(tester.widget<FlatButton>(find.byType(FlatButton)).onPressed, isNotNull);
+    expect(tester.widget<TextButton>(find.byType(TextButton)).onPressed, isNotNull);
 
-    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, isTrue);
+    expect(tester.widget<TextButton>(find.byType(TextButton)).enabled, isTrue);
 
-    await tester.tap(find.byType(FlatButton));
+    await tester.tap(find.byType(TextButton));
 
     await tester.pump();
   }
 
-  void checkPreference(String key, String expectedValue) {
+  void checkPreference(String key, Object? expectedValue) {
     expect(prefs.getString(key), equals(expectedValue));
   }
 
-  void checkPreferences(String testDiscogsUsername, String testLastfmUsername, String testSessionKey) {
+  void checkPreferences(String testDiscogsUsername, String testLastfmUsername, String? testSessionKey) {
     checkPreference(DiscogsSettings.discogsUsernameKey, testDiscogsUsername);
     checkPreference(LastfmSettings.lastfmUsernameKey, testLastfmUsername);
     checkPreference(LastfmSettings.sessionKeyKey, testSessionKey);
@@ -87,7 +86,7 @@ void main() {
   }
 
   Future<void> editAndVerify(WidgetTester tester, String testDiscogsUsername, String testLastfmUsername,
-      String testLastfmPassword, String testSessionKey,
+      String testLastfmPassword, String? testSessionKey,
       {bool shouldInitializeSession = true}) async {
     when(scrobbler.initializeSession(any, any)).thenAnswer((_) async {
       if (testSessionKey == null) {
@@ -112,10 +111,10 @@ void main() {
 
     expect(find.byType(Form), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(3));
-    expect(find.byType(FlatButton), findsOneWidget);
+    expect(find.byType(TextButton), findsOneWidget);
 
-    expect(find.text(prefs.getString(DiscogsSettings.discogsUsernameKey)), findsOneWidget);
-    expect(find.text(prefs.getString(LastfmSettings.lastfmUsernameKey)), findsOneWidget);
+    expect(find.text(prefs.getString(DiscogsSettings.discogsUsernameKey)!), findsOneWidget);
+    expect(find.text(prefs.getString(LastfmSettings.lastfmUsernameKey)!), findsOneWidget);
 
     // validates empty fields and doesn\'t save
 
@@ -189,16 +188,4 @@ Future clearSnackbars(WidgetTester tester) async {
   await tester.pump(
       const Duration(milliseconds: 750)); // 6.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
   await tester.pump(); // begin animation
-}
-
-// Mock classes
-class MockScrobbler extends Mock implements Scrobbler {}
-
-class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
-
-class MockTrace extends Mock implements Trace {}
-
-class MockFirebasePerformance extends Mock implements FirebasePerformance {
-  @override
-  Trace newTrace(String name) => MockTrace();
 }

@@ -4,11 +4,12 @@ import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
 import 'package:test/test.dart';
 
+import '../mocks/model_mocks.dart';
 import '../test_albums.dart';
 
 void main() {
   group('Playlist', () {
-    Playlist playlist;
+    late Playlist playlist;
 
     setUp(() {
       playlist = Playlist();
@@ -27,7 +28,7 @@ void main() {
       expect(playlist.isEmpty, equals(false));
       expect(playlist.isNotEmpty, equals(true));
 
-      final item = playlist.getPlaylistItem(testAlbum1);
+      final item = playlist.getPlaylistItem(testAlbum1)!;
       expect(item.count, equals(1));
     });
 
@@ -44,7 +45,7 @@ void main() {
       expect(playlist.isEmpty, isFalse);
       expect(playlist.isNotEmpty, isTrue);
 
-      final item = playlist.getPlaylistItem(testAlbum1);
+      final item = playlist.getPlaylistItem(testAlbum1)!;
       expect(item.count, equals(2));
     });
 
@@ -61,10 +62,10 @@ void main() {
       expect(playlist.isEmpty, isFalse);
       expect(playlist.isNotEmpty, isTrue);
 
-      var item = playlist.getPlaylistItem(testAlbum1);
+      var item = playlist.getPlaylistItem(testAlbum1)!;
       expect(item.count, equals(1));
 
-      item = playlist.getPlaylistItem(testAlbum2);
+      item = playlist.getPlaylistItem(testAlbum2)!;
       expect(item.count, equals(1));
     });
 
@@ -100,7 +101,7 @@ void main() {
     test('can increase and decrease the count of playlist item', () {
       playlist.addAlbum(testAlbum1);
 
-      final item = playlist.getPlaylistItem(testAlbum1);
+      final item = playlist.getPlaylistItem(testAlbum1)!;
       expect(item.count, equals(1));
       item.increase();
       expect(item.count, equals(2));
@@ -172,10 +173,6 @@ void main() {
 }
 
 // Mock classes
-class MockScrobbler extends Mock implements Scrobbler {}
-
-class MockCollection extends Mock implements Collection {}
-
 class FakeAlbumDetails extends Fake implements AlbumDetails {
   FakeAlbumDetails(this._id);
 

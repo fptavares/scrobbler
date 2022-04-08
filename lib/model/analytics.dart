@@ -12,28 +12,28 @@ class ScrobblerAnalytics {
   @visibleForTesting
   static FirebasePerformance performance = FirebasePerformance.instance;
 
-  final logLogin = analytics.logLogin;
-  final logAppOpen = analytics.logAppOpen;
+  final Future<void> Function({AnalyticsCallOptions callOptions, String loginMethod}) logLogin = analytics.logLogin;
+  final Future<void> Function({AnalyticsCallOptions callOptions}) logAppOpen = analytics.logAppOpen;
 
   void logException(String description) {
     analytics.logEvent(name: 'exception', parameters: {'exDescription': description});
   }
 
-  void logScrobbling({@required int numberOfAlbums, @required int numberOfExclusions, @required int offsetInMinutes}) {
+  void logScrobbling({required int numberOfAlbums, required int numberOfExclusions, required int offsetInMinutes}) {
     analytics.logEvent(
         name: 'scrobble',
         parameters: {'amount': numberOfAlbums, 'exclusions': numberOfExclusions, 'offset': offsetInMinutes});
   }
 
-  void logScrobbleOptionsOpen({@required int numberOfAlbums, @required int maxCount}) {
+  void logScrobbleOptionsOpen({required int numberOfAlbums, required int maxCount}) {
     analytics.logEvent(name: 'open_scrobble_options', parameters: {'amount': numberOfAlbums, 'max_count': maxCount});
   }
 
-  void logSkippedOnboarding({@required double fromPage}) {
+  void logSkippedOnboarding({required double fromPage}) {
     analytics.logEvent(name: 'skip_onboarding', parameters: {'step': fromPage});
   }
 
-  void logScrollToNextPage({@required int page}) {
+  void logScrollToNextPage({required int page}) {
     analytics.logEvent(name: 'scroll_next_page', parameters: {'page': page});
   }
 
@@ -46,10 +46,10 @@ class ScrobblerAnalytics {
   }
 
   void logOnboargding() {
-    FirebaseAnalytics.instance.logEvent(name: 'start_onboarding');
+    analytics.logEvent(name: 'start_onboarding');
   }
 
-  void logLoadAllForSearch({@required int amount}) {
+  void logLoadAllForSearch({required int amount}) {
     analytics.logEvent(name: 'load_all_on_search', parameters: {'amount': amount});
   }
 
