@@ -20,6 +20,7 @@ and scrobble records directly to Last.fm.
 
 ```bash
 $ make secrets
+$ make mocks
 $ make icons
 $ make run
 ```
