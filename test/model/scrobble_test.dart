@@ -142,7 +142,7 @@ void main() {
       expect(acceptedList, equals([4]));
     });
 
-    Future<void> verifyThrows(Future<dynamic> function()) async {
+    Future<void> verifyThrows(Future<dynamic> Function() function) async {
       try {
         await function();
         fail('Exception not thrown on: $function');

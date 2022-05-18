@@ -93,7 +93,7 @@ Future<void> main() async {
     when(cache.getSingleFile(any, headers: anyNamed('headers'))).thenThrow(exception);
   }
 
-  Future<T> verifyThrows<T extends Exception>(Future<dynamic> function()) async {
+  Future<T> verifyThrows<T extends Exception>(Future<dynamic> Function() function) async {
     try {
       await function();
       fail('Exception not thrown on: $function');

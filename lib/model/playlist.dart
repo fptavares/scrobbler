@@ -32,7 +32,7 @@ class Playlist extends ChangeNotifier {
   }
 
   Stream<int> scrobble(Scrobbler scrobbler, Collection collection,
-      Future<ScrobbleOptions?> requestOptions(List<AlbumDetails> albums)) async* {
+      Future<ScrobbleOptions?> Function(List<AlbumDetails> albums) requestOptions) async* {
     if (scrobbler.isNotAuthenticated) {
       throw UIException('Oops! You need to login to Last.fm first with your username and password.');
     }
