@@ -12,6 +12,8 @@ class ScrobblerAnalytics {
   @visibleForTesting
   static FirebasePerformance performance = FirebasePerformance.instance;
 
+  bool performanceEnabled = true;
+
   final Future<void> Function({AnalyticsCallOptions callOptions, String loginMethod}) logLogin = analytics.logLogin;
   final Future<void> Function({AnalyticsCallOptions callOptions}) logAppOpen = analytics.logAppOpen;
 

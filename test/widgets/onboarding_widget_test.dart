@@ -14,19 +14,17 @@ void main() {
   final startButton = find.text('Get started');
 
   group('Onboarding page', () {
-    late DiscogsSettings discogsSettings;
+    late Settings settings;
 
     Future<Widget> createOnboarding() async {
       replaceFirebaseWithMocks();
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final prefs = await SharedPreferences.getInstance();
-      discogsSettings = DiscogsSettings(prefs);
-      final lastfmSettings = LastfmSettings(prefs);
+      settings = Settings(prefs);
 
       return MultiProvider(
         providers: [
-          ChangeNotifierProvider<DiscogsSettings>.value(value: discogsSettings),
-          ChangeNotifierProvider<LastfmSettings>.value(value: lastfmSettings),
+          ChangeNotifierProvider<Settings>.value(value: settings),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -63,11 +61,11 @@ void main() {
     testWidgets('allows skipping', (tester) async {
       await tester.pumpWidget(await createOnboarding());
 
-      expect(discogsSettings.skipped, isFalse);
+      expect(settings.isSkipped, isFalse);
 
       await tester.tap(skipButton);
 
-      expect(discogsSettings.skipped, isTrue);
+      expect(settings.isSkipped, isTrue);
     });
   });
 }

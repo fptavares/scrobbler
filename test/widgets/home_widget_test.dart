@@ -7,6 +7,7 @@ import 'package:scrobbler/components/accounts.dart';
 import 'package:scrobbler/components/album.dart';
 import 'package:scrobbler/components/emtpy.dart';
 import 'package:scrobbler/components/home.dart';
+import 'package:scrobbler/model/bluos.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/playlist.dart';
 import 'package:scrobbler/model/settings.dart';
@@ -18,27 +19,26 @@ import '../test_albums.dart';
 
 Future<void> main() async {
   SharedPreferences.setMockInitialValues(<String, Object>{
-    DiscogsSettings.discogsUsernameKey: 'test-user',
-    DiscogsSettings.skippedKey: false,
-    LastfmSettings.lastfmUsernameKey: 'test-user',
-    LastfmSettings.sessionKeyKey: 'test',
+    Settings.discogsUsernameKey: 'test-user',
+    Settings.skippedKey: false,
+    Settings.lastfmUsernameKey: 'test-user',
+    Settings.lastfmSessionKeyKey: 'test',
   });
   final prefs = await SharedPreferences.getInstance();
 
   group('Home page', () {
     late MockCollection collection;
+    late MockBluOS bluos;
     late Playlist playlist;
 
     Widget createHome() {
       return MultiProvider(
         providers: [
-          ChangeNotifierProvider<DiscogsSettings>(
-            create: (_) => DiscogsSettings(prefs),
-          ),
-          ChangeNotifierProvider<LastfmSettings>(
-            create: (_) => LastfmSettings(prefs),
+          ChangeNotifierProvider<Settings>(
+            create: (_) => Settings(prefs),
           ),
           ChangeNotifierProvider<Collection>.value(value: collection),
+          ChangeNotifierProvider<BluOS>.value(value: bluos),
           ChangeNotifierProvider<Playlist>.value(value: playlist),
         ],
         child: MaterialApp(
@@ -57,6 +57,7 @@ Future<void> main() async {
 
       playlist = Playlist();
       collection = createMockCollection();
+      bluos = createMockBluOSMonitor();
 
       // mock album list
       when(collection.loadingNotifier).thenReturn(ValueNotifier<LoadingStatus>(LoadingStatus.neverLoaded));

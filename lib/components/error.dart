@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -5,7 +7,12 @@ import 'package:logging/logging.dart';
 import '../model/analytics.dart';
 
 void displayAndLogError(BuildContext context, Logger logger, Object e, StackTrace stackTrace, [String? message]) {
-  final errorMessage = e is UIException ? e.message : message ?? e.toString();
+  final errorMessage = e is UIException
+      ? e.message
+      : message ??
+          (e is SocketException && e.address != null
+              ? 'Could not connect to ${e.address!.host} (${e.message})'
+              : e.toString());
 
   if (e is! UIException) {
     logger.severe(errorMessage, e, stackTrace);
@@ -13,6 +20,10 @@ void displayAndLogError(BuildContext context, Logger logger, Object e, StackTrac
     logger.warning(errorMessage, e.exception, stackTrace);
   }
 
+  displayError(context, errorMessage);
+}
+
+void displayError(BuildContext context, String errorMessage) {
   final scaffoldMsg = ScaffoldMessenger.of(context);
   scaffoldMsg.removeCurrentSnackBar();
   scaffoldMsg.showSnackBar(SnackBar(
@@ -28,14 +39,8 @@ void displaySuccess(BuildContext context, String message) {
   ));
 }
 
-Future<T> handleFutureError<T>(
-  Future<T> future,
-  BuildContext context,
-  Logger logger, {
-  String? error,
-  String? success,
-  String? trace,
-}) async {
+Future<T?> handleFutureError<T>(Future<T> future, BuildContext context, Logger logger,
+    {String? error, String? success, String? trace}) async {
   Trace? callTrace;
   if (trace != null) {
     callTrace = analytics.newTrace(trace);
@@ -53,7 +58,7 @@ Future<T> handleFutureError<T>(
   } finally {
     callTrace?.stop();
   }
-  return Future<T>.value(null);
+  return Future<T?>.value(null);
 }
 
 class UIException implements Exception {

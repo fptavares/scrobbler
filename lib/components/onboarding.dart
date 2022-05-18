@@ -22,8 +22,8 @@ class OnboardingPage extends StatelessWidget {
         onPressed: () {
           analytics.logSkippedOnboarding(fromPage: controller.page!);
 
-          final settings = Provider.of<DiscogsSettings>(context, listen: false);
-          settings.skipped = true;
+          final settings = Provider.of<Settings>(context, listen: false);
+          settings.isSkipped = true;
         },
       ),
       body: PageView(
@@ -42,7 +42,13 @@ class OnboardingPage extends StatelessWidget {
           ),
           Container(
             color: Colors.amber[50],
-            child: AccountsForm(),
+            padding: EdgeInsets.all(50),
+            child: Center(
+              child: SizedBox(
+                width: 400,
+                child: AccountsForm(),
+              ),
+            ),
           ),
         ],
       ),

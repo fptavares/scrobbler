@@ -61,7 +61,7 @@ class CachedAlbumImage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (album.thumbUrl?.isEmpty ?? true) {
       return DefaultAlbumImage(
-        decoration: _shadowDecoration,
+        decoration: _defaultShadowDecoration,
         album: album,
       );
     }
@@ -69,7 +69,7 @@ class CachedAlbumImage extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: album.thumbUrl ?? '',
       imageBuilder: (context, image) => AlbumImage(
-        decoration: _shadowDecoration,
+        decoration: _defaultShadowDecoration,
         image: image,
       ),
       placeholder: (context, url) => const AspectRatio(
@@ -85,29 +85,18 @@ class CachedAlbumImage extends StatelessWidget {
         ),
       ),
       errorWidget: (context, url, error) => DefaultAlbumImage(
-        decoration: _shadowDecoration,
+        decoration: _defaultShadowDecoration,
         album: album,
       ),
       cacheManager: cacheManager,
     );
   }
-
-  static const BoxDecoration _shadowDecoration = BoxDecoration(
-    boxShadow: <BoxShadow>[
-      BoxShadow(
-        color: Color(0x88000000),
-        blurRadius: 5.0, // has the effect of softening the shadow
-        spreadRadius: -3, // has the effect of extending the shadow
-        offset: Offset(2, 2),
-      )
-    ],
-  );
 }
 
 class AlbumImage extends StatelessWidget {
   const AlbumImage({
     Key? key,
-    required this.decoration,
+    this.decoration = _defaultShadowDecoration,
     required this.image,
   }) : super(key: key);
 
@@ -186,3 +175,14 @@ class DefaultAlbumImage extends StatelessWidget {
 
   static const _defaultImage = AssetImage('assets/record_sleeve.png');
 }
+
+const BoxDecoration _defaultShadowDecoration = BoxDecoration(
+  boxShadow: <BoxShadow>[
+    BoxShadow(
+      color: Color(0x88000000),
+      blurRadius: 5.0, // has the effect of softening the shadow
+      spreadRadius: -3, // has the effect of extending the shadow
+      offset: Offset(2, 2),
+    )
+  ],
+);

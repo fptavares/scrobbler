@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
+import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
 
 import '../components/error.dart';
 import '../secrets.dart';
@@ -26,8 +27,10 @@ class Scrobbler {
   bool get isNotAuthenticated => _sessionKey == null;
 
   void updateSessionKey(String? value) {
-    _sessionKey = value;
-    log.info('Updated session key to: $value');
+    if (value != _sessionKey) {
+      _sessionKey = value;
+      log.info('Updated session key to: $value');
+    }
   }
 
   Future<String> initializeSession(String username, String password) async {
@@ -71,6 +74,22 @@ class Scrobbler {
     }
 
     final queue = _createScrobbleQueue(albums, options);
+    for (final scrobbles in queue.batches) {
+      yield await _postScrobbles(scrobbles);
+    }
+  }
+
+  Stream<int> scrobbleBluOSTracks(Iterable<BluOSTrack> tracks) async* {
+    if (_sessionKey == null) {
+      throw UIException('Oops! You need to login to Last.fm first with your username and password.');
+    }
+    if (tracks.isEmpty) {
+      throw UIException('Your playlist is empty! There\'s nothing to scrobble.');
+    }
+
+    final queue = ScrobbleQueue(0); // offset is not relevant because we have real timestamps
+    tracks.forEach(queue.addBluosTrack);
+
     for (final scrobbles in queue.batches) {
       yield await _postScrobbles(scrobbles);
     }
@@ -186,6 +205,19 @@ class ScrobbleQueue {
 
     timestamp -= durationInSeconds;
 
+    addScrobble(
+      artist: track.artist ?? album.artist,
+      track: track.title,
+      album: album.title,
+      timestamp: timestamp,
+    );
+  }
+
+  void addBluosTrack(BluOSTrack track) {
+    addScrobble(artist: track.artist, track: track.title, album: track.album, timestamp: track.timestamp);
+  }
+
+  void addScrobble({required String artist, required String track, required String? album, required int timestamp}) {
     var index = batches.last.length;
     if (index == 50) {
       batches.add(<Map<String, String>>[]);
@@ -193,9 +225,9 @@ class ScrobbleQueue {
     }
 
     batches.last.add(<String, String>{
-      'artist[$index]': track.artist ?? album.artist,
-      'track[$index]': track.title,
-      'album[$index]': album.title,
+      'artist[$index]': artist,
+      'track[$index]': track,
+      if (album != null) 'album[$index]': album,
       'timestamp[$index]': timestamp.toString(),
     });
   }

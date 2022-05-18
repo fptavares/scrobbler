@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -16,6 +17,7 @@ import 'components/onboarding.dart';
 import 'components/playlist.dart';
 import 'firebase_options.dart';
 import 'model/analytics.dart';
+import 'model/bluos.dart';
 import 'model/discogs.dart';
 import 'model/lastfm.dart';
 import 'model/playlist.dart';
@@ -39,6 +41,10 @@ Future<void> main() async {
           errorAndStacktrace.last,
         );
       }).sendPort);
+
+      if (Platform.isMacOS) {
+        ScrobblerAnalytics.instance.performanceEnabled = false;
+      }
     }
 
     // initialize logger
@@ -106,27 +112,29 @@ class ScrobblerApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<DiscogsSettings>(
-          create: (_) => DiscogsSettings(prefs),
+        ChangeNotifierProvider<Settings>(
+          create: (_) => Settings(prefs),
         ),
-        ChangeNotifierProvider<LastfmSettings>(
-          create: (_) => LastfmSettings(prefs),
+        ChangeNotifierProxyProvider<Settings, Collection?>(
+          create: (_) => Collection(userAgent),
+          update: (_, settings, collection) => collection
+            ?..updateUsername(settings.discogsUsername).catchError(
+                (e, stackTrace) => Logger.root.warning('Exception while updating username.', e, stackTrace)),
         ),
-        ChangeNotifierProxyProvider<DiscogsSettings, Collection?>(
-            create: (_) => Collection(userAgent),
-            update: (_, settings, collection) => collection
-              ?..updateUsername(settings.username).catchError(
-                  (e, stackTrace) => Logger.root.warning('Exception while updating username.', e, stackTrace))),
-        ProxyProvider<LastfmSettings, Scrobbler?>(
+        ProxyProvider<Settings, Scrobbler?>(
           lazy: false,
           create: (_) => Scrobbler(userAgent),
-          update: (_, settings, scrobbler) => scrobbler?..updateSessionKey(settings.sessionKey),
+          update: (_, settings, scrobbler) => scrobbler?..updateSessionKey(settings.lastfmSessionKey),
+        ),
+        ChangeNotifierProxyProvider<Settings, BluOS?>(
+          create: (_) => BluOS(),
+          update: (_, settings, bluos) => bluos?..updateMonitorAddress(settings.bluOSMonitorAddress),
         ),
         ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Record Scrobbler',
+        title: 'Scrobbler',
         theme: theme.copyWith(
             colorScheme: theme.colorScheme.copyWith(
               primary: primaryColor,
@@ -153,12 +161,12 @@ class ScrobblerApp extends StatelessWidget {
 class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final settings = Provider.of<DiscogsSettings>(context);
+    final settings = Provider.of<Settings>(context);
 
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 1000),
-        child: (settings.username != null || settings.skipped) ? HomePage() : OnboardingPage(),
+        child: (settings.discogsUsername != null || settings.isSkipped) ? HomePage() : OnboardingPage(),
       ),
     );
   }

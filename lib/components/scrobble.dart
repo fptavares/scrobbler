@@ -25,16 +25,21 @@ class ScrobbleFloatingButton extends StatelessWidget {
       return Container();
     }
 
-    return FloatingActionButton(
-      onPressed: playlist.isScrobbling ? null : () => handleScrobble(context, playlist),
-      tooltip: 'Scrobble',
-      backgroundColor: playlist.isScrobbling ? Theme.of(context).primaryColor : null,
-      foregroundColor: Theme.of(context).primaryColor,
-      child: playlist.isScrobblingPaused
-          ? Container()
-          : playlist.isScrobbling
-              ? const CircularProgressIndicator()
-              : const Icon(Icons.play_arrow),
+    return Container(
+      margin: const EdgeInsets.only(top: 10.0),
+      child: FloatingActionButton(
+        onPressed: playlist.isScrobbling ? null : () => handleScrobble(context, playlist),
+        tooltip: 'Scrobble',
+        backgroundColor: playlist.isScrobbling ? Theme.of(context).primaryColor : null,
+        foregroundColor: Theme.of(context).primaryColor,
+        //shape: StadiumBorder(side: BorderSide(color: Theme.of(context).primaryColor, width: 0.5)),
+        heroTag: null,
+        child: playlist.isScrobblingPaused
+            ? Container()
+            : playlist.isScrobbling
+                ? const CircularProgressIndicator()
+                : const Icon(Icons.play_arrow, size: 28),
+      ),
     );
   }
 
@@ -48,7 +53,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
       var successful = false;
       await for (int accepted
           in playlist.scrobble(scrobbler, collection, (albums) => showPlaylistOptionsDialog(context, albums))) {
-        displaySuccess(context, 'Scrobbled $accepted tracks successfuly.');
+        displaySuccess(context, 'Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
         successful |= accepted > 0;
       }
       if (successful) {
@@ -65,8 +70,9 @@ class ScrobbleFloatingButton extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: true,
+      constraints: BoxConstraints(maxWidth: 500),
       builder: (context) => DraggableScrollableSheet(
-        //initialChildSize: 0.3,
+        initialChildSize: 0.7,
         maxChildSize: 0.9,
         //minChildSize: 0.3,
         builder: (context, scrollController) {
@@ -96,13 +102,13 @@ class ScrobblePlaylistEditor extends StatefulWidget {
   final ScrollController scrollController;
 
   @override
-  _ScrobblePlaylistEditorState createState() => _ScrobblePlaylistEditorState();
+  ScrobblePlaylistEditorState createState() => ScrobblePlaylistEditorState();
 
   @visibleForTesting
   static String whenTooltipMessage = 'When you finished listening to the albums';
 }
 
-class _ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
+class ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
   final Map<int, Map<int, bool?>> _includeMask = {};
   int _timeOffsetIndex = 0;
 

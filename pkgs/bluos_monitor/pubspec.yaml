@@ -1,0 +1,14 @@
+name: scrobbler_bluos_monitor
+publish_to: none # not intended for publication to pub.dev
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  http: ^0.13.4
+  logging: ^1.0.2
+  xml: ^5.0.0
+
+dev_dependencies:
+  lints:
+  test:

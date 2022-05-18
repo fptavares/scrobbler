@@ -28,10 +28,10 @@ void main() {
     WidgetsApp.debugAllowBannerOverride = false; // remove debug banner
 
     SharedPreferences.setMockInitialValues({
-      DiscogsSettings.discogsUsernameKey: 'someuser',
-      DiscogsSettings.skippedKey: false,
-      LastfmSettings.lastfmUsernameKey: 'someuser',
-      LastfmSettings.sessionKeyKey: '',
+      Settings.discogsUsernameKey: 'someuser',
+      Settings.skippedKey: false,
+      Settings.lastfmUsernameKey: 'someuser',
+      Settings.lastfmSessionKeyKey: '',
     });
     prefs = await SharedPreferences.getInstance();
 

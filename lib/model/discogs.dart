@@ -255,22 +255,25 @@ class Collection extends ChangeNotifier {
   }
 
   Future<void> updateUsername(String? newUsername) async {
-    if (newUsername == null || newUsername.isEmpty) {
-      log.warning('Cannot update username because the new username is empty.');
-      return;
+    newUsername = newUsername?.trim(); // remove white space around username
+
+    if (newUsername != null && newUsername.isEmpty) {
+      newUsername = null; // make sure empty (i.e. no) username is always saved as null
     }
-    if (newUsername == _username) {
-      log.info('Collection updated with the same username, so didn\'t reload...');
-      return;
-    }
+
+    if (newUsername == _username) return;
 
     // If the username has changed, then we must remove any albums
     // that may have been loaded from the previous user's collection.
     _reset();
-
     _username = newUsername;
-    log.fine('Updated colletion username to: $_username');
-    await reload();
+
+    if (_username != null) {
+      log.info('Updated collection username to: $_username, reloading collection.');
+      await reload();
+    } else {
+      log.info('Collection username was removed.');
+    }
   }
 
   Future<void> reload({bool emptyCache = false}) async {
@@ -293,7 +296,6 @@ class Collection extends ChangeNotifier {
       _nextPage = 2;
 
       _progress.finished();
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       _progress.error(e);
       rethrow;
@@ -320,7 +322,6 @@ class Collection extends ChangeNotifier {
       _nextPage++;
 
       _progress.finished();
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       _progress.error(e);
       rethrow;
@@ -357,7 +358,6 @@ class Collection extends ChangeNotifier {
       _nextPage = _totalPages + 1; // setting page index to the end
 
       _progress.finished();
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       _progress.error(e);
       rethrow;

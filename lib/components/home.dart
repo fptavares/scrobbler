@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:scrobbler/model/settings.dart';
 
 import '../model/analytics.dart';
 import '../model/discogs.dart';
 import '../model/playlist.dart';
 import 'accounts.dart';
+import 'bluos.dart';
 import 'collection.dart';
 import 'error.dart';
 import 'scrobble.dart';
@@ -20,40 +22,58 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final collection = Provider.of<Collection>(context, listen: false);
+    final settings = Provider.of<Settings>(context, listen: false);
 
     return Scaffold(
-      drawer: const HomeDrawer(),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (scrollInfo) {
-          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-            if (collection.isNotLoading && collection.hasMorePages) {
-              analytics.logScrollToNextPage(page: collection.nextPage);
+        drawer: const HomeDrawer(),
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (scrollInfo) {
+            if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+              if (collection.isNotLoading && collection.hasMorePages) {
+                analytics.logScrollToNextPage(page: collection.nextPage);
 
-              handleFutureError(collection.loadMoreAlbums(), context, log,
-                  error: 'Failed to load collection!', trace: 'load_more');
-            }
-          }
-          return true;
-        },
-        child: ValueListenableProvider<LoadingStatus>.value(
-          value: collection.loadingNotifier,
-          child: RefreshIndicator(
-            //backgroundColor: Theme.of(context).colorScheme.secondary,
-            onRefresh: () {
-              if (collection.isLoading) {
-                return Future.value(null);
+                handleFutureError(collection.loadMoreAlbums(), context, log,
+                    error: 'Failed to load collection!', trace: 'load_more');
               }
-              analytics.logPullToRefresh();
+            }
+            return true;
+          },
+          child: ValueListenableProvider<LoadingStatus>.value(
+            value: collection.loadingNotifier,
+            child: RefreshIndicator(
+              //backgroundColor: Theme.of(context).colorScheme.secondary,
+              onRefresh: () {
+                if (collection.isLoading) {
+                  return Future.value(null);
+                }
+                analytics.logPullToRefresh();
 
-              return handleFutureError(collection.reload(emptyCache: true), context, log,
-                  error: 'Failed to reload collection!', trace: 'reload');
-            },
-            child: const HomeBody(),
+                return handleFutureError(collection.reload(emptyCache: true), context, log,
+                    error: 'Failed to reload collection!', trace: 'reload');
+              },
+              child: const HomeBody(),
+            ),
           ),
         ),
-      ),
-      floatingActionButton: ScrobbleFloatingButton(),
-    );
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            BluosFloatingButton(),
+            ScrobbleFloatingButton(),
+          ],
+        ),
+        endDrawer: SizedBox(
+          width: MediaQuery.of(context).size.width < 400 ? MediaQuery.of(context).size.width : 380,
+          child: Drawer(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: BluOSMonitorControl(
+                defaultPlayer: settings.bluOSPlayer,
+              ),
+            ),
+          ),
+        ));
   }
 }
 

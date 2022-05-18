@@ -11,10 +11,10 @@ import '../mocks/firebase_mocks.dart';
 import '../mocks/model_mocks.dart';
 
 final _prefsInitialValues = <String, Object>{
-  DiscogsSettings.discogsUsernameKey: 'd-test-user',
-  DiscogsSettings.skippedKey: false,
-  LastfmSettings.lastfmUsernameKey: 'l-test-user',
-  LastfmSettings.sessionKeyKey: 'session-key',
+  Settings.discogsUsernameKey: 'd-test-user',
+  Settings.skippedKey: false,
+  Settings.lastfmUsernameKey: 'l-test-user',
+  Settings.lastfmSessionKeyKey: 'session-key',
 };
 
 void main() {
@@ -32,12 +32,8 @@ void main() {
   Widget createAccountsWidget() {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<DiscogsSettings>(
-          create: (_) => DiscogsSettings(prefs),
-          lazy: false,
-        ),
-        ChangeNotifierProvider<LastfmSettings>(
-          create: (_) => LastfmSettings(prefs),
+        ChangeNotifierProvider<Settings>(
+          create: (_) => Settings(prefs),
           lazy: false,
         ),
         Provider<Scrobbler>.value(value: scrobbler),
@@ -70,9 +66,9 @@ void main() {
   }
 
   void checkPreferences(String testDiscogsUsername, String testLastfmUsername, String? testSessionKey) {
-    checkPreference(DiscogsSettings.discogsUsernameKey, testDiscogsUsername);
-    checkPreference(LastfmSettings.lastfmUsernameKey, testLastfmUsername);
-    checkPreference(LastfmSettings.sessionKeyKey, testSessionKey);
+    checkPreference(Settings.discogsUsernameKey, testDiscogsUsername);
+    checkPreference(Settings.lastfmUsernameKey, testLastfmUsername);
+    checkPreference(Settings.lastfmSessionKeyKey, testSessionKey);
   }
 
   void checkUnchanged(String key) {
@@ -80,9 +76,9 @@ void main() {
   }
 
   void checkAllUnchanged() {
-    checkUnchanged(DiscogsSettings.discogsUsernameKey);
-    checkUnchanged(LastfmSettings.lastfmUsernameKey);
-    checkUnchanged(LastfmSettings.sessionKeyKey);
+    checkUnchanged(Settings.discogsUsernameKey);
+    checkUnchanged(Settings.lastfmUsernameKey);
+    checkUnchanged(Settings.lastfmSessionKeyKey);
   }
 
   Future<void> editAndVerify(WidgetTester tester, String testDiscogsUsername, String testLastfmUsername,
@@ -113,8 +109,8 @@ void main() {
     expect(find.byType(TextFormField), findsNWidgets(3));
     expect(find.byType(TextButton), findsOneWidget);
 
-    expect(find.text(prefs.getString(DiscogsSettings.discogsUsernameKey)!), findsOneWidget);
-    expect(find.text(prefs.getString(LastfmSettings.lastfmUsernameKey)!), findsOneWidget);
+    expect(find.text(prefs.getString(Settings.discogsUsernameKey)!), findsOneWidget);
+    expect(find.text(prefs.getString(Settings.lastfmUsernameKey)!), findsOneWidget);
 
     // validates empty fields and doesn\'t save
 
@@ -124,18 +120,21 @@ void main() {
     checkAllUnchanged();
 
     await submitForm(tester, 'new_discogs_username', '', '');
+    expect(find.text(AccountsForm.discogsInvalidUsernameMessage), findsNothing);
     expect(find.text(AccountsForm.lastfmInvalidUsernameMessage), findsOneWidget);
     expect(find.text(AccountsForm.lastfmInvalidPasswordMessage), findsOneWidget);
     checkAllUnchanged();
 
     await submitForm(tester, '', 'new_lastfm_username', '');
-    expect(find.text(AccountsForm.discogsInvalidUsernameMessage), findsOneWidget);
+    expect(find.text(AccountsForm.discogsInvalidUsernameMessage), findsNothing); // empty Discogs allowed now
+    expect(find.text(AccountsForm.lastfmInvalidUsernameMessage), findsNothing);
     expect(find.text(AccountsForm.lastfmInvalidPasswordMessage), findsOneWidget);
     checkAllUnchanged();
 
     await submitForm(tester, '', '', 'new_password');
-    expect(find.text(AccountsForm.discogsInvalidUsernameMessage), findsOneWidget);
+    expect(find.text(AccountsForm.discogsInvalidUsernameMessage), findsNothing); // empty Discogs allowed now
     expect(find.text(AccountsForm.lastfmInvalidUsernameMessage), findsOneWidget);
+    expect(find.text(AccountsForm.lastfmInvalidPasswordMessage), findsNothing);
     checkAllUnchanged();
 
     // saves the new account details'

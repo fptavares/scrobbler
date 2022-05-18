@@ -4,13 +4,13 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     Key? key,
     required this.imagePath,
-    required this.headline,
-    required this.subhead,
+    this.headline,
+    this.subhead,
   }) : super(key: key);
 
   final String imagePath;
-  final String headline;
-  final String subhead;
+  final String? headline;
+  final String? subhead;
 
   @override
   Widget build(BuildContext context) {
@@ -32,26 +32,31 @@ class EmptyState extends StatelessWidget {
           children: <Widget>[
             Flexible(
               flex: 10,
-              child: Image(
-                image: AssetImage(imagePath),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 500),
+                child: Image(
+                  image: AssetImage(imagePath),
+                ),
               ),
             ),
-            const Flexible(flex: 1, child: SizedBox(height: 23.0)),
-            Text(
-              headline,
-              style: theme.textTheme.headline4!.copyWith(
-                color: theme.colorScheme.secondary,
-                fontWeight: FontWeight.w500,
+            if (headline != null) const Flexible(flex: 1, child: SizedBox(height: 23.0)),
+            if (headline != null)
+              Text(
+                headline!,
+                style: theme.textTheme.headline4!.copyWith(
+                  color: theme.colorScheme.secondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            const Flexible(flex: 1, child: SizedBox(height: 8.0)),
-            Text(
-              subhead,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                    color: Colors.black54,
-                  ),
-            ),
+            if (subhead != null) const Flexible(flex: 1, child: SizedBox(height: 8.0)),
+            if (subhead != null)
+              Text(
+                subhead!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      color: Colors.black54,
+                    ),
+              ),
           ],
         ),
       ),
