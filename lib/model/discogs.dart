@@ -185,7 +185,7 @@ class Collection extends ChangeNotifier {
     ),
   );
 
-  static final Logger log = Logger('Collection');
+  static final Logger _log = Logger('Collection');
 
   final String userAgent;
 
@@ -238,19 +238,19 @@ class Collection extends ChangeNotifier {
     _nextPage = 1;
     _totalItems = 0;
     _totalPages = 0;
-    log.fine('Reset collection.');
+    _log.fine('Reset collection.');
     notifyListeners();
   }
 
   void _clearAndAddAlbums(List<CollectionAlbum> albums) {
     _albumList.clear();
-    log.fine('Cleared all albums.');
+    _log.fine('Cleared all albums.');
     _addAlbums(albums);
   }
 
   void _addAlbums(List<CollectionAlbum> albums) {
     _albumList.addAll(albums);
-    log.fine('Added ${albums.length} albums.');
+    _log.fine('Added ${albums.length} albums.');
     notifyListeners();
   }
 
@@ -269,23 +269,23 @@ class Collection extends ChangeNotifier {
     _username = newUsername;
 
     if (_username != null) {
-      log.info('Updated collection username to: $_username, reloading collection.');
+      _log.info('Updated collection username to: $_username, reloading collection.');
       await reload();
     } else {
-      log.info('Collection username was removed.');
+      _log.info('Collection username was removed.');
     }
   }
 
   Future<void> reload({bool emptyCache = false}) async {
     if (isLoading) {
-      log.info('Cannot reload yet because the collection is still loading...');
+      _log.info('Cannot reload yet because the collection is still loading...');
       return;
     }
     if (_username == null) {
       throw UIException('Cannot load albums because the username is empty.');
     }
 
-    log.fine('Reloading collection for $_username...');
+    _log.fine('Reloading collection for $_username...');
 
     _progress.loading();
     try {
@@ -304,15 +304,15 @@ class Collection extends ChangeNotifier {
 
   Future<void> loadMoreAlbums() async {
     if (isLoading) {
-      log.info('Cannot load more yet because the collection is still loading...');
+      _log.info('Cannot load more yet because the collection is still loading...');
       return;
     }
     if (isFullyLoaded) {
-      log.info('Reached last page, not loading any more.');
+      _log.info('Reached last page, not loading any more.');
       return;
     }
     if (_username == null) {
-      log.info('Cannot load albums because the username is empty.');
+      _log.info('Cannot load albums because the username is empty.');
       return;
     }
 
@@ -330,11 +330,11 @@ class Collection extends ChangeNotifier {
 
   Future<void> loadAllAlbums() async {
     if (isLoading) {
-      log.info('Cannot load more yet because the collection is still loading...');
+      _log.info('Cannot load more yet because the collection is still loading...');
       return;
     }
     if (isFullyLoaded) {
-      log.info('Reached last page, not loading any more.');
+      _log.info('Reached last page, not loading any more.');
       return;
     }
     if (_username == null) {
@@ -365,7 +365,7 @@ class Collection extends ChangeNotifier {
   }
 
   Future<List<CollectionAlbum>> _loadCollectionPage(int pageNumber) async {
-    log.info('Started loading albums (page $pageNumber) for $_username...');
+    _log.info('Started loading albums (page $pageNumber) for $_username...');
 
     final page = await _get(
         '/users/$_username/collection/folders/0/releases?sort=added&sort_order=desc&per_page=$_pageSize&page=$pageNumber');
@@ -385,7 +385,7 @@ class Collection extends ChangeNotifier {
   }
 
   Future<AlbumDetails> loadAlbumDetails(int releaseId) async {
-    log.info('Loading album details for: $releaseId');
+    _log.info('Loading album details for: $releaseId');
 
     return AlbumDetails.fromJson(await _get('/releases/$releaseId'));
   }
@@ -409,7 +409,7 @@ class Collection extends ChangeNotifier {
       // If that response was not OK, throw an error.
       throw UIException('The Discogs service is currently unavailable. Please try again later.', e);
     } on FileSystemException catch (e) {
-      log.severe('Failed to read the chached file', e);
+      _log.severe('Failed to read the chached file', e);
       // try falling back to direct download
       final response = await fallbackClient.get(Uri.parse(url), headers: _headers);
       if (response.statusCode != 200) {

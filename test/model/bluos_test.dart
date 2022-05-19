@@ -21,7 +21,7 @@ Future<void> main() async {
       final bluos = BluOS();
       expect(bluos.monitorAddress, isNull);
 
-      final testAddress = 'test:1234';
+      const testAddress = 'test:1234';
 
       // when setting external monitor, the client checks the status immediately
       expectNextExternalMonitorRequest(equals('http://$testAddress/playlist'));
@@ -44,6 +44,6 @@ Future<void> main() async {
 void expectNextExternalMonitorRequest(Matcher matcher, [count = 1]) {
   BluOSExternalMonitorClient.httpClient = MockClient(expectAsync1<Future<http.Response>, http.Request>((request) async {
     expect(request.url.toString(), matcher);
-    return http.Response(JsonEncoder.withIndent(' ').convert(emptyPlaylistResponse), 200);
+    return http.Response(const JsonEncoder.withIndent(' ').convert(emptyPlaylistResponse), 200);
   }, count: count));
 }

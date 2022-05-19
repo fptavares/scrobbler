@@ -54,12 +54,9 @@ class AlbumSearch extends SearchDelegate<CollectionAlbum?> {
 }
 
 class _SearchResultsList extends StatelessWidget {
-  _SearchResultsList({
-    Key? key,
-    required this.query,
-  }) : super(key: key);
+  const _SearchResultsList({required this.query});
 
-  final Logger log = Logger('AlbumSearch');
+  static final Logger _log = Logger('AlbumSearch');
 
   final String query;
 
@@ -69,7 +66,7 @@ class _SearchResultsList extends StatelessWidget {
     // asynchronously load all albums
     if (query.isNotEmpty && collection.isNotFullyLoaded && collection.isNotLoading) {
       analytics.logLoadAllForSearch(amount: collection.totalItems);
-      WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(collection.loadAllAlbums(), context, log,
+      WidgetsBinding.instance.addPostFrameCallback((_) => handleFutureError(collection.loadAllAlbums(), _log,
           trace: 'load_all', error: 'Failed to load the full collection!'));
     }
 

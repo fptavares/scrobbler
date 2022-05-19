@@ -42,11 +42,9 @@ Future<void> main() async {
           ChangeNotifierProvider<Playlist>.value(value: playlist),
         ],
         child: MaterialApp(
-          home: Scaffold(body: HomePage()),
+          home: const Scaffold(body: HomePage()),
           routes: <String, WidgetBuilder>{
-            '/playlist': (_) => Container(
-                  child: const Text('Playlist test'),
-                ),
+            '/playlist': (_) => const Text('Playlist test'),
           },
         ),
       );

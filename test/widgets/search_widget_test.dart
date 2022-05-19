@@ -26,7 +26,7 @@ void main() {
           ChangeNotifierProvider<Playlist>.value(value: playlist),
           ValueListenableProvider<LoadingStatus>.value(value: collection.loadingNotifier),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: Scaffold(
             body: CustomScrollView(
               slivers: <Widget>[HomeAppBar()],

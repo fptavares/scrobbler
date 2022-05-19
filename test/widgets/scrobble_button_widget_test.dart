@@ -39,7 +39,7 @@ void main() {
         child: MaterialApp(
           home: Scaffold(
             body: Container(),
-            floatingActionButton: ScrobbleFloatingButton(),
+            floatingActionButton: const ScrobbleFloatingButton(),
           ),
         ),
       );

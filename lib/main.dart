@@ -95,7 +95,9 @@ Future<void> main() async {
 }
 
 class ScrobblerApp extends StatelessWidget {
-  const ScrobblerApp(this.prefs, this.userAgent);
+  const ScrobblerApp(this.prefs, this.userAgent, {super.key});
+
+  static GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   final SharedPreferences prefs;
   final String userAgent;
@@ -136,29 +138,34 @@ class ScrobblerApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Scrobbler',
         theme: theme.copyWith(
-            colorScheme: theme.colorScheme.copyWith(
-              primary: primaryColor,
-              secondary: secondaryColor,
-            ),
-            primaryColor: primaryColor,
-            disabledColor: disabledColor,
-            progressIndicatorTheme: const ProgressIndicatorThemeData(
-              circularTrackColor: primaryColor,
-              color: secondaryColor,
-              linearTrackColor: disabledColor,
-              refreshBackgroundColor: secondaryColor,
+          colorScheme: theme.colorScheme.copyWith(
+            primary: primaryColor,
+            secondary: secondaryColor,
+          ),
+          primaryColor: primaryColor,
+          disabledColor: disabledColor,
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            circularTrackColor: primaryColor,
+            color: secondaryColor,
+            linearTrackColor: disabledColor,
+            refreshBackgroundColor: secondaryColor,
+          ),
             )),
         home: StartPage(),
+        home: const StartPage(),
         routes: <String, WidgetBuilder>{
-          '/playlist': (_) => PlaylistPage(),
+          '/playlist': (_) => const PlaylistPage(),
         },
         navigatorObservers: [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)],
+        scaffoldMessengerKey: scaffoldMessengerKey,
       ),
     );
   }
 }
 
 class StartPage extends StatelessWidget {
+  const StartPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context);
@@ -166,7 +173,7 @@ class StartPage extends StatelessWidget {
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 1000),
-        child: (settings.discogsUsername != null || settings.isSkipped) ? HomePage() : OnboardingPage(),
+        child: (settings.discogsUsername != null || settings.isSkipped) ? const HomePage() : const OnboardingPage(),
       ),
     );
   }

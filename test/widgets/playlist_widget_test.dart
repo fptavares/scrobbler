@@ -14,7 +14,7 @@ void main() {
     Widget createPlaylist() {
       return ChangeNotifierProvider<Playlist>.value(
         value: playlist,
-        child: MaterialApp(
+        child: const MaterialApp(
           home: PlaylistPage(),
         ),
       );
@@ -33,7 +33,7 @@ void main() {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => PlaylistPage()),
+                          MaterialPageRoute(builder: (_) => const PlaylistPage()),
                         );
                       },
                     ),

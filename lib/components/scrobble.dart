@@ -11,11 +11,9 @@ import 'error.dart';
 import 'rating.dart';
 
 class ScrobbleFloatingButton extends StatelessWidget {
-  ScrobbleFloatingButton({
-    Key? key,
-  }) : super(key: key);
+  const ScrobbleFloatingButton({super.key});
 
-  final Logger log = Logger('ScrobbleFloatingButton');
+  static final Logger _log = Logger('ScrobbleFloatingButton');
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +51,14 @@ class ScrobbleFloatingButton extends StatelessWidget {
       var successful = false;
       await for (int accepted
           in playlist.scrobble(scrobbler, collection, (albums) => showPlaylistOptionsDialog(context, albums))) {
-        displaySuccess(context, 'Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
+        displaySuccess('Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
         successful |= accepted > 0;
       }
       if (successful) {
         ReviewRequester.instance.tryToAskForAppReview();
       }
     } on Exception catch (e, stackTrace) {
-      displayAndLogError(context, log, e, stackTrace);
+      displayAndLogError(_log, e, stackTrace);
     }
   }
 
@@ -70,7 +68,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: true,
-      constraints: BoxConstraints(maxWidth: 500),
+      constraints: const BoxConstraints(maxWidth: 500),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         maxChildSize: 0.9,
@@ -171,6 +169,7 @@ class ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
             },
             child: Tooltip(
               key: _whenToolTipKey,
+              message: ScrobblePlaylistEditor.whenTooltipMessage,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -179,7 +178,6 @@ class ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
                   Icon(Icons.info_outline, size: 20, color: Colors.grey[300]),
                 ],
               ),
-              message: ScrobblePlaylistEditor.whenTooltipMessage,
             ),
           ),
           title: Slider(

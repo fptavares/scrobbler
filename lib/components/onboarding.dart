@@ -7,12 +7,12 @@ import '../model/settings.dart';
 import 'accounts.dart';
 
 class OnboardingPage extends StatelessWidget {
-  OnboardingPage() {
-    analytics.logOnboargding();
-  }
+  const OnboardingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    analytics.logOnboargding();
+
     final controller = PageController(initialPage: 0);
 
     return Scaffold(
@@ -42,8 +42,8 @@ class OnboardingPage extends StatelessWidget {
           ),
           Container(
             color: Colors.amber[50],
-            padding: EdgeInsets.all(50),
-            child: Center(
+            padding: const EdgeInsets.all(50),
+            child: const Center(
               child: SizedBox(
                 width: 400,
                 child: AccountsForm(),
@@ -135,11 +135,11 @@ class WelcomePage extends StatelessWidget {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
               ),
+              onPressed: onPressed,
               child: Text(
                 'Get started',
                 style: Theme.of(context).textTheme.headline6,
               ),
-              onPressed: onPressed,
             ),
           ),
         ),

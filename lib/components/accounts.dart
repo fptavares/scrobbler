@@ -10,6 +10,8 @@ import '../model/settings.dart';
 import 'error.dart';
 
 class AccountsForm extends StatefulWidget {
+  const AccountsForm({Key? key}) : super(key: key);
+
   @override
   AccountsMyCustomFormState createState() {
     return AccountsMyCustomFormState();
@@ -29,9 +31,9 @@ class AccountsForm extends StatefulWidget {
 }
 
 class AccountsMyCustomFormState extends State<AccountsForm> {
-  final _formKey = GlobalKey<FormState>();
+  static final Logger _log = Logger('AccountsForm');
 
-  final Logger log = Logger('AccountsForm');
+  final _formKey = GlobalKey<FormState>();
 
   String? _discogsUsername;
   String? _lastfmUsername;
@@ -147,8 +149,8 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
                       ),
-                      child: const Text('Save accounts'),
                       onPressed: _isSaving ? null : () async => await _handleSave(settings),
+                      child: const Text('Save accounts'),
                     ),
                   ),
                 ],
@@ -177,9 +179,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                       'For more information, and instructions on how to install this, please go to ',
                 ),
                 TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.blue,
-                      ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blue),
                   text: 'github.com/fptavares/scrobbler/pkgs/bluos-monitor',
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async {
@@ -189,19 +189,15 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                       }
                     },
                 ),
-                const TextSpan(
-                  text: '.',
-                ),
+                const TextSpan(text: '.'),
               ],
             ),
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
               child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+              onPressed: () => Navigator.of(context).pop(),
+            )
           ],
         );
       },
@@ -231,10 +227,10 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
         final scrobbler = Provider.of<Scrobbler>(context, listen: false);
 
         settings.lastfmSessionKey = await handleFutureError(
-            scrobbler.initializeSession(_lastfmUsername!, _lastfmPassword!), context, log,
+            scrobbler.initializeSession(_lastfmUsername!, _lastfmPassword!), _log,
             success: AccountsForm.saveSuccessMessage, trace: 'init_lastfm_session');
       } else {
-        displaySuccess(context, AccountsForm.saveSuccessMessage);
+        displaySuccess(AccountsForm.saveSuccessMessage);
       }
 
       setState(() => _isSaving = false);

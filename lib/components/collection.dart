@@ -6,6 +6,8 @@ import 'album.dart';
 import 'emtpy.dart';
 
 class CollectionGrid extends StatelessWidget {
+  const CollectionGrid({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
@@ -32,7 +34,7 @@ class CollectionGrid extends StatelessWidget {
 }
 
 class CollectionLoadingStatus extends StatelessWidget {
-  const CollectionLoadingStatus();
+  const CollectionLoadingStatus({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +67,7 @@ class CollectionLoadingStatus extends StatelessWidget {
                   );
           }
 
-          return Container(
+          return SizedBox(
             height: 80,
             child: Center(
               child: collection.isLoading

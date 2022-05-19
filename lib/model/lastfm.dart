@@ -15,7 +15,7 @@ import 'discogs.dart';
 class Scrobbler {
   Scrobbler(this.userAgent);
 
-  final Logger log = Logger('Scrobbler');
+  static final Logger _log = Logger('Scrobbler');
 
   final String userAgent;
 
@@ -29,12 +29,12 @@ class Scrobbler {
   void updateSessionKey(String? value) {
     if (value != _sessionKey) {
       _sessionKey = value;
-      log.info('Updated session key to: $value');
+      _log.info('Updated session key to: $value');
     }
   }
 
   Future<String> initializeSession(String username, String password) async {
-    log.info('Initializing Last.fm session for $username...');
+    _log.info('Initializing Last.fm session for $username...');
     try {
       final response = await _postRequest({
         'method': 'auth.getMobileSession',
@@ -47,11 +47,11 @@ class Scrobbler {
         final dynamic jsonResponse = json.decode(response.body);
 
         _sessionKey = jsonResponse['session']['key'] as String;
-        log.info('Received new Last.fm session key: $_sessionKey');
+        _log.info('Received new Last.fm session key: $_sessionKey');
 
         return _sessionKey!;
       } else {
-        log.info('Error response (${response.statusCode}): ${response.body}');
+        _log.info('Error response (${response.statusCode}): ${response.body}');
         // If that response was not OK, throw an error.
         final errorCode = json.decode(response.body)['error'];
         throw UIException(errorCode == 4
@@ -129,7 +129,7 @@ class Scrobbler {
     if (scrobbles.isEmpty) {
       return 0;
     }
-    log.info('Posting ${scrobbles.length} tracks to Last.fm...');
+    _log.info('Posting ${scrobbles.length} tracks to Last.fm...');
     http.Response? response;
     try {
       response = await _postRequest(<String, String>{
@@ -144,11 +144,11 @@ class Scrobbler {
 
         final dynamic accepted = jsonResponse['scrobbles']['@attr']['accepted'];
         final dynamic ignored = jsonResponse['scrobbles']['@attr']['ignored'];
-        log.fine('Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
+        _log.fine('Scrobbled ${scrobbles.length} tracks: $accepted accepted, $ignored ignored.');
 
         return accepted as int;
       } else {
-        log.info('Error response from Last.fm (${response.statusCode}): ${response.body}');
+        _log.info('Error response from Last.fm (${response.statusCode}): ${response.body}');
         // If that response was not OK, throw an error.
         final errorCode = json.decode(response.body)['error'];
         throw UIException(<int>[4, 9, 14].contains(errorCode)
@@ -158,7 +158,7 @@ class Scrobbler {
     } on SocketException catch (e) {
       throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
     } on FormatException catch (e, stackTrace) {
-      log.severe('Failed to parse the Last.fm response: ${response!.body}', e, stackTrace);
+      _log.severe('Failed to parse the Last.fm response: ${response!.body}', e, stackTrace);
 
       if (response.statusCode == 200) {
         // assume full success in case accepted can't be parsed

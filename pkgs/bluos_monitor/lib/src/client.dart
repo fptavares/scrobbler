@@ -40,7 +40,7 @@ class BluOSAPIMonitor implements BluOSMonitor {
 
   static http.Client httpClient = http.Client();
 
-  static final _log = Logger('BluOSClient');
+  static final _log = Logger('BluOSAPIMonitor');
 
   final int timeout = 100;
 

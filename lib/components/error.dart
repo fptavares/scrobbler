@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:scrobbler/main.dart';
 
 import '../model/analytics.dart';
 
-void displayAndLogError(BuildContext context, Logger logger, Object e, StackTrace stackTrace, [String? message]) {
+void displayAndLogError(Logger logger, Object e, StackTrace stackTrace, [String? message]) {
   final errorMessage = e is UIException
       ? e.message
       : message ??
@@ -20,26 +22,26 @@ void displayAndLogError(BuildContext context, Logger logger, Object e, StackTrac
     logger.warning(errorMessage, e.exception, stackTrace);
   }
 
-  displayError(context, errorMessage);
+  displayError(errorMessage);
 }
 
-void displayError(BuildContext context, String errorMessage) {
-  final scaffoldMsg = ScaffoldMessenger.of(context);
-  scaffoldMsg.removeCurrentSnackBar();
-  scaffoldMsg.showSnackBar(SnackBar(
+void displayError(String errorMessage) {
+  final scaffoldMsg = ScrobblerApp.scaffoldMessengerKey.currentState;
+  scaffoldMsg?.removeCurrentSnackBar();
+  scaffoldMsg?.showSnackBar(SnackBar(
     content: Text(errorMessage),
     backgroundColor: Colors.red,
   ));
 }
 
-void displaySuccess(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+void displaySuccess(String message) {
+  ScrobblerApp.scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
     content: Text(message),
     backgroundColor: Colors.green,
   ));
 }
 
-Future<T?> handleFutureError<T>(Future<T> future, BuildContext context, Logger logger,
+Future<T?> handleFutureError<T>(Future<T> future, Logger logger,
     {String? error, String? success, String? trace}) async {
   Trace? callTrace;
   if (trace != null) {
@@ -50,11 +52,11 @@ Future<T?> handleFutureError<T>(Future<T> future, BuildContext context, Logger l
   try {
     final result = await future;
     if (success != null) {
-      displaySuccess(context, success);
+      displaySuccess(success);
     }
     return result;
   } on Exception catch (e, stackTrace) {
-    displayAndLogError(context, logger, e, stackTrace, error);
+    displayAndLogError(logger, e, stackTrace, error);
   } finally {
     callTrace?.stop();
   }

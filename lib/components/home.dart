@@ -15,9 +15,9 @@ import 'scrobble.dart';
 import 'search.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
-  final Logger log = Logger('HomePage');
+  static final Logger _log = Logger('HomePage');
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class HomePage extends StatelessWidget {
               if (collection.isNotLoading && collection.hasMorePages) {
                 analytics.logScrollToNextPage(page: collection.nextPage);
 
-                handleFutureError(collection.loadMoreAlbums(), context, log,
+                handleFutureError(collection.loadMoreAlbums(), _log,
                     error: 'Failed to load collection!', trace: 'load_more');
               }
             }
@@ -48,7 +48,7 @@ class HomePage extends StatelessWidget {
                 }
                 analytics.logPullToRefresh();
 
-                return handleFutureError(collection.reload(emptyCache: true), context, log,
+                return handleFutureError(collection.reload(emptyCache: true), _log,
                     error: 'Failed to reload collection!', trace: 'reload');
               },
               child: const HomeBody(),
@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
+          children: const [
             BluosFloatingButton(),
             ScrobbleFloatingButton(),
           ],
@@ -78,24 +78,24 @@ class HomePage extends StatelessWidget {
 }
 
 class HomeBody extends StatelessWidget {
-  const HomeBody();
+  const HomeBody({super.key});
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       controller: PrimaryScrollController.of(context),
-      slivers: <Widget>[
+      slivers: const [
         HomeAppBar(),
         CollectionGrid(),
-        const CollectionLoadingStatus(),
+        CollectionLoadingStatus(),
       ],
     );
   }
 }
 
 class HomeAppBar extends StatelessWidget {
-  final Logger log = Logger('HomeAppBar');
+  const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,11 +114,7 @@ class HomeAppBar extends StatelessWidget {
         ],
         title: GestureDetector(
           onTap: () => PrimaryScrollController.of(context)!
-              .animateTo(
-                0,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              )
+              .animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut)
               .then((_) => analytics.logTapLogo()),
           child: SafeArea(
             key: const Key('logo'),
@@ -190,7 +186,7 @@ class HomeAppBar extends StatelessWidget {
 }
 
 class HomeDrawer extends StatelessWidget {
-  const HomeDrawer();
+  const HomeDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +197,7 @@ class HomeDrawer extends StatelessWidget {
           backgroundColor: Theme.of(context).primaryColor,
         ),
         backgroundColor: Colors.transparent,
-        body: AccountsForm(),
+        body: const AccountsForm(),
       ),
     );
   }

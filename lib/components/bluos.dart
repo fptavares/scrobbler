@@ -13,11 +13,7 @@ import 'error.dart';
 import 'rating.dart';
 
 class BluosFloatingButton extends StatelessWidget {
-  BluosFloatingButton({
-    Key? key,
-  }) : super(key: key);
-
-  final Logger log = Logger('BluosFloatingButton');
+  const BluosFloatingButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +53,11 @@ class BluOSMonitorControl extends StatefulWidget {
   final BluOSPlayer? defaultPlayer;
 
   @override
-  BluOSMonitorControlState createState() => BluOSMonitorControlState(defaultPlayer);
+  BluOSMonitorControlState createState() => BluOSMonitorControlState();
 }
 
 class BluOSMonitorControlState extends State<BluOSMonitorControl> {
-  BluOSMonitorControlState(BluOSPlayer? defaultPlayer) : _selectedPlayer = defaultPlayer;
-
-  final Logger log = Logger('BluosPlaylistEditor');
+  static final Logger _log = Logger('BluosPlaylistEditor');
 
   final Map<int, bool> _includeMask = {};
   BluOSPlayer? _selectedPlayer;
@@ -72,6 +66,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
 
   @override
   Widget build(BuildContext context) {
+    _selectedPlayer ??= widget.defaultPlayer;
+
     return Consumer<BluOS>(
       builder: (context, bluos, _) {
         final playlist = bluos.playlist.reversed.toList();
@@ -85,7 +81,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 : const Image(image: AssetImage('assets/bluos_small.png'), height: 45),
             actions: [
               IconButton(
-                onPressed: bluos.canReload ? () => handleFutureError(bluos.refresh(), context, log) : null,
+                onPressed:
+                    bluos.canReload ? () => handleFutureError(bluos.refresh(), _log, trace: 'bluos_refresh') : null,
                 icon: const Icon(Icons.refresh),
               )
             ],
@@ -103,11 +100,11 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                               imagePath: 'assets/empty_playlist.png',
                               subhead: 'Start monitoring a BluOS device to scrobble the tracks that are played there.',
                             )
-                          : _createPlaylistEditor(playlist, scrobbableCount),
+                          : _createPlaylistEditor(context, playlist, scrobbableCount),
                 ),
                 const Divider(),
-                if (bluos.errorMessage != null && bluos.isPolling) _createErrorTile(bluos.errorMessage),
-                if (!bluos.isPolling) _createPlayerSelector(),
+                if (bluos.errorMessage != null && bluos.isPolling) _createErrorTile(context, bluos.errorMessage),
+                if (!bluos.isPolling) _createPlayerSelector(context),
                 _createControlButtonsTile(context, bluos, scrobbableCount),
               ],
             ),
@@ -117,7 +114,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     );
   }
 
-  Widget _createPlaylistEditor(List<BluOSTrack> playlist, int scrobbableCount) {
+  Widget _createPlaylistEditor(BuildContext context, List<BluOSTrack> playlist, int scrobbableCount) {
     return ListView(
       controller: ScrollController(),
       children: <Widget>[
@@ -167,7 +164,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     );
   }
 
-  Widget _createErrorTile(String? message) {
+  Widget _createErrorTile(BuildContext context, String? message) {
     return ListTile(
       dense: true,
       leading: const Icon(Icons.error, color: Colors.red),
@@ -175,7 +172,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     );
   }
 
-  Widget _createPlayerSelector() {
+  Widget _createPlayerSelector(BuildContext context) {
     return ListTile(
       dense: true,
       title: _isScanningPlayers
@@ -200,7 +197,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
       trailing: TextButton.icon(
         icon: const Icon(Icons.search),
         label: const Text('Scan'),
-        onPressed: _isScanningPlayers ? null : _handleScan,
+        onPressed: _isScanningPlayers ? null : () => _handleScan(context),
       ),
     );
   }
@@ -215,7 +212,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
               ),
-              onPressed: bluos.isLoading ? null : () => handleFutureError(bluos.stop(), context, log),
+              onPressed: bluos.isLoading ? null : () => handleFutureError(bluos.stop(), _log, trace: 'bluos_stop'),
             )
           : TextButton.icon(
               icon: const Icon(Icons.start, size: 20),
@@ -233,8 +230,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
         ),
-        child: const Text('Submit'),
         onPressed: bluos.isLoading || scrobbableCount == 0 ? null : () => _handleSubmit(context, bluos),
+        child: const Text('Submit'),
       ),
     );
   }
@@ -243,14 +240,14 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     final settings = Provider.of<Settings>(context, listen: false);
     settings.bluOSPlayer = player;
 
-    await handleFutureError(bluos.start(player.host, player.port, player.name), context, log);
+    await handleFutureError(bluos.start(player.host, player.port, player.name), _log, trace: 'bluos_start');
   }
 
-  Future<void> _handleScan() async {
+  Future<void> _handleScan(BuildContext context) async {
     setState(() {
       _isScanningPlayers = true;
     });
-    final players = await handleFutureError(BluOSPlayer.lookupBluOSPlayers(), context, log);
+    final players = await handleFutureError(BluOSPlayer.lookupBluOSPlayers(), _log, trace: 'bluos_discovery');
     setState(() {
       _isScanningPlayers = false;
       _availablePlayers = players;
@@ -259,7 +256,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
       }
     });
     if (players != null && players.isEmpty) {
-      displayError(context, 'No BluOS players were found in your network.');
+      displayError('No BluOS players were found in your network.');
     }
   }
 
@@ -269,7 +266,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     try {
       var successful = false;
       await for (int accepted in scrobbler.scrobbleBluOSTracks(_getTracksToScrobble(bluos.playlist))) {
-        displaySuccess(context, 'Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
+        displaySuccess('Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
         successful |= accepted > 0;
       }
 
@@ -282,7 +279,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
         ReviewRequester.instance.tryToAskForAppReview();
       }
     } on Exception catch (e, stackTrace) {
-      displayAndLogError(context, log, e, stackTrace);
+      displayAndLogError(_log, e, stackTrace);
     }
   }
 

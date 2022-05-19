@@ -33,7 +33,7 @@ class EmptyState extends StatelessWidget {
             Flexible(
               flex: 10,
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 500),
+                constraints: const BoxConstraints(maxWidth: 500),
                 child: Image(
                   image: AssetImage(imagePath),
                 ),

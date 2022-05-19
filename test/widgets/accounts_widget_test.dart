@@ -38,7 +38,7 @@ void main() {
         ),
         Provider<Scrobbler>.value(value: scrobbler),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         home: Scaffold(
           body: AccountsForm(),
         ),

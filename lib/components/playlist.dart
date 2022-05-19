@@ -7,6 +7,8 @@ import 'emtpy.dart';
 import 'scrobble.dart';
 
 class PlaylistPage extends StatelessWidget {
+  const PlaylistPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final playlist = Provider.of<Playlist>(context);
@@ -35,9 +37,9 @@ class PlaylistPage extends StatelessWidget {
                   headline: PlaylistPage.emptyHeadlineMessage,
                   subhead: PlaylistPage.emptySubheadMessage,
                 )
-              : _PlaylistList(playlist: playlist),
+              : _PlaylistList(playlist),
         ),
-        floatingActionButton: ScrobbleFloatingButton(),
+        floatingActionButton: const ScrobbleFloatingButton(),
       ),
     );
   }
@@ -49,10 +51,7 @@ class PlaylistPage extends StatelessWidget {
 }
 
 class _PlaylistList extends StatelessWidget {
-  const _PlaylistList({
-    Key? key,
-    required this.playlist,
-  }) : super(key: key);
+  const _PlaylistList(this.playlist);
 
   final Playlist playlist;
 

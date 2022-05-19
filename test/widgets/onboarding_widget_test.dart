@@ -26,7 +26,7 @@ void main() {
         providers: [
           ChangeNotifierProvider<Settings>.value(value: settings),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: Scaffold(
             body: OnboardingPage(),
           ),

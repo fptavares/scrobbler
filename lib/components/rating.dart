@@ -10,7 +10,7 @@ class ReviewRequester {
   @visibleForTesting
   static InAppReview appReview = InAppReview.instance;
 
-  final _log = Logger('ReviewRequester');
+  static final _log = Logger('ReviewRequester');
 
   Future<void> tryToAskForAppReview() async {
     try {
