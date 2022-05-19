@@ -150,8 +150,8 @@ class ScrobblerApp extends StatelessWidget {
             linearTrackColor: disabledColor,
             refreshBackgroundColor: secondaryColor,
           ),
-            )),
-        home: StartPage(),
+          tooltipTheme: const TooltipThemeData(waitDuration: Duration(milliseconds: 700)),
+        ),
         home: const StartPage(),
         routes: <String, WidgetBuilder>{
           '/playlist': (_) => const PlaylistPage(),
