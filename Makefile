@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons screenshots mocks clean
+.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons screenshots mocks firebaseOptions clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
 ASSETS = $(wildcard assets/**)
@@ -58,6 +58,9 @@ screenshots:
 
 mocks:
 	flutter pub run build_runner build
+
+firebaseOptions:
+	flutter pub run tool/generate_firebase_options_file.dart
 
 clean:
 	flutter clean
