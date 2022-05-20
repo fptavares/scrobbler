@@ -81,9 +81,10 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 : const Image(image: AssetImage('assets/bluos_small.png'), height: 45),
             actions: [
               IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Refresh',
                 onPressed:
                     bluos.canReload ? () => handleFutureError(bluos.refresh(), _log, trace: 'bluos_refresh') : null,
-                icon: const Icon(Icons.refresh),
               )
             ],
           ),
