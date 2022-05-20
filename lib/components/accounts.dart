@@ -180,10 +180,10 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                 ),
                 TextSpan(
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blue),
-                  text: 'github.com/fptavares/scrobbler/pkgs/bluos-monitor',
+                  text: 'github.com/fptavares/scrobbler/pkgs/bluos_monitor_server',
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async {
-                      final url = Uri.https('github.com', '/fptavares/scrobbler/pkgs/bluos-monitor');
+                      final url = Uri.https('github.com', '/fptavares/scrobbler/pkgs/bluos_monitor_server');
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url);
                       }
