@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
@@ -15,7 +17,7 @@ import 'scrobble.dart';
 import 'search.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   static final Logger _log = Logger('HomePage');
 
@@ -97,8 +99,12 @@ class HomeBody extends StatelessWidget {
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
 
+  static final Logger _log = Logger('HomeAppBar');
+
   @override
   Widget build(BuildContext context) {
+    final collection = Provider.of<Collection>(context, listen: false);
+
     return SliverAppBar(
       stretch: true,
       pinned: true,
@@ -173,13 +179,20 @@ class HomeAppBar extends StatelessWidget {
           builder: (context, collection, _) => IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Search',
-            onPressed: (collection.isNotEmpty)
-                ? () async {
-                    await showSearch(context: context, delegate: AlbumSearch());
-                  }
-                : null,
+            onPressed: collection.isNotEmpty ? () => showSearch(context: context, delegate: AlbumSearch()) : null,
           ),
         ),
+        if (Platform.isMacOS || Platform.isLinux || Platform.isWindows)
+          Consumer<LoadingStatus>(
+            builder: (context, status, _) => IconButton(
+              icon: const Icon(Icons.refresh_outlined),
+              tooltip: 'Reload collection',
+              onPressed: collection.isNotLoading
+                  ? () => handleFutureError(collection.reload(emptyCache: true), _log,
+                      error: 'Failed to reload collection!', trace: 'reload')
+                  : null,
+            ),
+          )
       ],
     );
   }
