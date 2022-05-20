@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/components/rating.dart';
 import 'package:scrobbler/components/scrobble.dart';
+import 'package:scrobbler/main.dart';
 import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/playlist.dart';
@@ -41,6 +42,7 @@ void main() {
             body: Container(),
             floatingActionButton: const ScrobbleFloatingButton(),
           ),
+          scaffoldMessengerKey: ScrobblerApp.scaffoldMessengerKey,
         ),
       );
     }

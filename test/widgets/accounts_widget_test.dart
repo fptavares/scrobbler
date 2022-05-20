@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler/components/accounts.dart';
+import 'package:scrobbler/main.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,10 +39,11 @@ void main() {
         ),
         Provider<Scrobbler>.value(value: scrobbler),
       ],
-      child: const MaterialApp(
-        home: Scaffold(
+      child: MaterialApp(
+        home: const Scaffold(
           body: AccountsForm(),
         ),
+        scaffoldMessengerKey: ScrobblerApp.scaffoldMessengerKey,
       ),
     );
   }
