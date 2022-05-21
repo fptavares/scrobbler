@@ -33,7 +33,7 @@ dependencies:
   in_app_review: ^2.0.4
   logging: ^1.0.2
   multicast_dns: ^0.3.2
-  package_info: ^2.0.2
+  package_info_plus: ^1.4.2
   provider: ^6.0.2
   scrobbler_bluos_monitor:
     path: pkgs/bluos_monitor
