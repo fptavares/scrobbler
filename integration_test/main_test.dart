@@ -38,7 +38,7 @@ void main() {
     final config = Config('testCache');
     Collection.cache = CacheManager.custom(config,
         webHelper: WebHelper(CacheStore(config), HttpFileService(httpClient: StaticCollectionHttpClient())));
-    Collection.cache.emptyCache();
+    await Collection.cache.emptyCache();
 
     if (Platform.isIOS) {
       // Even though the images used are not eligible for copyright,

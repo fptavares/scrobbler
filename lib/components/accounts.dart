@@ -162,8 +162,8 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
     );
   }
 
-  _showMoreAboutMonitor(BuildContext context) async {
-    showDialog<void>(
+  Future<void> _showMoreAboutMonitor(BuildContext context) async {
+    await showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(

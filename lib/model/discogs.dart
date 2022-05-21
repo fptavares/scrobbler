@@ -290,7 +290,7 @@ class Collection extends ChangeNotifier {
     _progress.loading();
     try {
       if (emptyCache) {
-        cache.emptyCache();
+        await cache.emptyCache();
       }
       _clearAndAddAlbums(await _loadCollectionPage(1));
       _nextPage = 2;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -25,7 +27,7 @@ class BluosFloatingButton extends StatelessWidget {
     }
 
     return FloatingActionButton(
-      onPressed: () => handleClick(context),
+      onPressed: () => _handleClick(context),
       tooltip: 'BluOS',
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
@@ -36,9 +38,9 @@ class BluosFloatingButton extends StatelessWidget {
     );
   }
 
-  Future<void> handleClick(BuildContext context) async {
+  Future<void> _handleClick(BuildContext context) async {
     final bluos = Provider.of<BluOS>(context, listen: false);
-    bluos.refresh();
+    unawaited(bluos.refresh());
 
     Scaffold.of(context).openEndDrawer();
   }
@@ -277,7 +279,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
       await bluos.clear(latestTimestamp);
 
       if (successful) {
-        ReviewRequester.instance.tryToAskForAppReview();
+        unawaited(Future.delayed(const Duration(seconds: 1), ReviewRequester.instance.tryToAskForAppReview));
       }
     } on Exception catch (e, stackTrace) {
       displayAndLogError(_log, e, stackTrace);

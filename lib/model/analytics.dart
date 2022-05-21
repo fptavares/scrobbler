@@ -14,8 +14,8 @@ class ScrobblerAnalytics {
 
   bool performanceEnabled = true;
 
-  final Future<void> Function({AnalyticsCallOptions callOptions, String loginMethod}) logLogin = analytics.logLogin;
-  final Future<void> Function({AnalyticsCallOptions callOptions}) logAppOpen = analytics.logAppOpen;
+  void logLogin({String? loginMethod}) => analytics.logLogin(loginMethod: loginMethod);
+  void logAppOpen() => analytics.logAppOpen();
 
   void logException(String description) {
     analytics.logEvent(name: 'exception', parameters: {'exDescription': description});

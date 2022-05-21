@@ -46,7 +46,7 @@ Future<T?> handleFutureError<T>(Future<T> future, Logger logger,
   Trace? callTrace;
   if (trace != null) {
     callTrace = analytics.newTrace(trace);
-    callTrace.start();
+    unawaited(callTrace.start());
   }
 
   try {
@@ -58,7 +58,7 @@ Future<T?> handleFutureError<T>(Future<T> future, Logger logger,
   } on Exception catch (e, stackTrace) {
     displayAndLogError(logger, e, stackTrace, error);
   } finally {
-    callTrace?.stop();
+    unawaited(callTrace?.stop());
   }
   return Future<T?>.value(null);
 }

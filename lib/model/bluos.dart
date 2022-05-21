@@ -56,7 +56,7 @@ class BluOS extends ChangeNotifier implements BluOSMonitor {
   @override
   Future<void> start(String host, int port, [String? name, bool? stopWhenPlayerStops]) async {
     if (_client.isPolling) {
-      _client.stop(); // stop the current player before starting again
+      await _client.stop(); // stop the current player before starting again
     }
 
     final address = monitorAddress;

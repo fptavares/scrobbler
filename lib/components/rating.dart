@@ -15,7 +15,7 @@ class ReviewRequester {
   Future<void> tryToAskForAppReview() async {
     try {
       if (await appReview.isAvailable()) {
-        appReview.requestReview();
+        await appReview.requestReview();
       }
     } catch (e, stackTrace) {
       _log.severe('Requesting app review failed.', e, stackTrace);

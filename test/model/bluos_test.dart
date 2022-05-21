@@ -41,7 +41,7 @@ Future<void> main() async {
   });
 }
 
-void expectNextExternalMonitorRequest(Matcher matcher, [count = 1]) {
+void expectNextExternalMonitorRequest(Matcher matcher, [int count = 1]) {
   BluOSExternalMonitorClient.httpClient = MockClient(expectAsync1<Future<http.Response>, http.Request>((request) async {
     expect(request.url.toString(), matcher);
     return http.Response(const JsonEncoder.withIndent(' ').convert(emptyPlaylistResponse), 200);

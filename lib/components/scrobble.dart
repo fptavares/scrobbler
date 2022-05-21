@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -55,7 +57,7 @@ class ScrobbleFloatingButton extends StatelessWidget {
         successful |= accepted > 0;
       }
       if (successful) {
-        ReviewRequester.instance.tryToAskForAppReview();
+        unawaited(Future.delayed(const Duration(seconds: 1), ReviewRequester.instance.tryToAskForAppReview));
       }
     } on Exception catch (e, stackTrace) {
       displayAndLogError(_log, e, stackTrace);
