@@ -136,10 +136,10 @@ class BluOSAPITrack extends BluOSTrack {
   }
 
   @override
-  bool operator ==(other) => hashCode == other.hashCode;
+  bool operator ==(Object other) => hashCode == other.hashCode;
 
   @override
-  int get hashCode => "$playId$artist$title".hashCode;
+  int get hashCode => '$playId$artist$title'.hashCode;
 
   static int _nowTimestamp() => (DateTime.now().millisecondsSinceEpoch / 1000).floor();
 }
