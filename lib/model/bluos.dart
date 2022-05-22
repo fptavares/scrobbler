@@ -30,7 +30,7 @@ class BluOS extends ChangeNotifier implements BluOSMonitor {
   @override
   List<BluOSTrack> get playlist => _client.playlist;
 
-  void updateMonitorAddress(String? address) {
+  Future<void> updateMonitorAddress(String? address) async {
     if (address != null && address.trim().isEmpty) {
       address = null; // make sure empty (i.e. no) adress is always saved as null
     }
@@ -39,13 +39,9 @@ class BluOS extends ChangeNotifier implements BluOSMonitor {
       monitorAddress = address;
       _log.info('Updated BluOS monitor address to: $address');
 
-      if (address != null) {
-        if (!_client.isPolling) {
-          _client = BluOSExternalMonitorClient.withAddressAndNotifier(address, notifyListeners);
-        }
-        if (_client.canReload) {
-          _client.refresh();
-        }
+      if (address != null && !_client.isPolling) {
+        _client = BluOSExternalMonitorClient.withAddressAndNotifier(address, notifyListeners);
+        await _client.refresh();
       }
     }
   }
@@ -92,18 +88,18 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
 
   String? _monitorAddress;
 
-  @override
-  List<BluOSMonitorTrack> playlist = [];
+  List<BluOSMonitorTrack> _playlist = [];
   bool _isLoading = false;
   bool _isPolling = false;
   String? _playerName;
-  String? playerState;
-  @override
-  String? errorMessage;
+  //String? _playerState;
+  String? _errorMessage;
 
   // ignore: prefer_function_declarations_over_variables
   void Function() _notifyListeners = () {};
 
+  @override
+  List<BluOSMonitorTrack> get playlist => _playlist;
   @override
   bool get isLoading => _isLoading;
   @override
@@ -111,11 +107,13 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
   @override
   String? get playerName => _playerName;
   @override
+  String? get errorMessage => _errorMessage;
+  @override
   bool get canReload => true;
 
   @override
   Future<void> start(String host, int port, [String? name, bool? _]) async {
-    await _get('/start/$host/$port', {if (name != null) 'name': name});
+    await _get('/start/$host/$port', name != null ? {'name': name} : null);
   }
 
   @override
@@ -141,10 +139,10 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
 
       _isPolling = status['isPolling'] as bool;
       _playerName = status['playerName'] as String?;
-      playerState = status['playerState'] as String?;
-      errorMessage = status['errorMessage'] as String?;
+      //_playerState = status['playerState'] as String?;
+      _errorMessage = status['errorMessage'] as String?;
 
-      playlist = (status['playlist'] as List<dynamic>).map((track) => BluOSMonitorTrack.fromJson(track)).toList();
+      _playlist = (status['playlist'] as List<dynamic>).map((track) => BluOSMonitorTrack.fromJson(track)).toList();
     } on SocketException catch (error) {
       throw UIException('Could not connect to $address.', error);
     } catch (error) {
@@ -163,20 +161,13 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
 
 class BluOSMonitorTrack extends BluOSTrack {
   BluOSMonitorTrack({
-    required timestamp,
-    required artist,
-    album,
-    required title,
-    imageUrl,
+    required super.timestamp,
+    required super.artist,
+    super.album,
+    required super.title,
+    super.imageUrl,
     required isScrobbable,
-  })  : _isScrobbable = isScrobbable,
-        super(
-          timestamp: timestamp,
-          artist: artist,
-          album: album,
-          title: title,
-          imageUrl: imageUrl,
-        );
+  }) : _isScrobbable = isScrobbable;
 
   factory BluOSMonitorTrack.fromJson(Map<String, dynamic> track) {
     return BluOSMonitorTrack(
