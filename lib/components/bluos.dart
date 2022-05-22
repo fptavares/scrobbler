@@ -279,7 +279,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
       await bluos.clear(latestTimestamp);
 
       if (successful) {
-        unawaited(Future.delayed(const Duration(seconds: 1), ReviewRequester.instance.tryToAskForAppReview));
+        unawaited(ReviewRequester.instance.tryToAskForAppReview());
       }
     } on Exception catch (e, stackTrace) {
       displayAndLogError(_log, e, stackTrace);

@@ -5,6 +5,8 @@ import 'package:logging/logging.dart';
 class ReviewRequester {
   ReviewRequester._();
 
+  final delay = const Duration(seconds: 1);
+
   static final ReviewRequester instance = ReviewRequester._();
 
   @visibleForTesting
@@ -15,7 +17,7 @@ class ReviewRequester {
   Future<void> tryToAskForAppReview() async {
     try {
       if (await appReview.isAvailable()) {
-        await appReview.requestReview();
+        await Future.delayed(delay, appReview.requestReview);
       }
     } catch (e, stackTrace) {
       _log.severe('Requesting app review failed.', e, stackTrace);
