@@ -38,7 +38,7 @@ class BluOSAPIMonitor implements BluOSMonitor {
   static const Duration initialRetryDelay = Duration(seconds: 30);
   static const Duration maxRetryDelay = Duration(minutes: 2);
 
-  static http.Client httpClient = http.Client();
+  http.Client httpClient = http.Client();
 
   static final _log = Logger('BluOSAPIMonitor');
 

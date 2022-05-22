@@ -23,3 +23,5 @@ MockFile createMockFile(String Function() readCallback) {
   when(file.readAsStringSync()).thenAnswer((_) => readCallback());
   return file;
 }
+
+MockClient createMockHttpClient() => MockClient();

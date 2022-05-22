@@ -9,84 +9,80 @@ import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
 
 import '../components/error.dart';
 
-class BluOS extends ChangeNotifier implements BluOSMonitor {
+class BluOS extends ChangeNotifier {
   static final Logger _log = Logger('BluOS');
 
-  BluOSMonitor _client = BluOSAPIMonitor();
+  BluOS({BluOSAPIMonitor? apiMonitor}) {
+    _client = apiMonitorInstance = apiMonitor ?? BluOSAPIMonitor.withNotifier(notifyListeners);
+  }
 
-  String? monitorAddress;
+  @visibleForTesting
+  late final BluOSAPIMonitor apiMonitorInstance;
+  @visibleForTesting
+  BluOSExternalMonitorClient? externalMonitorClientInstance;
 
-  @override
+  late BluOSMonitor _client;
+
   bool get isLoading => _client.isLoading;
-  @override
   bool get isPolling => _client.isPolling;
-  @override
   String? get playerName => _client.playerName;
-  @override
   String? get errorMessage => _client.errorMessage;
-  @override
   bool get canReload => _client.canReload;
 
-  @override
   List<BluOSTrack> get playlist => _client.playlist;
 
-  Future<void> updateMonitorAddress(String? address) async {
-    if (address != null && address.trim().isEmpty) {
+  void updateMonitorAddress(String? address) {
+    address = address?.trim();
+    if (address != null && address.isEmpty) {
       address = null; // make sure empty (i.e. no) adress is always saved as null
     }
 
-    if (address != monitorAddress) {
-      monitorAddress = address;
-      _log.info('Updated BluOS monitor address to: $address');
-
-      if (address != null && !_client.isPolling) {
-        _client = BluOSExternalMonitorClient.withAddressAndNotifier(address, notifyListeners);
-        await _client.refresh();
+    if (address != externalMonitorClientInstance?.monitorAddress) {
+      if (address == null) {
+        externalMonitorClientInstance = null;
+        _log.info('Removed external BluOS monitor');
+      } else {
+        externalMonitorClientInstance = BluOSExternalMonitorClient.withAddressAndNotifier(address, notifyListeners);
+        _log.info('Updated external BluOS monitor address to: $address');
       }
     }
   }
 
-  @override
-  Future<void> refresh() => _client.refresh();
+  Future<void> refresh() async {
+    if (!_client.isPolling) {
+      _client = externalMonitorClientInstance ?? apiMonitorInstance;
+    }
+    await _client.refresh();
+  }
 
-  @override
   Future<void> start(String host, int port, [String? name, bool? stopWhenPlayerStops]) async {
     if (_client.isPolling) {
       await _client.stop(); // stop the current player before starting again
     }
 
-    final address = monitorAddress;
-    if (address == null || address.trim().isEmpty) {
-      _client = BluOSAPIMonitor.withNotifier(notifyListeners);
-    } else {
-      _client = BluOSExternalMonitorClient.withAddressAndNotifier(address, notifyListeners);
-    }
+    _client = externalMonitorClientInstance ?? apiMonitorInstance;
 
     await _client.start(host, port, name, stopWhenPlayerStops);
   }
 
-  @override
   Future<void> stop() => _client.stop();
 
-  @override
   Future<void> clear(int timestamp) => _client.clear(timestamp);
 }
 
 class BluOSExternalMonitorClient implements BluOSMonitor {
-  BluOSExternalMonitorClient._();
+  BluOSExternalMonitorClient._(this.monitorAddress);
 
   factory BluOSExternalMonitorClient.withAddressAndNotifier(String address, Function() changeNotifier) {
-    _instance._monitorAddress = address;
-    _instance._changeNotifier = changeNotifier;
-    return _instance;
+    final instance = BluOSExternalMonitorClient._(address);
+    instance._changeNotifier = changeNotifier;
+    return instance;
   }
 
-  static final BluOSExternalMonitorClient _instance = BluOSExternalMonitorClient._();
-
   @visibleForTesting
-  static http.Client httpClient = http.Client();
+  http.Client httpClient = http.Client();
 
-  String? _monitorAddress;
+  final String monitorAddress;
 
   List<BluOSMonitorTrack> _playlist = [];
   bool _isLoading = false;
@@ -128,13 +124,11 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
   }
 
   Future<void> _get(String path, [Map<String, dynamic>? queryParameters]) async {
-    final address = _monitorAddress ?? (throw UIException('BluOS monitor address is not set.'));
-
     _isLoading = true;
     _notifyListeners();
 
     try {
-      final response = await httpClient.get(Uri.http(address, path, queryParameters));
+      final response = await httpClient.get(Uri.http(monitorAddress, path, queryParameters));
 
       final status = json.decode(response.body) as Map<String, dynamic>;
 
@@ -145,9 +139,9 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
 
       _playlist = (status['playlist'] as List<dynamic>).map((track) => BluOSMonitorTrack.fromJson(track)).toList();
     } on SocketException catch (error) {
-      throw UIException('Could not connect to $address.', error);
+      throw UIException('Could not connect to $monitorAddress.', error);
     } catch (error) {
-      throw UIException('Failed to process response from $address.', error);
+      throw UIException('Failed to process response from $monitorAddress.', error);
     } finally {
       _isLoading = false;
       _notifyListeners();
@@ -194,12 +188,6 @@ class BluOSPlayer {
   final String name;
   final String host;
   final int port;
-
-  @override
-  bool operator ==(Object other) => hashCode == other.hashCode;
-
-  @override
-  int get hashCode => '$host:$port'.hashCode;
 
   static Future<List<BluOSPlayer>> lookupBluOSPlayers() async {
     final players = <BluOSPlayer>[];
