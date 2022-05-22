@@ -77,7 +77,7 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
 
   factory BluOSExternalMonitorClient.withAddressAndNotifier(String address, Function() changeNotifier) {
     _instance._monitorAddress = address;
-    _instance._notifyListeners = changeNotifier;
+    _instance._changeNotifier = changeNotifier;
     return _instance;
   }
 
@@ -95,8 +95,9 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
   //String? _playerState;
   String? _errorMessage;
 
-  // ignore: prefer_function_declarations_over_variables
-  void Function() _notifyListeners = () {};
+  void Function()? _changeNotifier;
+
+  void _notifyListeners() => _changeNotifier?.call();
 
   @override
   List<BluOSMonitorTrack> get playlist => _playlist;

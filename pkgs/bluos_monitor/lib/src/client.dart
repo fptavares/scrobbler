@@ -29,7 +29,7 @@ class BluOSAPIMonitor implements BluOSMonitor {
   factory BluOSAPIMonitor() => _instance;
 
   factory BluOSAPIMonitor.withNotifier(void Function() changeNotifier) {
-    _instance._notifyListeners = changeNotifier;
+    _instance._changeNotifier = changeNotifier;
     return _instance;
   }
 
@@ -67,8 +67,9 @@ class BluOSAPIMonitor implements BluOSMonitor {
   @override
   bool get canReload => false;
 
-  // ignore: prefer_function_declarations_over_variables
-  void Function() _notifyListeners = () {};
+  void Function()? _changeNotifier;
+
+  void _notifyListeners() => _changeNotifier?.call();
 
   @override
   Future<void> stop() async {
