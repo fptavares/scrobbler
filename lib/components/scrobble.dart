@@ -105,7 +105,7 @@ class ScrobblePlaylistEditor extends StatefulWidget {
   ScrobblePlaylistEditorState createState() => ScrobblePlaylistEditorState();
 
   @visibleForTesting
-  static String whenTooltipMessage = 'When you finished listening to the albums';
+  static const String whenTooltipMessage = 'When you finished listening to the albums';
 }
 
 class ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {

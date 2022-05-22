@@ -175,7 +175,7 @@ class Collection extends ChangeNotifier {
   Collection(this.userAgent);
 
   @visibleForTesting
-  static http.Client fallbackClient = http.Client();
+  http.Client fallbackClient = http.Client();
 
   @visibleForTesting
   static CacheManager cache = CacheManager(

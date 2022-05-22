@@ -45,7 +45,7 @@ Future<void> main() async {
     when(cache.emptyCache()).thenAnswer((_) => Future.value(null));
 
     Collection.cache = cache;
-    Collection.fallbackClient = fallbackClient;
+    collection.fallbackClient = fallbackClient;
   }
 
   void verifyHeaders(Map<String, String>? headers) {
