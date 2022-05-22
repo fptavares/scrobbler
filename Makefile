@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons screenshots mocks firebaseOptions clean
+.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons macos screenshots mocks firebaseOptions clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**)
 ASSETS = $(wildcard assets/**)
@@ -50,6 +50,9 @@ android: test
 
 playStoreRelease: android
 	cd android && fastlane release
+
+macos: test
+	flutter build macos --release
 
 screenshots:
 	screenshots \
