@@ -16,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../mocks/app_review_mock.dart';
 import '../mocks/firebase_mocks.dart';
 import '../mocks/model_mocks.dart';
-import '../test_albums.dart';
+import '../discogs_test_albums.dart';
 
 void main() {
   group('Scrobble button', () {
@@ -237,6 +237,8 @@ void main() {
       await tester.tap(find.byIcon(Icons.play_arrow));
       await tester.pump();
 
+      await tester.pump(ReviewRequester.instance.delay * 1.1);
+
       verify(review.requestReview());
     });
 
@@ -251,14 +253,21 @@ void main() {
       await tester.tap(find.byIcon(Icons.play_arrow));
       await tester.pump();
 
+      await tester.pump(ReviewRequester.instance.delay * 1.1);
+
       verifyNever(review.requestReview());
     });
 
     testWidgets('catches and ignore errors when trying to ask for review', (tester) async {
       final review = createMockAppReview();
-      ReviewRequester.appReview = review;
       when(review.requestReview()).thenThrow(Exception('boom'));
-      expect(ReviewRequester.instance.tryToAskForAppReview, returnsNormally); // doesn't throw
+      ReviewRequester.appReview = review;
+
+      final requestForAppReview = ReviewRequester.instance.tryToAskForAppReview();
+
+      await tester.pump(ReviewRequester.instance.delay * 1.1);
+
+      await expectLater(requestForAppReview, completes); // doesn't throw
     });
   });
 }
