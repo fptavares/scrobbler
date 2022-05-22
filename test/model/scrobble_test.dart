@@ -6,7 +6,7 @@ import 'package:http/testing.dart';
 import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/model/lastfm.dart';
 
-import '../test_albums.dart';
+import '../discogs_test_albums.dart';
 
 String _createScrobbleResponse(int accepted, int ignored) =>
     '{"scrobbles":{"@attr":{"accepted":$accepted,"ignored":$ignored},"scrobble":[${List.generate(accepted, (_) => '{}').join(',')}]}}';

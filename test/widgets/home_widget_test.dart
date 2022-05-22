@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../mocks/firebase_mocks.dart';
 import '../mocks/model_mocks.dart';
-import '../test_albums.dart';
+import '../discogs_test_albums.dart';
 
 Future<void> main() async {
   SharedPreferences.setMockInitialValues(<String, Object>{

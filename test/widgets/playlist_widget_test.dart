@@ -5,7 +5,7 @@ import 'package:scrobbler/components/emtpy.dart';
 import 'package:scrobbler/components/playlist.dart';
 import 'package:scrobbler/model/playlist.dart';
 
-import '../test_albums.dart';
+import '../discogs_test_albums.dart';
 
 void main() {
   group('Playlist page', () {
