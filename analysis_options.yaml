@@ -3,6 +3,7 @@ include: package:flutter_lints/flutter.yaml
 linter:
   rules:
     - always_declare_return_types
+    - avoid_void_async 
     - cast_nullable_to_non_nullable
     - prefer_single_quotes
     - type_annotate_public_apis
