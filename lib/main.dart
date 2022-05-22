@@ -130,7 +130,9 @@ class ScrobblerApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<Settings, BluOS?>(
           create: (_) => BluOS(),
-          update: (_, settings, bluos) => bluos?..updateMonitorAddress(settings.bluOSMonitorAddress),
+          update: (_, settings, bluos) => bluos
+            ?..updateMonitorAddress(settings.bluOSMonitorAddress)
+            ..refresh(),
         ),
         ChangeNotifierProvider<Playlist>(create: (_) => Playlist()),
       ],
