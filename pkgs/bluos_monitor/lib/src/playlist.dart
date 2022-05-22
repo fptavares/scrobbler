@@ -78,21 +78,14 @@ class BluOSAPITrack extends BluOSTrack {
 
   BluOSAPITrack({
     required this.playId,
-    required artist,
-    album,
-    required title,
+    required super.artist,
+    super.album,
+    required super.title,
     required this.length,
-    required timestamp,
-    required imageUrl,
+    required super.timestamp,
+    required super.imageUrl,
     required this.state,
-  })  : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, max(length / 2, 15)),
-        super(
-          timestamp: timestamp,
-          artist: artist,
-          title: title,
-          album: album,
-          imageUrl: imageUrl,
-        );
+  }) : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, max(length / 2, 15));
   // threshold = half of duration, no more than 4 minutes, no less than 15 seconds, default to 1 minute
 
   factory BluOSAPITrack.fromXml(XmlDocument document, BluOSTrackState state, String authorityForRelativeImages) {
