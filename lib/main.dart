@@ -97,7 +97,7 @@ Future<void> main() async {
 class ScrobblerApp extends StatelessWidget {
   const ScrobblerApp(this.prefs, this.userAgent, {super.key});
 
-  static GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   final SharedPreferences prefs;
   final String userAgent;
