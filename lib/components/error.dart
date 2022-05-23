@@ -4,9 +4,10 @@ import 'dart:io';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:scrobbler/main.dart';
 
 import '../model/analytics.dart';
+
+final GlobalKey<ScaffoldMessengerState> scrobblerScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void displayAndLogError(Logger logger, Object e, StackTrace stackTrace, [String? message]) {
   final errorMessage = e is UIException
@@ -26,7 +27,7 @@ void displayAndLogError(Logger logger, Object e, StackTrace stackTrace, [String?
 }
 
 void displayError(String errorMessage) {
-  final scaffoldMsg = ScrobblerApp.scaffoldMessengerKey.currentState;
+  final scaffoldMsg = scrobblerScaffoldMessengerKey.currentState;
   scaffoldMsg?.removeCurrentSnackBar();
   scaffoldMsg?.showSnackBar(SnackBar(
     content: Text(errorMessage),
@@ -35,7 +36,7 @@ void displayError(String errorMessage) {
 }
 
 void displaySuccess(String message) {
-  ScrobblerApp.scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
+  scrobblerScaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
     content: Text(message),
     backgroundColor: Colors.green,
   ));

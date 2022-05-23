@@ -12,6 +12,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'components/error.dart';
 import 'components/home.dart';
 import 'components/onboarding.dart';
 import 'components/playlist.dart';
@@ -97,8 +98,6 @@ Future<void> main() async {
 class ScrobblerApp extends StatelessWidget {
   const ScrobblerApp(this.prefs, this.userAgent, {super.key});
 
-  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-
   final SharedPreferences prefs;
   final String userAgent;
 
@@ -159,7 +158,7 @@ class ScrobblerApp extends StatelessWidget {
           '/playlist': (_) => const PlaylistPage(),
         },
         navigatorObservers: [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)],
-        scaffoldMessengerKey: scaffoldMessengerKey,
+        scaffoldMessengerKey: scrobblerScaffoldMessengerKey,
       ),
     );
   }

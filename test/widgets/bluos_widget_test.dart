@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler/components/bluos.dart';
-import 'package:scrobbler/main.dart';
+import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/model/bluos.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/settings.dart';
@@ -59,7 +59,7 @@ void main() {
             floatingActionButton: const BluosFloatingButton(),
             endDrawer: const Text('End Drawer Here'),
           ),
-          scaffoldMessengerKey: ScrobblerApp.scaffoldMessengerKey,
+          scaffoldMessengerKey: scrobblerScaffoldMessengerKey,
         ),
       ));
 
@@ -136,7 +136,7 @@ void main() {
           home: const Scaffold(
             body: BluOSMonitorControl(),
           ),
-          scaffoldMessengerKey: ScrobblerApp.scaffoldMessengerKey,
+          scaffoldMessengerKey: scrobblerScaffoldMessengerKey,
         ),
       ));
 
