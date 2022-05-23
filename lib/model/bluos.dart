@@ -68,6 +68,26 @@ class BluOS extends ChangeNotifier {
   Future<void> stop() => _client.stop();
 
   Future<void> clear(int timestamp) => _client.clear(timestamp);
+
+  Future<List<BluOSPlayer>> lookupBluOSPlayers() async {
+    final players = <BluOSPlayer>[];
+
+    const name = '_musc._tcp.local';
+    final client = MDnsClient();
+    await client.start();
+
+    await for (final PtrResourceRecord ptr
+        in client.lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(name))) {
+      await for (final SrvResourceRecord srv
+          in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(ptr.domainName))) {
+        final bundleId = ptr.domainName.substring(0, ptr.domainName.indexOf('.$name'));
+        players.add(BluOSPlayer(bundleId, srv.target, srv.port));
+      }
+    }
+    client.stop();
+
+    return players;
+  }
 }
 
 class BluOSExternalMonitorClient implements BluOSMonitor {
@@ -188,24 +208,4 @@ class BluOSPlayer {
   final String name;
   final String host;
   final int port;
-
-  static Future<List<BluOSPlayer>> lookupBluOSPlayers() async {
-    final players = <BluOSPlayer>[];
-
-    const name = '_musc._tcp.local';
-    final client = MDnsClient();
-    await client.start();
-
-    await for (final PtrResourceRecord ptr
-        in client.lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(name))) {
-      await for (final SrvResourceRecord srv
-          in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(ptr.domainName))) {
-        final bundleId = ptr.domainName.substring(0, ptr.domainName.indexOf('.$name'));
-        players.add(BluOSPlayer(bundleId, srv.target, srv.port));
-      }
-    }
-    client.stop();
-
-    return players;
-  }
 }

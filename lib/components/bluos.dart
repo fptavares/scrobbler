@@ -107,7 +107,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 ),
                 const Divider(),
                 if (bluos.errorMessage != null && bluos.isPolling) _createErrorTile(context, bluos.errorMessage),
-                if (!bluos.isPolling) _createPlayerSelector(context),
+                if (!bluos.isPolling) _createPlayerSelector(context, bluos),
                 _createControlButtonsTile(context, bluos, scrobbableCount),
               ],
             ),
@@ -175,7 +175,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     );
   }
 
-  Widget _createPlayerSelector(BuildContext context) {
+  Widget _createPlayerSelector(BuildContext context, BluOS bluos) {
     return ListTile(
       dense: true,
       title: _isScanningPlayers
@@ -200,7 +200,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
       trailing: TextButton.icon(
         icon: const Icon(Icons.search),
         label: const Text('Scan'),
-        onPressed: _isScanningPlayers ? null : () => _handleScan(context),
+        onPressed: _isScanningPlayers ? null : () => _handleScan(context, bluos),
       ),
     );
   }
@@ -246,11 +246,11 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     await handleFutureError(bluos.start(player.host, player.port, player.name), _log, trace: 'bluos_start');
   }
 
-  Future<void> _handleScan(BuildContext context) async {
+  Future<void> _handleScan(BuildContext context, BluOS bluos) async {
     setState(() {
       _isScanningPlayers = true;
     });
-    final players = await handleFutureError(BluOSPlayer.lookupBluOSPlayers(), _log, trace: 'bluos_discovery');
+    final players = await handleFutureError(bluos.lookupBluOSPlayers(), _log, trace: 'bluos_discovery');
     setState(() {
       _isScanningPlayers = false;
       _availablePlayers = players;
