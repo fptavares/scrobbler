@@ -22,13 +22,13 @@ class BluosFloatingButton extends StatelessWidget {
     final settings = Provider.of<Settings>(context);
     final bluos = Provider.of<BluOS>(context);
 
-    if (!settings.isScrobblingBluOS) {
+    if (!settings.isBluOSEnabled) {
       return Container();
     }
 
     return FloatingActionButton(
       onPressed: () => _handleClick(context),
-      tooltip: 'BluOS',
+      tooltip: bluos.isPolling ? 'Listening on ${bluos.playerName ?? 'BluOS device'}' : 'BluOS',
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
       shape: StadiumBorder(side: BorderSide(color: bluos.isPolling ? Colors.redAccent : Colors.amberAccent, width: 3)),

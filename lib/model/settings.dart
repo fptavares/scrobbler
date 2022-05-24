@@ -16,7 +16,7 @@ class Settings extends ChangeNotifier {
 
   String? get lastfmSessionKey => prefs.getString(lastfmSessionKeyKey);
 
-  bool get isScrobblingBluOS => prefs.getBool(scrobblingBluOSKey) ?? false;
+  bool get isBluOSEnabled => prefs.getBool(bluOSEnabledKey) ?? false;
 
   String? get bluOSMonitorAddress => prefs.getString(bluOSMonitorAddressKey);
 
@@ -62,8 +62,8 @@ class Settings extends ChangeNotifier {
     notifyListeners();
   }
 
-  set isScrobblingBluOS(bool value) {
-    prefs.setBool(scrobblingBluOSKey, value);
+  set isBluOSEnabled(bool value) {
+    prefs.setBool(bluOSEnabledKey, value);
     notifyListeners();
   }
 
@@ -93,7 +93,7 @@ class Settings extends ChangeNotifier {
   @visibleForTesting
   static const String lastfmSessionKeyKey = 'lastfmSessionKey';
   @visibleForTesting
-  static const String scrobblingBluOSKey = 'scrobblingBluOS';
+  static const String bluOSEnabledKey = 'bluOSEnabled';
   @visibleForTesting
   static const String bluOSMonitorAddressKey = 'bluOSMonitorAddress';
   @visibleForTesting

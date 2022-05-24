@@ -20,9 +20,9 @@ class AccountsForm extends StatefulWidget {
   static const discogsUsernameFieldKey = Key('discogs_username');
   static const lastfmUsernameFieldKey = Key('lastfm_username');
   static const lastfmPasswordFieldKey = Key('lastfm_password');
+  static const bluosEnabledCheckboxKey = Key('bluos_enabled');
   static const bluosMonitorFieldKey = Key('bluos_monitor_address');
 
-  static const discogsInvalidUsernameMessage = 'Please enter your Discogs username';
   static const lastfmInvalidUsernameMessage = 'Please enter your Last.fm username';
   static const lastfmInvalidPasswordMessage = 'Please enter your Last.fm password';
   static const bluosInvalidAddressMessage = 'Must be a valid hostname or IP address';
@@ -38,6 +38,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
   String? _discogsUsername;
   String? _lastfmUsername;
   String? _lastfmPassword;
+  bool _bluosEnabled = false;
   String? _bluosMonitorAddress;
 
   bool _isSaving = false;
@@ -114,35 +115,47 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   ),
                   if (_isSaving) const LinearProgressIndicator(),
                   const SizedBox(height: 40),
-                  CheckboxListTile(
-                    contentPadding: const EdgeInsets.all(0),
-                    title: const Image(
-                      image: AssetImage('assets/bluos_logo.png'),
-                      semanticLabel: 'BluOS',
-                    ),
-                    value: settings.isScrobblingBluOS,
-                    onChanged: (value) => settings.isScrobblingBluOS = value!,
-                  ),
-                  if (settings.isScrobblingBluOS)
-                    TextFormField(
-                      key: AccountsForm.bluosMonitorFieldKey,
-                      keyboardType: TextInputType.url,
-                      validator: (value) => _validateAddress(value) ? null : AccountsForm.bluosInvalidAddressMessage,
-                      decoration: const InputDecoration(
-                        labelText: 'BluOS monitor address',
-                        helperText: 'Leave empty if not using an external server to monitor BluOS players',
-                        helperMaxLines: 3,
-                        hintText: '[Hostname/IP]:[Port]',
-                      ),
-                      initialValue: settings.bluOSMonitorAddress,
-                      onSaved: (value) => _bluosMonitorAddress = value,
-                    ),
-                  if (settings.isScrobblingBluOS)
-                    TextButton.icon(
-                      icon: const Icon(Icons.help),
-                      label: const Text('More about BluOS monitor'),
-                      onPressed: () => _showMoreAboutMonitor(context),
-                    ),
+                  FormField<bool>(
+                      initialValue: settings.isBluOSEnabled,
+                      onSaved: (value) => _bluosEnabled = value ?? false,
+                      builder: (FormFieldState<bool> bluOSEnabledState) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            CheckboxListTile(
+                              key: AccountsForm.bluosEnabledCheckboxKey,
+                              contentPadding: const EdgeInsets.all(0),
+                              title: const Image(
+                                image: AssetImage('assets/bluos_logo.png'),
+                                semanticLabel: 'BluOS',
+                              ),
+                              value: bluOSEnabledState.value,
+                              onChanged: bluOSEnabledState.didChange,
+                            ),
+                            if (bluOSEnabledState.value ?? false)
+                              TextFormField(
+                                key: AccountsForm.bluosMonitorFieldKey,
+                                keyboardType: TextInputType.url,
+                                validator: (value) =>
+                                    _validateAddress(value) ? null : AccountsForm.bluosInvalidAddressMessage,
+                                decoration: const InputDecoration(
+                                  labelText: 'BluOS monitor address',
+                                  helperText: 'Leave empty if not using an external server to monitor BluOS players',
+                                  helperMaxLines: 3,
+                                  hintText: '[Hostname/IP]:[Port]',
+                                ),
+                                initialValue: settings.bluOSMonitorAddress,
+                                onSaved: (value) => _bluosMonitorAddress = value,
+                              ),
+                            if (bluOSEnabledState.value ?? false)
+                              TextButton.icon(
+                                icon: const Icon(Icons.help),
+                                label: const Text('More about BluOS monitor'),
+                                onPressed: () => _showMoreAboutMonitor(context),
+                              ),
+                          ],
+                        );
+                      }),
                   const SizedBox(height: 40),
                   Center(
                     child: TextButton(
@@ -212,7 +225,11 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
 
       form.save();
 
-      settings.bluOSMonitorAddress = _bluosMonitorAddress;
+      settings.isBluOSEnabled = _bluosEnabled;
+
+      if (_bluosEnabled) {
+        settings.bluOSMonitorAddress = _bluosMonitorAddress;
+      }
 
       if (settings.discogsUsername != _discogsUsername) {
         settings.discogsUsername = _discogsUsername;
@@ -241,7 +258,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
     if (value == null || value.isEmpty) {
       return true;
     }
-    final matcher = RegExp(r'^[\w\d\-\.\:]+$');
+    final matcher = RegExp(r'^[\w\d\-\.]+(?:\:\d+)?$');
     return matcher.hasMatch(value);
   }
 }
