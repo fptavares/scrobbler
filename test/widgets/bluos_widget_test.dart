@@ -39,7 +39,7 @@ void main() {
   group('BluOS button', () {
     Future<Settings> pumpButton(WidgetTester tester, BluOS bluos, Scrobbler scrobbler, {bool? visible}) async {
       final settings = await initSettings();
-      settings.isScrobblingBluOS = visible ?? true;
+      settings.isBluOSEnabled = visible ?? true;
 
       await tester.pumpWidget(MultiProvider(
         providers: [
@@ -73,13 +73,13 @@ void main() {
 
       final settings = await pumpButton(tester, bluos, scrobbler, visible: false);
 
-      expect(settings.isScrobblingBluOS, isFalse);
+      expect(settings.isBluOSEnabled, isFalse);
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(find.byType(Image), findsNothing);
 
-      settings.isScrobblingBluOS = true;
-      expect(settings.isScrobblingBluOS, isTrue);
+      settings.isBluOSEnabled = true;
+      expect(settings.isBluOSEnabled, isTrue);
 
       await tester.pump();
 

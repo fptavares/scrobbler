@@ -6,6 +6,7 @@ import 'package:http/testing.dart';
 import 'package:scrobbler/components/error.dart';
 import 'package:scrobbler/model/lastfm.dart';
 
+import '../bluos_test_data.dart';
 import '../discogs_test_albums.dart';
 
 String _createScrobbleResponse(int accepted, int ignored) =>
@@ -140,6 +141,35 @@ void main() {
           .scrobbleAlbums(albums, const ScrobbleOptions(inclusionMask: {}, offsetInSeconds: offset))
           .toList();
       expect(acceptedList, equals([4]));
+    });
+
+    test('submit BluOS tracks to Last.fm', () async {
+      // set a key
+      scrobbler.updateSessionKey('test-session-key');
+
+      // list of tracks to scrobble
+      final tracks = BluOSTestData.listOfBluOSMonitorTracks.sublist(0, 2);
+
+      // override http client
+      scrobbler.httpClient = MockClient(expectAsync1<Future<Response>, Request>((request) async {
+        expect(request.method, equals('POST'));
+        expect(request.url.toString(), equals('https://ws.audioscrobbler.com/2.0/'));
+
+        var index = 0;
+        for (final track in tracks) {
+          expect(request.bodyFields['timestamp[$index]'], track.timestamp.toString());
+          expect(request.bodyFields['artist[$index]'], track.artist);
+          expect(request.bodyFields['album[$index]'], track.album);
+          expect(request.bodyFields['track[$index]'], track.title);
+          index++;
+        }
+
+        return Response(_createScrobbleResponse(1, 0), 200);
+      }, count: 1));
+
+      // scrobble
+      final acceptedList = await scrobbler.scrobbleBluOSTracks(tracks).toList();
+      expect(acceptedList, equals([1]));
     });
 
     Future<void> verifyThrows(Future<dynamic> Function() function) async {
