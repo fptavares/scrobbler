@@ -69,7 +69,4 @@ class UIException implements Exception {
 
   final String message;
   final Object? exception;
-
-  @override
-  String toString() => message;
 }
