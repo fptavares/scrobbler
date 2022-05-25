@@ -165,7 +165,7 @@ class BluOSTrackState {
   bool get isPlaying => const ['play', 'stream'].contains(playerState);
   bool get isConnecting => playerState == 'connecting';
   bool get isStopped => playerState == 'stop';
-  bool get isActive => !isConnecting && !isStopped;
+  bool get isActive => isPlaying || playerState == 'pause';
 }
 
 class UnknownTrackException implements Exception {
