@@ -63,5 +63,5 @@ class ScrobblerAnalytics {
     analytics.setCurrentScreen(screenName: 'search');
   }
 
-  Trace newTrace(String name) => performance.newTrace(name);
+  Trace? newTrace(String name) => performanceEnabled ? performance.newTrace(name) : null;
 }
