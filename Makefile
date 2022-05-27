@@ -1,6 +1,6 @@
-.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons macos screenshots mocks firebaseOptions clean
+.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons macos screenshots mocks firebaseOptions dependencies clean
 
-CODE = $(wildcard lib/**) $(wildcard test/**)
+CODE = $(wildcard lib/**) $(wildcard test/**) $(wildcard pkgs/*/lib/**) $(wildcard pkgs/*/test/**)
 ASSETS = $(wildcard assets/**)
 SOURCES = $(CODE) $(ASSETS)
 
@@ -9,16 +9,15 @@ all: analysis showCoverage
 secrets:
 	[ -f .env ] && source .env; flutter pub run tool/generate_secrets_file.dart
 
-test: coverage/lcov.info
+test: coverage/lcov-combined.info
 
-coverage/lcov.info: $(SOURCES)
-	flutter test --coverage
+coverage/lcov-combined.info: $(SOURCES)
+	./tool/run_tests.sh
 
-coverage/html/index.html: coverage/lcov.info
-	genhtml -q coverage/lcov.info -o coverage/html
+coverage/html-combined/index.html: coverage/lcov-combined.info
+	./tool/run_tests.sh --report
 
-showCoverage: coverage/html/index.html
-	open coverage/html/index.html
+report: coverage/html-combined/index.html
 
 analysis: analysis.txt
 
@@ -64,6 +63,11 @@ mocks:
 
 firebaseOptions:
 	flutter pub run tool/generate_firebase_options_file.dart
+
+dependencies:
+	flutter pub get \
+	&& cd pkgs/bluos_monitor \
+	&& dart pub get
 
 clean:
 	flutter clean
