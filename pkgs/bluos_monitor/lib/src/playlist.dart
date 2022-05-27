@@ -117,17 +117,6 @@ class BluOSAPITrack extends BluOSTrack {
     state.seconds = state.isPlaying ? BluOSAPITrack._nowTimestamp() - timestamp : state.seconds;
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'timestamp': timestamp,
-      'artist': artist,
-      'title': title,
-      'album': album,
-      'image': imageUrl,
-      if (!isScrobbable) 'isScrobbable': isScrobbable,
-    }..removeWhere((key, value) => value == null);
-  }
-
   @override
   bool operator ==(Object other) => hashCode == other.hashCode;
 
@@ -172,4 +161,9 @@ class UnknownTrackException implements Exception {
   final String failedAttribute;
 
   UnknownTrackException(MissingMandatoryAttributeException e) : failedAttribute = e.missingAttribute;
+
+  @override
+  String toString() {
+    return 'Could not process player status due to missing attribute: $failedAttribute.';
+  }
 }

@@ -63,6 +63,8 @@ class LongPollingSession {
     if (!_isPolling) return;
 
     var delayedRetry = false;
+    // make sure that no more than one request per second is made
+    var delay = Duration(seconds: 1);
 
     try {
       // long poll and process status update
@@ -77,8 +79,8 @@ class LongPollingSession {
         return stop();
       }
     } on BluOSHttpException catch (e) {
-      _pushErrorMessage('Received unexpected status code: ${e.statusCode}');
-      _log.warning('Received unexpected status code: ${e.statusCode}');
+      _pushErrorMessage('Received unexpected status code: ${e.statusCode}.');
+      _log.warning('Received unexpected status code: ${e.statusCode}.');
       if (e.statusCode >= 400 && e.statusCode < 500) {
         // if client error, stop polling
         return stop();
@@ -96,28 +98,25 @@ class LongPollingSession {
       _log.info('Connection error: ${e.toString()}', e, st);
       delayedRetry = true;
     } catch (e, st) {
-      _pushErrorMessage('Polling error: ${e.toString()}');
+      _pushErrorMessage('Polling error: ${e.toString()}.');
       _log.severe('Polling error: ${e.toString()}', e, st);
       delayedRetry = true;
     } finally {
-      onChange();
-    }
+      if (delayedRetry) {
+        delay = _retryDelay;
 
-    // make sure that no more than one request per second is made
-    var delay = Duration(seconds: 1);
+        final retryTimeoutMessage = (_retryDelay.inMicroseconds < Duration.microsecondsPerMinute)
+            ? 'Retrying in ${_retryDelay.inSeconds} seconds...'
+            : 'Retrying in ${_retryDelay.inMinutes} minute${_retryDelay.inMinutes > 1 ? 's' : ''}...';
+        _appendToErrorMessage(retryTimeoutMessage);
+        _log.info(retryTimeoutMessage);
 
-    if (delayedRetry) {
-      delay = _retryDelay;
-
-      final retryTimeoutMessage = (_retryDelay.inMicroseconds < Duration.microsecondsPerMinute)
-          ? 'Retrying in ${_retryDelay.inSeconds} seconds...'
-          : 'Retrying in ${_retryDelay.inMinutes} minute${_retryDelay.inMinutes > 1 ? 's' : ''}...';
-      _appendToErrorMessage(retryTimeoutMessage);
-      _log.info(retryTimeoutMessage);
-
-      if (_retryDelay < maxRetryDelay) {
-        _retryDelay *= 2; // increase delay exponentially
+        if (_retryDelay < maxRetryDelay) {
+          _retryDelay *= 2; // increase delay exponentially
+        }
       }
+
+      onChange();
     }
 
     Future.delayed(delay, () => _recursivePolling());
