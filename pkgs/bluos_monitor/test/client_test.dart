@@ -223,11 +223,7 @@ class FakePollingResponder {
       expect(client.isPolling, isTrue);
 
       // client has a retry delay of 30 sec
-      unawaited(() async {
-        try {
-          await emitTrack(track1Status);
-        } catch (_) {}
-      }.call());
+      unawaited(emitTrack(track1Status).catchError((_) {}));
       // wait 5 seconds
       await Future.delayed(Duration(seconds: 5));
 
