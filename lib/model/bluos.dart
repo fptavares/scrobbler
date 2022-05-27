@@ -10,7 +10,8 @@ import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
 import '../components/error.dart';
 
 class BluOS extends ChangeNotifier {
-  static final Logger _log = Logger('BluOS');
+  static final _log = Logger('BluOS');
+  static const mdnsName = '_musc._tcp.local';
 
   BluOS({BluOSAPIMonitor? apiMonitor}) {
     _client = apiMonitorInstance = apiMonitor ?? BluOSAPIMonitor.withNotifier(notifyListeners);
@@ -71,17 +72,13 @@ class BluOS extends ChangeNotifier {
 
   Future<List<BluOSPlayer>> lookupBluOSPlayers() async {
     final players = <BluOSPlayer>[];
-
-    const name = '_musc._tcp.local';
     final client = MDnsClient();
-    await client.start();
 
-    await for (final PtrResourceRecord ptr
-        in client.lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(name))) {
-      await for (final SrvResourceRecord srv
-          in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(ptr.domainName))) {
-        final bundleId = ptr.domainName.substring(0, ptr.domainName.indexOf('.$name'));
-        players.add(BluOSPlayer(bundleId, srv.target, srv.port));
+    await client.start();
+    await for (final ptr in client.lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(mdnsName))) {
+      await for (final srv in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(ptr.domainName))) {
+        players
+            .add(BluOSPlayer(ptr.domainName.substring(0, ptr.domainName.indexOf('.$mdnsName')), srv.target, srv.port));
       }
     }
     client.stop();
