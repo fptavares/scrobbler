@@ -190,7 +190,7 @@ void main() {
       await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
     });
 
-    test('throws UI exception on server error', () async {
+    test('throws UI exception on no connection error', () async {
       final scrobbler = Scrobbler(userAgent);
       scrobbler.httpClient = MockClient((_) async => throw const SocketException(''));
 
@@ -206,6 +206,7 @@ void main() {
 
       scrobbler.updateSessionKey(key);
       await verifyThrows(() async => await scrobbler.scrobbleAlbums([]).toList());
+      await verifyThrows(() async => await scrobbler.scrobbleBluOSTracks([]).toList());
     });
 
     test('throws UI exception if session key is empty', () async {
@@ -213,6 +214,7 @@ void main() {
       scrobbler.httpClient = MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+      await verifyThrows(() async => await scrobbler.scrobbleBluOSTracks([]).toList());
     });
   });
 }
