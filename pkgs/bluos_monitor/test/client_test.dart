@@ -26,16 +26,16 @@ Future<void> main() async {
 
       polling.startClient();
 
-      await polling.emitResponseAndValidate(track1Status, track1Expected, 1, first: true);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
       expect(client.isPolling, isTrue);
 
-      await polling.emitResponseAndValidate(track1Status, track1Expected, 1);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1);
       expect(client.isPolling, isTrue);
 
-      await polling.emitResponseAndValidate(track2Status, track2Expected, 2);
+      await polling.emitResponseAndValidate(track2Xml, track2Expected, 2);
       expect(client.isPolling, isTrue);
 
-      await polling.emitResponseAndValidate(track3Status, track3Expected, 3);
+      await polling.emitResponseAndValidate(track3Xml, track3Expected, 3);
       expect(client.isPolling, isTrue);
 
       await polling.close();
@@ -47,15 +47,15 @@ Future<void> main() async {
 
       polling.startClient();
 
-      await polling.emitResponseAndValidate(track1Status, track1Expected, 1, first: true);
-      await polling.emitResponseAndValidate(track2Status, track2Expected, 2);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
+      await polling.emitResponseAndValidate(track2Xml, track2Expected, 2);
 
       await client.clear(client.playlist.first.timestamp);
 
       expect(client.playlist.length, equals(1));
       expect(client.playlist.first.title, equals(track2Expected.title));
 
-      await polling.emitResponseAndValidate(track2Status, track2Expected, 1);
+      await polling.emitResponseAndValidate(track2Xml, track2Expected, 1);
 
       await polling.close();
     });
@@ -66,7 +66,7 @@ Future<void> main() async {
 
       polling.startClient();
 
-      await polling.emitResponseAndValidate(track1Status, track1Expected, 1, first: true);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
 
       await Future.delayed(Duration(seconds: 1)); // make sure there's time for the next poll to start
 
@@ -76,9 +76,29 @@ Future<void> main() async {
       expect(client.playlist.length, equals(1));
 
       // validate that after response is reveived, it's ignored because the client was stopped
-      await polling.emitResponseAndValidate(track2Status, track1Expected, 1);
+      await polling.emitResponseAndValidate(track2Xml, track1Expected, 1);
 
       expect(client.isPolling, isFalse);
+      expect(client.playlist.length, equals(1));
+
+      await polling.close();
+    });
+
+    test('supports stopping automatically when player stops', () async {
+      final polling = FakePollingResponder(2);
+      final client = polling.client;
+
+      polling.startClient(stopWhenPlayerStops: true);
+
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
+
+      expect(client.isPolling, isTrue);
+      expect(client.state!.isPlaying, isTrue);
+
+      await polling.emitTrack(stoppedXml);
+
+      expect(client.isPolling, isFalse);
+      expect(client.state!.isStopped, isTrue);
       expect(client.playlist.length, equals(1));
 
       await polling.close();
@@ -147,9 +167,9 @@ class FakePollingResponder {
 
   final _statuses = <StatusRequestData>[];
 
-  void startClient() {
+  void startClient({bool? stopWhenPlayerStops}) {
     _statusStreamer.stream.listen(_statuses.add);
-    unawaited(client.start('test', 1234));
+    unawaited(client.start('test', 1234, 'Test Player', stopWhenPlayerStops));
   }
 
   Future<void> emitTrack(String trackStatusXml) {
@@ -217,13 +237,13 @@ class FakePollingResponder {
       expect(client.isPolling, isFalse);
     } else if (noDelay) {
       expect(client.isPolling, isTrue);
-      await emitResponseAndValidate(track1Status, track1Expected, 1);
+      await emitResponseAndValidate(track1Xml, track1Expected, 1);
       expect(client.errorMessage, isNull);
     } else {
       expect(client.isPolling, isTrue);
 
       // client has a retry delay of 30 sec
-      unawaited(emitTrack(track1Status).catchError((_) {}));
+      unawaited(emitTrack(track1Xml).catchError((_) {}));
       // wait 5 seconds
       await Future.delayed(Duration(seconds: 5));
 
