@@ -88,12 +88,7 @@ class Playlist extends ChangeNotifier {
     _itemById.removeWhere((_, item) => item.count == 0);
   }
 
-  int maxItemCount() {
-    if (_itemById.isEmpty) {
-      return 0;
-    }
-    return _itemById.values.map((item) => item.count).reduce(max);
-  }
+  int maxItemCount() => _itemById.isEmpty ? 0 : _itemById.values.map((item) => item.count).reduce(max);
 }
 
 class PlaylistItem extends ValueNotifier<int> {
