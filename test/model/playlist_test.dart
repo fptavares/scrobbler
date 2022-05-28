@@ -9,22 +9,20 @@ import '../discogs_test_albums.dart';
 
 void main() {
   group('Playlist', () {
-    late Playlist playlist;
-
-    setUp(() {
-      playlist = Playlist();
-    });
-
     test('starts empty', () {
+      final playlist = Playlist();
       expect(playlist.numberOfItems, equals(0));
+      expect(playlist.maxItemCount(), equals(0));
       expect(playlist.isEmpty, equals(true));
       expect(playlist.isNotEmpty, equals(false));
     });
 
     test('can add a new album', () {
+      final playlist = Playlist();
       playlist.addAlbum(testAlbum1);
 
       expect(playlist.numberOfItems, equals(1));
+      expect(playlist.maxItemCount(), equals(1));
       expect(playlist.isEmpty, equals(false));
       expect(playlist.isNotEmpty, equals(true));
 
@@ -33,6 +31,7 @@ void main() {
     });
 
     test('can add the same album multiple times', () {
+      final playlist = Playlist();
       playlist.addAlbum(testAlbum1);
 
       expect(playlist.numberOfItems, equals(1));
@@ -42,6 +41,7 @@ void main() {
       playlist.addAlbum(testAlbum1);
 
       expect(playlist.numberOfItems, equals(1));
+      expect(playlist.maxItemCount(), equals(2));
       expect(playlist.isEmpty, isFalse);
       expect(playlist.isNotEmpty, isTrue);
 
@@ -50,6 +50,7 @@ void main() {
     });
 
     test('can add a second album', () {
+      final playlist = Playlist();
       playlist.addAlbum(testAlbum1);
 
       expect(playlist.numberOfItems, equals(1));
@@ -70,6 +71,7 @@ void main() {
     });
 
     test('can remove only album in the playlist', () {
+      final playlist = Playlist();
       playlist.addAlbum(testAlbum1);
 
       expect(playlist.numberOfItems, equals(1));
@@ -84,6 +86,7 @@ void main() {
     });
 
     test('can remove one album of two in the playlist', () {
+      final playlist = Playlist();
       playlist.addAlbum(testAlbum1);
       playlist.addAlbum(testAlbum2);
 
@@ -99,6 +102,7 @@ void main() {
     });
 
     test('can increase and decrease the count of playlist item', () {
+      final playlist = Playlist();
       playlist.addAlbum(testAlbum1);
 
       final item = playlist.getPlaylistItem(testAlbum1)!;
@@ -120,11 +124,13 @@ void main() {
     });
 
     test('can scrobble the albums', () async {
+      final playlist = Playlist();
       // add albums
       playlist.addAlbum(testAlbum1);
       playlist.addAlbum(testAlbum2);
       playlist.addAlbum(testAlbum1);
       expect(playlist.numberOfItems, equals(2));
+      expect(playlist.maxItemCount(), equals(2));
 
       final scrobbleResults = [10, 5];
 

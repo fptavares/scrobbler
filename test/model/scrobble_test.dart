@@ -20,13 +20,9 @@ void main() {
     const username = 'test-user';
     const password = 'test-password';
     const key = 'd580d57f32848f5dcf574d1ce18d78b2';
-    late Scrobbler scrobbler;
-
-    setUp(() {
-      scrobbler = Scrobbler(userAgent);
-    });
 
     test('initializes a Last.fm session', () async {
+      final scrobbler = Scrobbler(userAgent);
       // override http client
       scrobbler.httpClient = MockClient(expectAsync1<Future<Response>, Request>((request) async {
         expect(request.method, equals('POST'));
@@ -49,6 +45,7 @@ void main() {
     });
 
     test('submits more than 50 tracks to Last.fm with exclusions but no offset', () async {
+      final scrobbler = Scrobbler(userAgent);
       // set a key
       scrobbler.updateSessionKey('test-session-key');
 
@@ -102,6 +99,7 @@ void main() {
     test('submit a single album to Last.fm with a 4 hour offset', () async {
       const offset = 240 * 60; // 4 hour offset
 
+      final scrobbler = Scrobbler(userAgent);
       // set a key
       scrobbler.updateSessionKey('test-session-key');
 
@@ -144,6 +142,7 @@ void main() {
     });
 
     test('submit BluOS tracks to Last.fm', () async {
+      final scrobbler = Scrobbler(userAgent);
       // set a key
       scrobbler.updateSessionKey('test-session-key');
 
@@ -182,6 +181,7 @@ void main() {
     }
 
     test('throws UI exception on server error', () async {
+      final scrobbler = Scrobbler(userAgent);
       scrobbler.httpClient = MockClient((_) async => Response('', 500));
 
       await verifyThrows(() => scrobbler.initializeSession(username, password));
@@ -191,6 +191,7 @@ void main() {
     });
 
     test('throws UI exception on server error', () async {
+      final scrobbler = Scrobbler(userAgent);
       scrobbler.httpClient = MockClient((_) async => throw const SocketException(''));
 
       await verifyThrows(() => scrobbler.initializeSession(username, password));
@@ -200,6 +201,7 @@ void main() {
     });
 
     test('throws UI exception if album list is empty', () async {
+      final scrobbler = Scrobbler(userAgent);
       scrobbler.httpClient = MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       scrobbler.updateSessionKey(key);
@@ -207,6 +209,7 @@ void main() {
     });
 
     test('throws UI exception if session key is empty', () async {
+      final scrobbler = Scrobbler(userAgent);
       scrobbler.httpClient = MockClient((_) async => Response(_createScrobbleResponse(1, 1), 200));
 
       await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
