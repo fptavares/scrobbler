@@ -68,25 +68,32 @@ abstract class BluOSTrack {
 
 class BluOSAPITrack extends BluOSTrack {
   final String playId;
-  final int? length;
+  final double? length;
   final BluOSTrackState state;
 
   final double _thresholdPlayingTime;
 
   @override
-  bool get isScrobbable => state.seconds >= _thresholdPlayingTime;
+  bool get isScrobbable => length != null && length! <= 30 ? false : state.seconds >= _thresholdPlayingTime;
 
   BluOSAPITrack({
     required this.playId,
-    required super.artist,
-    super.album,
-    required super.title,
-    required this.length,
-    required super.timestamp,
-    required super.imageUrl,
+    required String artist,
+    String? album,
+    required String title,
+    this.length,
+    required String? imageUrl,
     required this.state,
-  }) : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, max(length / 2, 15));
-  // threshold = half of duration, no more than 4 minutes, no less than 15 seconds, default to 1 minute
+  })  : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, length / 2),
+        super(
+          artist: artist,
+          album: album,
+          title: title,
+          imageUrl: imageUrl,
+          timestamp: (BluOSAPITrack._nowTimestamp() - state.seconds).floor(),
+        );
+  // threshold = half of duration, no more than 4 minutes, default to 1 minute
+  // https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
 
   factory BluOSAPITrack.fromXml(XmlDocument document, BluOSTrackState state, String authorityForRelativeImages) {
     try {
@@ -103,8 +110,7 @@ class BluOSAPITrack extends BluOSTrack {
         artist: parser.getMandatory(config.artist),
         album: parser.getOptional(config.album),
         title: parser.getMandatory(config.title),
-        length: parser.getIntOptional(config.length),
-        timestamp: BluOSAPITrack._nowTimestamp() - state.seconds,
+        length: parser.getDoubleOptional(config.length),
         imageUrl: image,
         state: state,
       );
@@ -123,13 +129,13 @@ class BluOSAPITrack extends BluOSTrack {
   @override
   int get hashCode => '$playId$artist$title'.hashCode;
 
-  static int _nowTimestamp() => (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+  static double _nowTimestamp() => DateTime.now().millisecondsSinceEpoch / 1000;
 }
 
 class BluOSTrackState {
   final String? etag;
   final String? playerState;
-  int seconds;
+  double seconds;
 
   BluOSTrackState([
     this.etag,
@@ -144,7 +150,7 @@ class BluOSTrackState {
       return BluOSTrackState(
         parser.getEtag(),
         parser.getOptional(AttributeConfig.stateConfig),
-        parser.getIntOptional(AttributeConfig.secondsConfig) ?? 0,
+        parser.getDoubleOptional(AttributeConfig.secondsConfig) ?? 0,
       );
     } on MissingMandatoryAttributeException catch (e) {
       throw UnknownTrackException(e);
@@ -152,7 +158,6 @@ class BluOSTrackState {
   }
 
   bool get isPlaying => const ['play', 'stream'].contains(playerState);
-  bool get isConnecting => playerState == 'connecting';
   bool get isStopped => playerState == 'stop';
   bool get isActive => isPlaying || playerState == 'pause';
 }

@@ -33,8 +33,8 @@ class BluOSStatusParser {
     return value;
   }
 
-  int? getIntOptional(AttributeConfig attribute) {
-    return int.tryParse(getOptional(attribute) ?? '');
+  double? getDoubleOptional(AttributeConfig attribute) {
+    return double.tryParse(getOptional(attribute) ?? '');
   }
 
   String? getEtag() {
@@ -73,6 +73,8 @@ class ServiceConfig {
 
   static const defaultConfig = ServiceConfig();
   static final Map<String, ServiceConfig> serviceConfigs = {
+    'LocalMusic': defaultConfig,
+    'Qobuz': defaultConfig,
     'Tidal': const ServiceConfig(
       title: AttributeConfig('name', alternativeKey: 'title2'), // title2 used on radio instead of name
     ),
