@@ -6,6 +6,7 @@ test_task:
     CODECOV_TOKEN: ENCRYPTED[fd031740ff3ab7b9da5819c6bc67681e8fb1916c9b35dd28df7f660dc0d84752f2caceefaf17f6598b7126772f9943cb]
   pub_cache:
     folder: ~/.pub-cache
+  install_dependencies_script: make dependencies
   activate_coverage_script: dart pub global activate coverage
   generate_secrets_script: make secrets
   generate_firebase_options_script: make firebaseOptions
