@@ -33,10 +33,14 @@ runTests () {
 
     # run tests with coverage
     if grep flutter pubspec.yaml > /dev/null; then
+      flutter pub get || error=true
+      flutter analyze || error=true
       echo "Running flutter tests in $1"
       flutter test --coverage || error=true
     else
       # pure dart
+      dart pub get || error=true
+      dart analyze || error=true
       echo "Running dart tests in $1"
       dart pub global run coverage:test_with_coverage || error=true
     fi
