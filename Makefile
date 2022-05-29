@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease icons macos screenshots mocks firebaseOptions dependencies clean
+.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease testFlight icons macos screenshots mocks firebaseOptions dependencies clean
 
 CODE = $(wildcard lib/**) $(wildcard test/**) $(wildcard pkgs/*/lib/**) $(wildcard pkgs/*/test/**)
 ASSETS = $(wildcard assets/**)
@@ -24,33 +24,31 @@ analysis: analysis.txt
 analysis.txt: $(CODE) analysis_options.yaml
 	flutter analyze --write analysis.txt
 
-run: test
+run:
 	flutter run --release $(if $(DEVICE),-d "$(DEVICE)")
 
 icons:
 	flutter pub run flutter_launcher_icons:main
 
-ipa: test
-	flutter build ios --release \
-    && mkdir -p build/ios/iphoneos/Payload \
-    && cd build/ios/iphoneos \
-    && rm -rf Payload/Runner.app app.ipa \
-    && mv Runner.app Payload/ \
-    && zip -r app.ipa Payload
+ipa:
+	flutter build ipa --release
 
-ios: test
+ios:
 	flutter build ios --release
 
-appStoreRelease: test
+appStoreRelease:
 	cd ios && fastlane release
 
-android: test
+testflight:
+	cd ios && fastlane beta
+
+android:
 	flutter build appbundle --release
 
 playStoreRelease: android
 	cd android && fastlane release
 
-macos: test
+macos:
 	flutter build macos --release
 
 screenshots:
@@ -66,8 +64,8 @@ firebaseOptions:
 
 dependencies:
 	flutter pub get \
-	&& cd pkgs/bluos_monitor \
-	&& dart pub get
+	&& ( cd pkgs/bluos_monitor && dart pub get ) \
+	&& ( cd pkgs/bluos_monitor_server && dart pub get )
 
 clean:
 	flutter clean
