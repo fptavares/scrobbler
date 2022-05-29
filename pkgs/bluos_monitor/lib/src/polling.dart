@@ -10,10 +10,7 @@ import 'playlist.dart';
 
 class LongPollingSession {
   LongPollingSession(this.host, this.port,
-      {required void Function() this.onChange,
-      LongPollingSession? previousSession,
-      bool? stopWhenPlayerStops,
-      http.Client? httpClient})
+      {required this.onChange, LongPollingSession? previousSession, bool? stopWhenPlayerStops, http.Client? httpClient})
       : _playlistTracker = previousSession?._playlistTracker ?? BluOSPlaylistTracker(),
         _stopWhenPlayerStops = stopWhenPlayerStops ?? false,
         _httpClient = httpClient ?? http.Client();
