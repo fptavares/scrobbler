@@ -29,6 +29,7 @@ class BluOS extends ChangeNotifier {
   String? get playerName => _client.playerName;
   String? get errorMessage => _client.errorMessage;
   bool get canReload => _client.canReload;
+  bool get isExternal => _client is BluOSExternalMonitorClient;
 
   List<BluOSTrack> get playlist => _client.playlist;
 

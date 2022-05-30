@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
 
+import '../model/analytics.dart';
 import '../model/bluos.dart';
 import '../model/lastfm.dart';
 import '../model/settings.dart';
@@ -243,6 +244,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     final settings = Provider.of<Settings>(context, listen: false);
     settings.bluOSPlayer = player;
 
+    analytics.logStartBluOS(bluos.isExternal);
+
     await handleFutureError(bluos.start(player.host, player.port, player.name), _log, trace: 'bluos_start');
   }
 
@@ -265,6 +268,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
 
   Future<void> _handleSubmit(BuildContext context, BluOS bluos) async {
     final scrobbler = Provider.of<Scrobbler>(context, listen: false);
+
+    analytics.logScrobbleBluOS();
 
     try {
       var successful = false;
