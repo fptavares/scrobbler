@@ -19,6 +19,7 @@ Future<void> main() async {
     test('updates the monitor address', () async {
       final bluos = BluOS();
       expect(bluos.externalMonitorClientInstance, isNull);
+      expect(bluos.isExternal, isFalse);
 
       const testAddress = 'monitor:1234';
 
@@ -30,6 +31,8 @@ Future<void> main() async {
       // check the external monitor is used when starting
       await expectExternalMonitorRequest(() => bluos.start('test', 4321), equals('http://$testAddress/start/test/4321'),
           BluOSTestData.pollingEmptyPlaylist, bluos);
+
+      expect(bluos.isExternal, isTrue);
 
       // empty address should unset address
       bluos.updateMonitorAddress('');
@@ -92,6 +95,7 @@ Future<void> main() async {
       // check the external monitor is used and that the data stored matches
       await expectExternalMonitorRequest(() => bluos.start('test', 4321), equals('http://$testAddress/start/test/4321'),
           BluOSTestData.pollingWithPlaylist, bluos);
+      expect(bluos.isExternal, isTrue);
       expect(bluos.canReload, isTrue);
       expect(bluos.isPolling, isTrue);
       expect(bluos.playlist, isNotEmpty);
@@ -102,6 +106,7 @@ Future<void> main() async {
       // check that refresh gets the correct data inclusing the error message
       await expectExternalMonitorRequest(
           bluos.refresh, equals('http://$testAddress/playlist'), BluOSTestData.pollingWithPlaylistAndError, bluos);
+      expect(bluos.isExternal, isTrue);
       expect(bluos.canReload, isTrue);
       expect(bluos.isPolling, isTrue);
       expect(bluos.playlist, isNotEmpty);
@@ -112,6 +117,7 @@ Future<void> main() async {
       // when stopping external monitor, the client should retain the last state
       await expectExternalMonitorRequest(
           bluos.stop, equals('http://$testAddress/stop'), BluOSTestData.notPollingWithPlaylist, bluos);
+      expect(bluos.isExternal, isTrue);
       expect(bluos.canReload, isTrue);
       expect(bluos.isPolling, isFalse);
       expect(bluos.playlist, isNotEmpty);
@@ -146,6 +152,7 @@ Future<void> main() async {
       final apiMonitorMock = createMockBluOSAPIMonitor();
       final bluos = BluOS(apiMonitor: apiMonitorMock);
       expect(bluos.externalMonitorClientInstance, isNull);
+      expect(bluos.isExternal, isFalse);
 
       // mock polling API monitor
       when(apiMonitorMock.isPolling).thenReturn(true);
@@ -156,8 +163,9 @@ Future<void> main() async {
       expect(bluos.externalMonitorClientInstance, isNotNull);
       expect(bluos.externalMonitorClientInstance!.monitorAddress, equals(monitorAddress));
 
-      verifyZeroInteractions(apiMonitorMock);
+      verifyZeroInteractions(apiMonitorMock); // should not trigger a refresh on API monitor
       expect(bluos.isPolling, isTrue);
+      expect(bluos.isExternal, isFalse);
 
       // mock external http client
       final externalMonitorHttpClientMock = mocks.createMockHttpClient();
@@ -167,6 +175,7 @@ Future<void> main() async {
       await bluos.refresh();
       verify(apiMonitorMock.refresh());
       verifyZeroInteractions(externalMonitorHttpClientMock);
+      expect(bluos.isExternal, isFalse);
 
       // start without stopping first, expect stop to be sent before starting API client
       await expectExternalMonitorRequest(() => bluos.start('test', 4321),
@@ -175,6 +184,7 @@ Future<void> main() async {
       verify(apiMonitorMock.stop()); // should stop
       verifyNoMoreInteractions(apiMonitorMock);
 
+      expect(bluos.isExternal, isTrue);
       expect(bluos.isPolling, isTrue);
       expect(bluos.canReload, isTrue);
       expect(bluos.playlist.length, equals(3));
