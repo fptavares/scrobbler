@@ -214,6 +214,48 @@ void main() {
       verify(bluos.start(lastPlayer.host, lastPlayer.port, lastPlayer.name));
     });
 
+    testWidgets('show error when no players are found in the network', (tester) async {
+      final scrobbler = initScrobbler();
+      final bluos = initBluOS();
+      when(bluos.canReload).thenReturn(false);
+      when(bluos.isPolling).thenReturn(false);
+      when(bluos.isLoading).thenReturn(false);
+      when(bluos.errorMessage).thenReturn(null);
+      when(bluos.playlist).thenReturn([]);
+
+      when(bluos.lookupBluOSPlayers()).thenAnswer((_) => Future.value([]));
+
+      await pumpBluOSWidget(tester, bluos, scrobbler);
+
+      expect(find.text('Scan for players'), findsOneWidget);
+
+      await tester.tap(find.text('Scan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(BluOSMonitorControl.noPlayerFoundErrorMessage), findsOneWidget);
+
+      verify(bluos.lookupBluOSPlayers());
+    });
+
+    testWidgets('show error when returned by the monitor', (tester) async {
+      final scrobbler = initScrobbler();
+      final bluos = initBluOS();
+      when(bluos.canReload).thenReturn(false);
+      when(bluos.isPolling).thenReturn(true);
+      when(bluos.isLoading).thenReturn(false);
+      when(bluos.playerName).thenReturn('Player name');
+      const errorMessage = 'My test error message!';
+      when(bluos.errorMessage).thenReturn(errorMessage);
+      when(bluos.playlist).thenReturn([]);
+
+      when(bluos.lookupBluOSPlayers()).thenAnswer((_) => Future.value([]));
+
+      await pumpBluOSWidget(tester, bluos, scrobbler);
+
+      expect(find.byIcon(Icons.error), findsOneWidget);
+      expect(find.text(errorMessage), findsOneWidget);
+    });
+
     testWidgets('allows status refresh for extenal monitors', (tester) async {
       final scrobbler = initScrobbler();
       final bluos = initBluOS();
@@ -296,7 +338,5 @@ void main() {
 }
 
 extension BluOSFinders on CommonFinders {
-  Finder bluOSTrack(BluOSTrack track) => text(formatTrackText(track));
+  Finder bluOSTrack(BluOSTrack track) => text('${track.artist} - ${track.title}');
 }
-
-String formatTrackText(BluOSTrack track) => '${track.artist} - ${track.title}';

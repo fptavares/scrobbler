@@ -57,6 +57,8 @@ class BluOSMonitorControl extends StatefulWidget {
 
   @override
   BluOSMonitorControlState createState() => BluOSMonitorControlState();
+
+  static const noPlayerFoundErrorMessage = 'No BluOS players were found in your network.';
 }
 
 class BluOSMonitorControlState extends State<BluOSMonitorControl> {
@@ -262,7 +264,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
       }
     });
     if (players != null && players.isEmpty) {
-      displayError('No BluOS players were found in your network.');
+      displayError(BluOSMonitorControl.noPlayerFoundErrorMessage);
     }
   }
 
