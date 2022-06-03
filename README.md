@@ -19,6 +19,7 @@ and scrobble records directly to Last.fm.
 # Build it
 
 ```bash
+$ make dependencies
 $ make secrets
 $ make firebaseOptions
 $ make mocks
