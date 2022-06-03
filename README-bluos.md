@@ -1,1 +1,0 @@
-pkgs/bluos_monitor_server/README.md

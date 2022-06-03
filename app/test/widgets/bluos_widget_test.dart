@@ -17,18 +17,17 @@ import '../mocks/model_mocks.dart';
 
 void main() {
   Future<Settings> initSettings() async {
-    final settings = Settings(await SharedPreferences.getInstance());
-    return settings;
+    return Settings(await SharedPreferences.getInstance());
   }
 
   MockBluOS initBluOS() {
     final bluos = createMockBluOSMonitor();
+    when(bluos.isExternal).thenReturn(true);
     return bluos;
   }
 
   MockScrobbler initScrobbler() {
-    final scrobbler = createMockScrobbler();
-    return scrobbler;
+    return createMockScrobbler();
   }
 
   setUpAll(() {

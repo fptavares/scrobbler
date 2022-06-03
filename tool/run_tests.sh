@@ -33,27 +33,31 @@ runTests () {
 
     # run tests with coverage
     if grep flutter pubspec.yaml > /dev/null; then
+      echo -e "\nAnalyzing flutter code in $1"
+      flutter format --line-length=120 . || error=true
       flutter analyze || error=true
-      echo "Running flutter tests in $1"
+      echo -e "\nRunning flutter tests in $1"
       flutter test --coverage || error=true
     else
       # pure dart
+      echo -e "\nAnalyzing dart code in $1"
+      dart format --line-length=120 . || error=true
       dart analyze || error=true
-      echo "Running dart tests in $1"
+      echo -e "\nRunning dart tests in $1"
       dart pub global run coverage:test_with_coverage || error=true
     fi
     if [ -d "coverage" ]; then
       # combine line coverage info from package tests to a common file
-      sed "s/^SF:lib/SF:$escapedPath\/lib/g" coverage/lcov.info >> $2/coverage/lcov-combined.info
+      sed "s/^SF:lib/SF:$escapedPath\/lib/g" coverage/lcov.info >> $2/coverage/lcov.info
     fi
   fi
   cd $2 > /dev/null
 }
 
 runReport() {
-    if [ -f "coverage/lcov-combined.info" ] && ! [ "$TRAVIS" ]; then
-        genhtml -q coverage/lcov-combined.info -o coverage/html-combined --no-function-coverage -s -p `pwd`
-        open coverage/html-combined/index.html
+    if [ -f "coverage/lcov.info" ] && ! [ "$TRAVIS" ]; then
+        genhtml -q coverage/lcov.info -o coverage/html --no-function-coverage -s -p `pwd`
+        open coverage/html/index.html
     fi
 }
 
@@ -75,9 +79,10 @@ case $1 in
         currentDir=`pwd`
         # if no parameter passed
         if [ -z $1 ]; then
-            rm -f coverage/lcov-combined.info
+            [ -d coverage ] || mkdir coverage
+            rm -f coverage/lcov.info
             runTests $currentDir $currentDir
-            dirs=(`find pkgs -mindepth 1 -maxdepth 1 -type d`)
+            dirs=(`find . -maxdepth 2 -type d`)
             for dir in "${dirs[@]}"; do
                 runTests $dir $currentDir
             done

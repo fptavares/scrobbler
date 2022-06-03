@@ -1,71 +1,62 @@
 .PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease testFlight icons macos screenshots mocks firebaseOptions dependencies clean
 
-CODE = $(wildcard lib/**) $(wildcard test/**) $(wildcard pkgs/*/lib/**) $(wildcard pkgs/*/test/**)
+CODE = $(wildcard app/lib/**) $(wildcard app/test/**) $(wildcard pkgs/*/lib/**) $(wildcard pkgs/*/test/**)
 ASSETS = $(wildcard assets/**)
 SOURCES = $(CODE) $(ASSETS)
 
 all: analysis showCoverage
 
 secrets:
-	[ -f .env ] && source .env; flutter pub run tool/generate_secrets_file.dart
+	[ -f .env ] && source .env; cd app && flutter pub run tool/generate_secrets_file.dart
 
-test: coverage/lcov-combined.info
-
-coverage/lcov-combined.info: $(SOURCES)
+test: 
 	./tool/run_tests.sh
 
-coverage/html-combined/index.html: coverage/lcov-combined.info
+report:
 	./tool/run_tests.sh --report
 
-report: coverage/html-combined/index.html
-
-analysis: analysis.txt
-
-analysis.txt: $(CODE) analysis_options.yaml
-	flutter analyze --write analysis.txt
-
 run:
-	flutter run --release $(if $(DEVICE),-d "$(DEVICE)")
+	cd app && flutter run --release $(if $(DEVICE),-d "$(DEVICE)")
 
 icons:
-	flutter pub run flutter_launcher_icons:main
+	cd app && flutter pub run flutter_launcher_icons:main
 
 ipa:
-	flutter build ipa --release
+	cd app && flutter build ipa --release
 
 ios:
-	flutter build ios --release
+	cd app && flutter build ios --release
 
 appStoreRelease:
-	cd ios && fastlane release
+	cd app/ios && fastlane release
 
-testflight:
-	cd ios && fastlane beta
+testflight: ipa
+	cd app/ios && fastlane beta
 
 android:
-	flutter build appbundle --release
+	cd app && flutter build appbundle --release
 
 playStoreRelease: android
-	cd android && fastlane release
+	cd app/android && fastlane release
 
 macos:
-	flutter build macos --release
+	cd app && flutter build macos --release
 
 screenshots:
-	screenshots \
+	cd app && screenshots \
 	&& cd ios/fastlane/screenshots/en-US \
 	&& fastlane frameit
 
 mocks:
-	flutter pub run build_runner build
+	cd app && flutter pub run build_runner build --delete-conflicting-outputs
 
 firebaseOptions:
-	flutter pub run tool/generate_firebase_options_file.dart
+	cd app && flutter pub run tool/generate_firebase_options_file.dart
 
 dependencies:
-	flutter pub get \
+	( cd app && flutter pub get ) \
 	&& ( cd pkgs/bluos_monitor && dart pub get ) \
 	&& ( cd pkgs/bluos_monitor_server && dart pub get )
 
 clean:
-	flutter clean
+	cd app && flutter clean

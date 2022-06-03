@@ -16,7 +16,6 @@ void main() {
     exit(1);
   }
 
-  secretsFile.writeAsStringSync(config.entries
-      .map((e) => "const ${e.key} = '${e.value.replaceAll('\'', '\\\'')}';")
-      .join('\n'));
+  secretsFile.writeAsStringSync(
+      config.entries.map((e) => "const ${e.key} = '${e.value.replaceAll('\'', '\\\'')}';").join('\n'));
 }

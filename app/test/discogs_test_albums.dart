@@ -8,10 +8,7 @@ final CollectionAlbum testAlbum1 = CollectionAlbum(
   year: 1997,
   formats: [
     AlbumFormat(
-        name: 'Vinyl',
-        descriptions: ['LP', 'Album', 'Limited Edition', 'Reissue'],
-        extraText: '180 gram',
-        quantity: 2),
+        name: 'Vinyl', descriptions: ['LP', 'Album', 'Limited Edition', 'Reissue'], extraText: '180 gram', quantity: 2),
     AlbumFormat(name: 'CD', descriptions: [], extraText: null, quantity: 1)
   ],
   thumbUrl:
@@ -26,8 +23,7 @@ final CollectionAlbum testAlbum2 = CollectionAlbum(
   title: 'Never Gonna Give You Up',
   year: 0,
   formats: [
-    AlbumFormat(
-        name: 'Vinyl', descriptions: ['7"', '45 RPM', 'Single'], quantity: 1)
+    AlbumFormat(name: 'Vinyl', descriptions: ['7"', '45 RPM', 'Single'], quantity: 1)
   ],
   thumbUrl:
       'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
