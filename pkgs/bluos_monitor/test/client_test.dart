@@ -230,7 +230,6 @@ class FakePollingResponder {
 
   Future<void> validateErrorHandling({required bool shouldStop, required bool noDelay}) async {
     expect(client.errorMessage, isNotNull);
-    print(client.errorMessage);
     expect(client.playlist, isEmpty);
 
     if (shouldStop) {
