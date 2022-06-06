@@ -9,17 +9,12 @@ import 'package:scrobbler/model/bluos.dart';
 import 'package:scrobbler/model/lastfm.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bluos_test_data.dart';
 import '../mocks/firebase_mocks.dart';
 import '../mocks/model_mocks.dart';
 
 void main() {
-  Future<Settings> initSettings() async {
-    return Settings(await SharedPreferences.getInstance());
-  }
-
   MockBluOS initBluOS() {
     final bluos = createMockBluOSMonitor();
     when(bluos.isExternal).thenReturn(true);
@@ -32,13 +27,11 @@ void main() {
 
   setUpAll(() {
     replaceFirebaseWithMocks();
-    SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
   group('BluOS button', () {
     Future<Settings> pumpButton(WidgetTester tester, BluOS bluos, Scrobbler scrobbler, {bool? visible}) async {
-      final settings = await initSettings();
-      settings.isBluOSEnabled = visible ?? true;
+      final settings = createMockSettings(isBluOSEnabled: visible ?? true);
 
       await tester.pumpWidget(MultiProvider(
         providers: [
@@ -70,15 +63,12 @@ void main() {
       final bluos = initBluOS();
       when(bluos.isPolling).thenReturn(false);
 
-      final settings = await pumpButton(tester, bluos, scrobbler, visible: false);
-
-      expect(settings.isBluOSEnabled, isFalse);
+      await pumpButton(tester, bluos, scrobbler, visible: false);
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(find.byType(Image), findsNothing);
 
-      settings.isBluOSEnabled = true;
-      expect(settings.isBluOSEnabled, isTrue);
+      await pumpButton(tester, bluos, scrobbler, visible: true);
 
       await tester.pump();
 
@@ -91,6 +81,8 @@ void main() {
       final bluos = initBluOS();
       when(bluos.canReload).thenReturn(true);
       when(bluos.isPolling).thenReturn(false);
+
+      createMockSettings(isBluOSEnabled: true);
 
       await pumpButton(tester, bluos, scrobbler);
 
@@ -116,8 +108,9 @@ void main() {
   });
 
   group('BluOS widget', () {
-    Future<Settings> pumpBluOSWidget(WidgetTester tester, BluOS bluos, Scrobbler scrobbler) async {
-      final settings = await initSettings();
+    Future<Settings> pumpBluOSWidget(WidgetTester tester, BluOS bluos, Scrobbler scrobbler,
+        [Settings? mockSettings]) async {
+      final settings = mockSettings ?? createMockSettings();
 
       await tester.pumpWidget(MultiProvider(
         providers: [
@@ -167,7 +160,7 @@ void main() {
       expect(find.text('Scan'), findsOneWidget);
     });
 
-    testWidgets('scans the network for players', (tester) async {
+    testWidgets('scans the network for players and starts', (tester) async {
       final scrobbler = initScrobbler();
       final bluos = initBluOS();
       when(bluos.canReload).thenReturn(false);
@@ -212,6 +205,95 @@ void main() {
       await tester.pump();
 
       verify(bluos.start(lastPlayer.host, lastPlayer.port, lastPlayer.name));
+    });
+
+    testWidgets('prefills the last used BluOS player', (tester) async {
+      final scrobbler = initScrobbler();
+      final bluos = initBluOS();
+      when(bluos.canReload).thenReturn(true);
+      when(bluos.isPolling).thenReturn(false);
+      when(bluos.isLoading).thenReturn(false);
+      when(bluos.errorMessage).thenReturn(null);
+      when(bluos.playlist).thenReturn([]);
+
+      final settings = createMockSettings(
+        bluOSPlayer: const BluOSPlayer('Player name', 'player', 1234),
+        isBluOSWarningShown: true,
+      );
+
+      await pumpBluOSWidget(tester, bluos, scrobbler, settings);
+
+      expect(find.text('Scan for players'), findsNothing);
+      expect(find.text('Player name'), findsOneWidget);
+
+      await tester.tap(find.text('Start'));
+      await tester.pump();
+
+      verify(bluos.start('player', 1234, 'Player name'));
+    });
+
+    testWidgets('shows warning before starting the first time', (tester) async {
+      final scrobbler = initScrobbler();
+      final bluos = initBluOS();
+      when(bluos.canReload).thenReturn(false);
+      when(bluos.isPolling).thenReturn(false);
+      when(bluos.isLoading).thenReturn(false);
+      when(bluos.errorMessage).thenReturn(null);
+      when(bluos.playlist).thenReturn([]);
+
+      when(bluos.isExternal).thenReturn(false);
+
+      final settings = createMockSettings(
+        bluOSPlayer: const BluOSPlayer('Player name', 'player', 1234),
+      );
+
+      await pumpBluOSWidget(tester, bluos, scrobbler, settings);
+
+      expect(settings.isBluOSWarningShown, isFalse);
+
+      await tester.tap(find.text('Start'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.textContaining('github.com/fptavares/scrobbler/wiki/BluOS', findRichText: true), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'OK'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(TextButton, 'OK'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      verify(settings.isBluOSWarningShown = true);
+    });
+
+    testWidgets('does not show warning before starting the next time', (tester) async {
+      final scrobbler = initScrobbler();
+      final bluos = initBluOS();
+      when(bluos.canReload).thenReturn(false);
+      when(bluos.isPolling).thenReturn(false);
+      when(bluos.isLoading).thenReturn(false);
+      when(bluos.errorMessage).thenReturn(null);
+      when(bluos.playlist).thenReturn([]);
+
+      when(bluos.isExternal).thenReturn(false);
+
+      final settings = createMockSettings(
+        bluOSPlayer: const BluOSPlayer('Player name', 'player', 1234),
+        isBluOSWarningShown: true,
+      );
+
+      await pumpBluOSWidget(tester, bluos, scrobbler, settings);
+
+      expect(settings.isBluOSWarningShown, isTrue);
+
+      await tester.tap(find.text('Start'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.textContaining('github.com/fptavares/scrobbler/wiki/BluOS', findRichText: true), findsNothing);
+
+      expect(settings.isBluOSWarningShown, isTrue);
+
+      verify(bluos.start('player', 1234, 'Player name'));
     });
 
     testWidgets('show error when no players are found in the network', (tester) async {
