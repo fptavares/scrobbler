@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
@@ -104,6 +102,7 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final collection = Provider.of<Collection>(context, listen: false);
+    final platform = Theme.of(context).platform;
 
     return SliverAppBar(
       stretch: true,
@@ -139,10 +138,7 @@ class HomeAppBar extends StatelessWidget {
         background: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10.0,
-              vertical: 10.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -151,21 +147,19 @@ class HomeAppBar extends StatelessWidget {
                   flex: 1,
                   child: Text('scrobbler.',
                       textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: Colors.white60,
-                        fontFamily: 'Quicksand',
-                        fontSize: 24.0,
-                      )),
+                      style: TextStyle(color: Colors.white60, fontFamily: 'Quicksand', fontSize: 24.0)),
                 ),
                 SizedBox(width: 70),
-                Expanded(
-                  flex: 1,
-                  child: Text(''),
-                ),
+                Expanded(flex: 1, child: Text('')),
               ],
             ),
           ),
         ),
+      ),
+      leading: IconButton(
+        icon: const Icon(Icons.menu),
+        tooltip: 'Settings',
+        onPressed: () => Scaffold.of(context).openDrawer(),
       ),
       actions: <Widget>[
         Consumer<Playlist>(
@@ -182,19 +176,22 @@ class HomeAppBar extends StatelessWidget {
             onPressed: collection.isNotEmpty ? () => showSearch(context: context, delegate: AlbumSearch()) : null,
           ),
         ),
-        if (Platform.isMacOS || Platform.isLinux || Platform.isWindows)
+        if ([TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux].contains(platform))
           Consumer<LoadingStatus>(
             builder: (context, status, _) => IconButton(
-              icon: const Icon(Icons.refresh_outlined),
+              icon: const Icon(Icons.refresh),
               tooltip: 'Reload collection',
-              onPressed: collection.isNotLoading
-                  ? () => handleFutureError(collection.reload(emptyCache: true), _log,
-                      error: 'Failed to reload collection!', trace: 'reload')
-                  : null,
+              onPressed: collection.isNotLoading ? () => _handleReload(collection) : null,
             ),
           )
       ],
     );
+  }
+
+  Future<void> _handleReload(Collection collection) {
+    analytics.logTapRefreshButton();
+    return handleFutureError(collection.reload(emptyCache: true), _log,
+        error: 'Failed to reload collection!', trace: 'reload');
   }
 }
 
@@ -206,7 +203,7 @@ class HomeDrawer extends StatelessWidget {
     return Drawer(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Account Settings'),
+          title: const Text('Settings'),
           backgroundColor: Theme.of(context).primaryColor,
         ),
         backgroundColor: Colors.transparent,

@@ -103,7 +103,7 @@ Future<void> main() async {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
 
-      expect(find.text('Account Settings'), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
       expect(find.byType(AccountsForm), findsOneWidget);
     });
 
@@ -155,12 +155,27 @@ Future<void> main() async {
 
       await tester.pumpWidget(createHome());
 
+      expect(find.byIcon(Icons.refresh), findsNothing); // no refresh button on mobile platforms
+
       await tester.drag(find.byKey(const ValueKey<int>(0)), const Offset(0.0, 250.0));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
       verify(collection.reload(emptyCache: true));
-    });
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('reloads collection on refresh button tap', (tester) async {
+      when(collection.albums).thenReturn(List.generate(20, (index) => testAlbum1.copyWith(id: index)));
+
+      await tester.pumpWidget(createHome());
+
+      expect(find.byIcon(Icons.refresh), findsOneWidget); // refresh button available on desktop platforms
+
+      await tester.tap(find.byIcon(Icons.refresh));
+      await tester.pump();
+
+      verify(collection.reload(emptyCache: true));
+    }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('scroll to top when user taps the app bar title', (tester) async {
       when(collection.albums).thenReturn(List.generate(50, (index) => testAlbum1.copyWith(id: index)));
