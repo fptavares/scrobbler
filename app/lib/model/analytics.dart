@@ -43,7 +43,7 @@ class ScrobblerAnalytics {
     analytics.logEvent(name: 'pull_refresh');
   }
 
-  void logTapRefreshButton() {
+  void logClickRefreshButton() {
     analytics.logEvent(name: 'tap_refresh');
   }
 
