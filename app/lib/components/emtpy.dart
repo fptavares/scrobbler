@@ -19,12 +19,7 @@ class EmptyState extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-        padding: const EdgeInsets.only(
-          top: 30.0,
-          bottom: 15.0,
-          left: 30.0,
-          right: 30.0,
-        ),
+        padding: const EdgeInsets.only(top: 30.0, bottom: 15.0, left: 30.0, right: 30.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -33,10 +28,8 @@ class EmptyState extends StatelessWidget {
             Flexible(
               flex: 10,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: Image(
-                  image: AssetImage(imagePath),
-                ),
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Image(image: AssetImage(imagePath)),
               ),
             ),
             if (headline != null) const Flexible(flex: 1, child: SizedBox(height: 23.0)),
@@ -50,13 +43,9 @@ class EmptyState extends StatelessWidget {
               ),
             if (subhead != null) const Flexible(flex: 1, child: SizedBox(height: 8.0)),
             if (subhead != null)
-              Text(
-                subhead!,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                      color: Colors.black54,
-                    ),
-              ),
+              Text(subhead!,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.subtitle1!.copyWith(color: Colors.black54)),
           ],
         ),
       ),
