@@ -48,7 +48,7 @@ class CollectionLoadingStatus extends StatelessWidget {
               imagePath: 'assets/empty_nothing.png',
               headline: 'Anyone out there?',
               subhead:
-                  'Your Discogs collection will be displayed here, so that you can easily select which albums to scrobble.\n\nHave a Discogs account? Just open the account settings on the top left corner when you\'re ready.\n\n(Only works for public Discogs collections.)',
+                  'Your Discogs collection will be displayed here, so that you can easily select which albums to scrobble.\n\nHave a Discogs account? Just open the account settings on the top left corner when you\'re ready.\nPlease note that this only works for public Discogs collections.',
             );
           }
 
