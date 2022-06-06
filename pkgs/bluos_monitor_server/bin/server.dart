@@ -9,7 +9,12 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 
 Future main() async {
-  //Logger.root.level = Level.ALL; // defaults to Level.INFO
+  const isProduction = bool.fromEnvironment('dart.vm.product');
+  if (isProduction) {
+    Logger.root.level = Level.WARNING;
+  } else {
+    Logger.root.level = Level.ALL;
+  }
   Logger.root.onRecord.listen((record) {
     print(
         '${record.time.toIso8601String()} [${record.level.name}] ${record.loggerName}: ${record.message}'); // ignore: avoid_print
