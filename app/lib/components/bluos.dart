@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../model/analytics.dart';
 import '../model/bluos.dart';
@@ -248,6 +250,11 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
 
     analytics.logStartBluOS(bluos.isExternal);
 
+    // show warning for the first time, only if direct monitor
+    if (!bluos.isExternal && !settings.isBluOSWarningShown) {
+      await showAboutBluOSMonitor(context, settings);
+    }
+
     await handleFutureError(bluos.start(player.host, player.port, player.name), _log, trace: 'bluos_start');
   }
 
@@ -306,4 +313,47 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
   Iterable<BluOSTrack> _getTracksToScrobble(List<BluOSTrack> tracks) {
     return tracks.where(_isIncluded);
   }
+}
+
+Future<void> showAboutBluOSMonitor(BuildContext context, Settings settings) async {
+  await showDialog<void>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Monitoring BluOS players'),
+        content: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
+                text:
+                    'Unfortunately, the app by itself can only monitor what\'s being played on another device while the app is open.\n\n'
+                    'To monitor tracks played even if the app is closed, you need to run a separate server that will monitor the BluOS player independently of the app.\n\n'
+                    'For more information, and instructions on how to install this, please go to ',
+              ),
+              TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blue),
+                text: 'github.com/fptavares/scrobbler/wiki/BluOS',
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () async {
+                    final url = Uri.https('github.com', '/fptavares/scrobbler/wiki/BluOS');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    }
+                  },
+              ),
+              const TextSpan(text: '.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          )
+        ],
+      );
+    },
+  );
+  settings.isBluOSWarningShown = true;
 }

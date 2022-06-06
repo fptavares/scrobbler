@@ -149,8 +149,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.textContaining('github.com/fptavares/scrobbler/pkgs/bluos_monitor_server', findRichText: true),
-        findsOneWidget);
+    expect(find.textContaining('github.com/fptavares/scrobbler/wiki/BluOS', findRichText: true), findsOneWidget);
     expect(find.widgetWithText(TextButton, 'OK'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(TextButton, 'OK'));

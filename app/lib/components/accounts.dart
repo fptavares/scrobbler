@@ -1,12 +1,11 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../model/analytics.dart';
 import '../model/lastfm.dart';
 import '../model/settings.dart';
+import 'bluos.dart';
 import 'error.dart';
 
 class AccountsForm extends StatefulWidget {
@@ -82,7 +81,6 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                   ),
                   TextFormField(
                     key: AccountsForm.discogsUsernameFieldKey,
-                    //validator: (value) => value!.isEmpty ? AccountsForm.discogsInvalidUsernameMessage : null,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: 'Discogs Username',
@@ -151,7 +149,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                               TextButton.icon(
                                 icon: const Icon(Icons.help),
                                 label: const Text('More about BluOS monitor'),
-                                onPressed: () => _showMoreAboutMonitor(context),
+                                onPressed: () => showAboutBluOSMonitor(context, settings),
                               ),
                           ],
                         );
@@ -172,48 +170,6 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _showMoreAboutMonitor(BuildContext context) async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Monitoring BluOS players'),
-          content: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  text:
-                      'Unfortunately, the app by itself can only monitor what\'s being played on another device while the app is open.\n\n'
-                      'To monitor tracks played even if the app is in the background, or closed, you need to run a separate server that will monitor the BluOS player independetly of this application.\n\n'
-                      'For more information, and instructions on how to install this, please go to ',
-                ),
-                TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blue),
-                  text: 'github.com/fptavares/scrobbler/pkgs/bluos_monitor_server',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () async {
-                      final url = Uri.https('github.com', '/fptavares/scrobbler/pkgs/bluos_monitor_server');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url);
-                      }
-                    },
-                ),
-                const TextSpan(text: '.'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(),
-            )
-          ],
-        );
-      },
     );
   }
 
