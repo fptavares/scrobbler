@@ -17,10 +17,12 @@ void displayAndLogError(Logger logger, Object e, StackTrace stackTrace, [String?
               ? 'Could not connect to ${e.address!.host} (${e.message})'
               : e.toString());
 
-  if (e is! UIException) {
+  if (e is UIException) {
+    if (e.exception != null) {
+      logger.warning(errorMessage, e.exception, stackTrace);
+    }
+  } else {
     logger.severe(errorMessage, e, stackTrace);
-  } else if (e.exception != null) {
-    logger.warning(errorMessage, e.exception, stackTrace);
   }
 
   displayError(errorMessage);
