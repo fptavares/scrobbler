@@ -1,4 +1,4 @@
-.PHONY: all secrets test showCoverage analysis run ipa ios appStoreRelease android playStoreRelease testFlight icons macos screenshots mocks installOnMacos container firebaseOptions dependencies clean
+.PHONY: all secrets test showCoverage analysis run server runServer ipa ios appStoreRelease android playStoreRelease testFlight icons macos screenshots mocks installOnMacos container firebaseOptions dependencies clean
 
 CODE = $(wildcard app/lib/**) $(wildcard app/test/**) $(wildcard pkgs/*/lib/**) $(wildcard pkgs/*/test/**)
 ASSETS = $(wildcard assets/**)
@@ -45,6 +45,14 @@ macos:
 installOnMacos: macos
 	rm -rf /Applications/Scrobbler.app \
 	&& cp -r app/build/macos/Build/Products/Release/scrobbler.app /Applications/Scrobbler.app
+
+server:
+	cd pkgs/bluos_monitor_server \
+	&& mkdir -p build \
+	&& dart compile exe bin/server.dart -o build/server
+
+runServer:
+	cd pkgs/bluos_monitor_server && dart bin/server.dart
 
 container:
 	docker build -t scrobbler-bluos-monitor -f pkgs/bluos_monitor_server/Dockerfile .
