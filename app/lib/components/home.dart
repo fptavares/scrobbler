@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:scrobbler/model/settings.dart';
 
 import '../model/analytics.dart';
 import '../model/discogs.dart';
@@ -22,7 +21,6 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final collection = Provider.of<Collection>(context, listen: false);
-    final settings = Provider.of<Settings>(context, listen: false);
 
     return Scaffold(
         drawer: const HomeDrawer(),
@@ -65,12 +63,10 @@ class HomePage extends StatelessWidget {
         ),
         endDrawer: SizedBox(
           width: MediaQuery.of(context).size.width < 400 ? MediaQuery.of(context).size.width : 380,
-          child: Drawer(
+          child: const Drawer(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 5),
-              child: BluOSMonitorControl(
-                defaultPlayer: settings.bluOSPlayer,
-              ),
+              padding: EdgeInsets.only(bottom: 5),
+              child: BluOSMonitorControl(),
             ),
           ),
         ));
@@ -189,7 +185,7 @@ class HomeAppBar extends StatelessWidget {
   }
 
   Future<void> _handleReload(Collection collection) {
-    analytics.logTapRefreshButton();
+    analytics.logClickRefreshButton();
     return handleFutureError(collection.reload(emptyCache: true), _log,
         error: 'Failed to reload collection!', trace: 'reload');
   }

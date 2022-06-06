@@ -50,12 +50,7 @@ class BluosFloatingButton extends StatelessWidget {
 }
 
 class BluOSMonitorControl extends StatefulWidget {
-  const BluOSMonitorControl({
-    Key? key,
-    this.defaultPlayer,
-  }) : super(key: key);
-
-  final BluOSPlayer? defaultPlayer;
+  const BluOSMonitorControl({super.key});
 
   @override
   BluOSMonitorControlState createState() => BluOSMonitorControlState();
@@ -73,7 +68,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
 
   @override
   Widget build(BuildContext context) {
-    _selectedPlayer ??= widget.defaultPlayer;
+    final settings = Provider.of<Settings>(context, listen: false);
+    _selectedPlayer ??= settings.bluOSPlayer;
 
     return Consumer<BluOS>(
       builder: (context, bluos, _) {
