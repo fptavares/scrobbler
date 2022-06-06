@@ -20,6 +20,8 @@ class Settings extends ChangeNotifier {
 
   String? get bluOSMonitorAddress => prefs.getString(bluOSMonitorAddressKey);
 
+  bool get isBluOSWarningShown => prefs.getBool(bluOSWarningShownKey) ?? false;
+
   BluOSPlayer? get bluOSPlayer {
     final host = prefs.getString(bluOSHostKey);
     final port = prefs.getInt(bluOSPortKey);
@@ -84,6 +86,11 @@ class Settings extends ChangeNotifier {
     notifyListeners();
   }
 
+  set isBluOSWarningShown(bool value) {
+    prefs.setBool(bluOSWarningShownKey, value);
+    notifyListeners();
+  }
+
   @visibleForTesting
   static const String skippedKey = 'skipped';
   @visibleForTesting
@@ -102,4 +109,6 @@ class Settings extends ChangeNotifier {
   static const String bluOSPortKey = 'bluOSPort';
   @visibleForTesting
   static const String bluOSNameKey = 'bluOSName';
+  @visibleForTesting
+  static const String bluOSWarningShownKey = 'bluOSWarningShown';
 }
