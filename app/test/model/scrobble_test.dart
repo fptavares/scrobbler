@@ -39,9 +39,13 @@ void main() {
         );
       }, count: 1));
 
+      expect(scrobbler.isNotAuthenticated, isTrue);
+
       // login
       final returnedKey = await scrobbler.initializeSession(username, password);
       expect(returnedKey, equals(key));
+
+      expect(scrobbler.isNotAuthenticated, isFalse);
     });
 
     test('submits more than 50 tracks to Last.fm with exclusions but no offset', () async {
@@ -171,14 +175,27 @@ void main() {
       expect(acceptedList, equals([1]));
     });
 
-    Future<void> verifyThrows(Future<dynamic> Function() function) async {
+    Future<void> verifyThrows(Future<dynamic> Function() function, [String? messageContainsText]) async {
       try {
         await function();
         fail('Exception not thrown on: $function');
       } on Exception catch (e) {
         expect(e, isA<UIException>());
+        if (messageContainsText != null && e is UIException) {
+          expect(e.message, contains('authentication failed'));
+        }
       }
     }
+
+    test('throws UI exception on Last.fm authentication error', () async {
+      final scrobbler = Scrobbler(userAgent);
+      scrobbler.httpClient = MockClient((_) async => Response('{ "error": 4 }', 300));
+
+      await verifyThrows(() => scrobbler.initializeSession(username, password));
+
+      scrobbler.updateSessionKey(key);
+      await verifyThrows(() async => await scrobbler.scrobbleAlbums([testAlbumDetails1]).toList());
+    });
 
     test('throws UI exception on server error', () async {
       final scrobbler = Scrobbler(userAgent);
