@@ -39,7 +39,7 @@ class Settings extends ChangeNotifier {
 
   set discogsUsername(String? newUsername) {
     if (newUsername != discogsUsername) {
-      prefs.setString(discogsUsernameKey, newUsername!);
+      _setOrRemoveString(discogsUsernameKey, newUsername);
       notifyListeners();
     }
   }
@@ -49,18 +49,14 @@ class Settings extends ChangeNotifier {
   /// after assigning the new username.
   set lastfmUsername(String? newUsername) {
     if (newUsername != lastfmUsername) {
-      prefs.setString(lastfmUsernameKey, newUsername!);
+      _setOrRemoveString(lastfmUsernameKey, newUsername);
       prefs.remove(lastfmSessionKeyKey);
       notifyListeners();
     }
   }
 
   set lastfmSessionKey(String? value) {
-    if (value == null) {
-      prefs.remove(lastfmSessionKeyKey);
-    } else {
-      prefs.setString(lastfmSessionKeyKey, value);
-    }
+    _setOrRemoveString(lastfmSessionKeyKey, value);
     notifyListeners();
   }
 
@@ -70,10 +66,8 @@ class Settings extends ChangeNotifier {
   }
 
   set bluOSMonitorAddress(String? value) {
-    if (value != null) {
-      prefs.setString(bluOSMonitorAddressKey, value);
-      notifyListeners();
-    }
+    _setOrRemoveString(bluOSMonitorAddressKey, value);
+    notifyListeners();
   }
 
   set bluOSPlayer(BluOSPlayer? player) {
@@ -89,6 +83,14 @@ class Settings extends ChangeNotifier {
   set isBluOSWarningShown(bool value) {
     prefs.setBool(bluOSWarningShownKey, value);
     notifyListeners();
+  }
+
+  Future<bool> _setOrRemoveString(String key, String? value) async {
+    if (value == null) {
+      return await prefs.remove(key);
+    } else {
+      return await prefs.setString(key, value);
+    }
   }
 
   @visibleForTesting
