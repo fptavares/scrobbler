@@ -74,7 +74,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     return Consumer<BluOS>(
       builder: (context, bluos, _) {
         final playlist = bluos.playlist.reversed.toList();
-        final scrobbableCount = _getTracksToScrobble(playlist).length;
+        final toScrobbleCount = _getTracksToScrobble(playlist).length;
+        final toClearCount = _getTracksToClear(playlist).length;
 
         return Scaffold(
           appBar: AppBar(
@@ -104,12 +105,12 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                               imagePath: 'assets/empty_playlist.png',
                               subhead: 'Start monitoring a BluOS device to scrobble the tracks that are played there.',
                             )
-                          : _createPlaylistEditor(context, playlist, scrobbableCount),
+                          : _createPlaylistEditor(context, playlist, toScrobbleCount),
                 ),
                 const Divider(),
                 if (bluos.errorMessage != null && bluos.isPolling) _createErrorTile(context, bluos.errorMessage),
                 if (!bluos.isPolling) _createPlayerSelector(context, bluos),
-                _createControlButtonsTile(context, bluos, scrobbableCount),
+                _createControlButtonsTile(context, bluos, playlist, toScrobbleCount, toClearCount),
               ],
             ),
           ),
@@ -118,7 +119,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     );
   }
 
-  Widget _createPlaylistEditor(BuildContext context, List<BluOSTrack> playlist, int scrobbableCount) {
+  Widget _createPlaylistEditor(BuildContext context, List<BluOSTrack> playlist, int toScrobbleCount) {
     return ListView(
       controller: ScrollController(),
       children: <Widget>[
@@ -127,7 +128,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
           headingTextStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
           columns: <DataColumn>[
             DataColumn(
-              label: Text('Tracks to Scrobble ($scrobbableCount)'),
+              label: Text('Tracks to Scrobble ($toScrobbleCount)'),
             ),
             const DataColumn(label: Text('')),
           ],
@@ -206,7 +207,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     );
   }
 
-  Widget _createControlButtonsTile(BuildContext context, BluOS bluos, int scrobbableCount) {
+  Widget _createControlButtonsTile(
+      BuildContext context, BluOS bluos, List<BluOSTrack> playlist, int toScrobbleCount, int toClearCount) {
     return ListTile(
       trailing: (bluos.isPolling)
           ? TextButton.icon(
@@ -234,8 +236,14 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all<Color>(Colors.amberAccent),
         ),
-        onPressed: bluos.isLoading || scrobbableCount == 0 ? null : () => _handleSubmit(context, bluos),
-        child: const Text('Submit'),
+        onPressed: bluos.isLoading || (toScrobbleCount == 0 && toClearCount == 0)
+            ? null
+            : () => _handleSubmit(context, bluos, playlist),
+        child: toScrobbleCount > 0
+            ? Text('Submit $toScrobbleCount track${toScrobbleCount == 1 ? '' : 's'}')
+            : toClearCount > 0
+                ? Text('Clear $toClearCount track${toClearCount == 1 ? '' : 's'}')
+                : const Text('Submit'),
       ),
     );
   }
@@ -271,29 +279,42 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     }
   }
 
-  Future<void> _handleSubmit(BuildContext context, BluOS bluos) async {
+  Future<void> _handleSubmit(BuildContext context, BluOS bluos, List<BluOSTrack> playlist) async {
     final scrobbler = Provider.of<Scrobbler>(context, listen: false);
 
-    analytics.logScrobbleBluOS();
-
     try {
-      var successful = false;
-      await for (int accepted in scrobbler.scrobbleBluOSTracks(_getTracksToScrobble(bluos.playlist))) {
-        displaySuccess('Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
-        successful |= accepted > 0;
+      var tracksWereScrobbled = false;
+      final tracksToScrobble = _getTracksToScrobble(playlist).toList();
+
+      if (tracksToScrobble.isNotEmpty) {
+        analytics.logScrobbleBluOS(numberOfTracks: tracksToScrobble.length);
+
+        await for (int accepted in scrobbler.scrobbleBluOSTracks(tracksToScrobble)) {
+          displaySuccess('Scrobbled $accepted track${accepted != 1 ? 's' : ''} successfuly.');
+          tracksWereScrobbled |= accepted > 0;
+        }
       }
 
-      final latestTimestamp = bluos.playlist
+      final latestTimestamp = playlist
           .where((track) => track.isScrobbable)
           .fold<int>(0, (max, track) => track.timestamp > max ? track.timestamp : max);
+
       await bluos.clear(latestTimestamp);
 
-      if (successful) {
+      _resetIncluded();
+
+      if (tracksWereScrobbled) {
         unawaited(ReviewRequester.instance.tryToAskForAppReview());
       }
     } on Exception catch (e, stackTrace) {
       displayAndLogError(_log, e, stackTrace);
     }
+  }
+
+  void _resetIncluded() {
+    setState(() {
+      _includeMask.clear();
+    });
   }
 
   void _setIncluded(BluOSTrack track, bool? included) {
@@ -306,8 +327,16 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
     return track.isScrobbable && (_includeMask[track.timestamp] ?? true); // include by default
   }
 
+  bool _isExcluded(BluOSTrack track) {
+    return track.isScrobbable && !(_includeMask[track.timestamp] ?? true); // include by default
+  }
+
   Iterable<BluOSTrack> _getTracksToScrobble(List<BluOSTrack> tracks) {
     return tracks.where(_isIncluded);
+  }
+
+  Iterable<BluOSTrack> _getTracksToClear(List<BluOSTrack> tracks) {
+    return tracks.where(_isExcluded);
   }
 }
 

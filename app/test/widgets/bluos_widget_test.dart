@@ -15,6 +15,8 @@ import '../mocks/firebase_mocks.dart';
 import '../mocks/model_mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   MockBluOS initBluOS() {
     final bluos = createMockBluOSMonitor();
     when(bluos.isExternal).thenReturn(true);
@@ -156,7 +158,7 @@ void main() {
       expect(find.byType(CloseButton), findsOneWidget);
       expect(find.byIcon(Icons.refresh), findsOneWidget);
       expect(find.text('Start'), findsOneWidget);
-      expect(find.text('Submit'), findsOneWidget);
+      expect(find.text('Submit 2 tracks'), findsOneWidget);
       expect(find.text('Scan'), findsOneWidget);
     });
 
@@ -396,25 +398,69 @@ void main() {
       }
 
       expect(find.text('Stop'), findsOneWidget);
-      expect(find.text('Submit'), findsOneWidget);
+      expect(find.text('Submit 2 tracks'), findsOneWidget);
       expect(find.text('Start'), findsNothing);
       expect(find.text('Scan'), findsNothing);
 
-      await tester.tap(find.text('Submit'));
+      await tester.tap(find.text('Submit 2 tracks'));
       await tester.pump();
 
-      verify(scrobbler.scrobbleBluOSTracks(playlist.sublist(0, 2))); // third track is not scrobbable
+      // UI reverses list and third track is not scrobbable
+      verify(scrobbler.scrobbleBluOSTracks(playlist.sublist(0, 2).reversed.toList()));
+      verify(bluos.clear(playlist[1].timestamp));
 
       await tester.tap(find.bluOSTrack(playlist.first));
       await tester.pump();
 
+      expect(find.text('Submit 1 track'), findsOneWidget);
+
       await tester.tap(find.bluOSTrack(playlist.last));
       await tester.pump();
 
-      await tester.tap(find.text('Submit'));
+      expect(find.text('Submit 1 track'), findsOneWidget);
+
+      await tester.tap(find.text('Submit 1 track'));
       await tester.pump();
 
       verify(scrobbler.scrobbleBluOSTracks([playlist[1]])); // only middle (second) track remained selected
+      verify(bluos.clear(playlist[1].timestamp));
+    });
+
+    testWidgets('allows clearing when all tracks are unselected', (tester) async {
+      final scrobbler = initScrobbler();
+      final bluos = initBluOS();
+      when(bluos.canReload).thenReturn(true);
+      when(bluos.isPolling).thenReturn(true);
+      when(bluos.isLoading).thenReturn(false);
+      when(bluos.playerName).thenReturn('Player name');
+      when(bluos.errorMessage).thenReturn(null);
+
+      final playlist = BluOSTestData.listOfBluOSMonitorTracks;
+      when(bluos.playlist).thenReturn(playlist);
+
+      await pumpBluOSWidget(tester, bluos, scrobbler);
+
+      for (final track in playlist) {
+        expect(find.bluOSTrack(track), findsOneWidget);
+      }
+
+      expect(find.text('Submit 2 tracks'), findsOneWidget);
+
+      await tester.tap(find.bluOSTrack(playlist[0]));
+      await tester.pump();
+
+      expect(find.text('Submit 1 track'), findsOneWidget);
+
+      await tester.tap(find.bluOSTrack(playlist[1]));
+      await tester.pump();
+
+      expect(find.text('Clear 2 tracks'), findsOneWidget);
+
+      await tester.tap(find.text('Clear 2 tracks'));
+      await tester.pump();
+
+      verifyNever(scrobbler.scrobbleBluOSTracks(any));
+      verify(bluos.clear(playlist[1].timestamp));
     });
   });
 }
