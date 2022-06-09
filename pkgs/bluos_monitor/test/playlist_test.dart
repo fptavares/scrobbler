@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:scrobbler_bluos_monitor/src/playlist.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
@@ -6,90 +7,108 @@ import 'test_data.dart';
 
 void main() {
   group('BluOS playlist', () {
-    BluOSAPITrack createTrack(int pid, double length, double secs) => BluOSAPITrack(
-          playId: '$pid',
+    BluOSAPITrack createTrack(int pid, double length) => BluOSAPITrack(
+          queuePosition: 'position$pid',
           artist: 'artist$pid',
           album: 'album$pid',
           title: 'title$pid',
           imageUrl: 'image$pid',
           length: length,
-          state: BluOSTrackState('etag$pid', 'play', secs),
         );
 
     test('ensures that tracks meet the requirements to be scrobbled', () {
-      final playlist = BluOSPlaylistTracker();
+      FakeAsync().run((async) {
+        final playlist = BluOSPlaylistTracker();
 
-      // long tracks are deemed scrobbable after 4 min
-      final longTrack = createTrack(1, 1200, 240);
-      expect(longTrack.isScrobbable, isTrue);
+        // long tracks are deemed scrobbable after 4 min
+        final longTrack = createTrack(1, 1200);
+        expect(longTrack.isScrobbable, isFalse);
 
-      playlist.addTrack(longTrack);
-      expect(playlist.length, equals(1));
-      expect(playlist.tracks.last, equals(longTrack));
+        playlist.updateWith(longTrack);
+        expect(playlist.length, equals(1));
+        expect(playlist.tracks.last, equals(longTrack));
 
-      // status update for the same track doesn't create a duplicate
-      playlist.addTrack(longTrack);
-      expect(playlist.length, equals(1));
+        async.elapse(Duration(minutes: 2));
+        expect(longTrack.isScrobbable, isFalse);
 
-      // tracks listened to less than 50% of length are not kept in the playlist
-      final notScrobbableTrack = createTrack(2, 240, 20);
-      expect(notScrobbableTrack.isScrobbable, isFalse);
+        // status update for the same track doesn't create a duplicate
+        playlist.updateWith(longTrack);
+        expect(playlist.length, equals(1));
+        expect(longTrack.isScrobbable, isFalse);
 
-      playlist.addTrack(notScrobbableTrack);
-      expect(playlist.length, equals(2));
-      expect(playlist.tracks.last, equals(notScrobbableTrack));
+        async.elapse(Duration(minutes: 2));
+        expect(longTrack.isScrobbable, isTrue);
 
-      final scrobbableTrack = createTrack(3, 120, 60);
-      expect(scrobbableTrack.isScrobbable, isTrue);
+        // tracks listened to less than 50% of length are not kept in the playlist
+        final notScrobbableTrack = createTrack(2, 240);
+        expect(notScrobbableTrack.isScrobbable, isFalse);
 
-      playlist.addTrack(scrobbableTrack);
-      expect(playlist.length, equals(2));
-      expect(playlist.tracks.last, equals(scrobbableTrack));
+        async.elapse(Duration(minutes: 1));
+        expect(notScrobbableTrack.isScrobbable, isFalse);
 
-      // tracks need to be longer than 30 seconds
-      final tooShortTrack = createTrack(4, 30, 30);
-      expect(tooShortTrack.isScrobbable, isFalse);
+        playlist.updateWith(notScrobbableTrack);
+        expect(playlist.length, equals(2));
+        expect(playlist.tracks.last, equals(notScrobbableTrack));
 
-      playlist.addTrack(tooShortTrack);
-      expect(playlist.length, equals(3));
-      expect(playlist.tracks.last, equals(tooShortTrack));
+        final scrobbableTrack = createTrack(3, 120);
+        expect(scrobbableTrack.isScrobbable, isFalse);
 
-      // last track is removed if not scrobbable when stopping
-      playlist.stop();
-      expect(playlist.length, equals(2));
-      expect(playlist.tracks, equals([longTrack, scrobbableTrack]));
+        playlist.updateWith(scrobbableTrack);
+        expect(playlist.length, equals(2));
+        expect(playlist.tracks.last, equals(scrobbableTrack));
+
+        async.elapse(Duration(minutes: 1));
+        expect(scrobbableTrack.isScrobbable, isTrue);
+
+        // tracks need to be longer than 30 seconds
+        final tooShortTrack = createTrack(4, 30);
+        expect(tooShortTrack.isScrobbable, isFalse);
+
+        playlist.updateWith(tooShortTrack);
+        expect(playlist.length, equals(3));
+        expect(playlist.tracks.last, equals(tooShortTrack));
+
+        async.elapse(Duration(seconds: 30));
+        expect(tooShortTrack.isScrobbable, isFalse);
+
+        // last track is removed if not scrobbable when stopping
+        playlist.stop();
+        expect(playlist.length, equals(2));
+        expect(playlist.tracks, equals([longTrack, scrobbableTrack]));
+      });
     });
 
-    void verifyMatches(String trackXml, BluOSAPITrack expectedTrack) {
+    void verifyMatches(String trackXml, BluOSAPITrack expectedTrack, BluOSPlayerState expectedState) {
       final document = XmlDocument.parse(trackXml);
-      final state = BluOSTrackState.fromXml(document);
-      final track = BluOSAPITrack.fromXml(document, state, '');
+      final state = BluOSPlayerState.fromXml(document);
+      final track = BluOSAPITrack.fromXml(document, '');
 
-      expect(expectedTrack.playId, equals(track.playId));
       expect(expectedTrack.artist, equals(track.artist));
       expect(expectedTrack.album, equals(track.album));
       expect(expectedTrack.title, equals(track.title));
       expect(expectedTrack.imageUrl, isIn(track.imageUrl));
       expect(expectedTrack.length, equals(track.length));
-      expect(expectedTrack.state.etag, equals(track.state.etag));
-      expect(expectedTrack.state.playerState, equals(track.state.playerState));
-      expect(expectedTrack.state.seconds, equals(track.state.seconds));
+      expect(expectedState.etag, equals(state.etag));
+      expect(expectedState.playerState, equals(state.playerState));
+      expect(expectedState.seconds, equals(state.seconds));
     }
 
-    test('supports local music', () => verifyMatches(localXml, localExpected));
+    test('supports local music', () => verifyMatches(localXml, localExpected, localExpectedState));
 
-    test('supports Qobuz', () => verifyMatches(qobuzXml, qobuzExpected));
+    test('supports Qobuz', () => verifyMatches(qobuzXml, qobuzExpected, qobuzExpectedState));
 
     test('supports Tidal', () {
-      verifyMatches(tidalXml, tidalExpected);
-      verifyMatches(tidalRadioXml, tidalRadioExpected);
-      verifyMatches(tidalConnectXml, tidalConnectExpected);
+      verifyMatches(tidalXml, tidalExpected, tidalExpectedState);
+      verifyMatches(tidalRadioXml, tidalRadioExpected, tidalRadioExpectedState);
+      verifyMatches(tidalConnectXml, tidalConnectExpected, tidalConnectExpectedState);
     });
 
-    test('supports Spotify (Connect)', () => verifyMatches(spotifyConnectXml, spotifyConnectExpected));
+    test('supports Spotify (Connect)',
+        () => verifyMatches(spotifyConnectXml, spotifyConnectExpected, spotifyConnectExpectedState));
 
-    test('supports Radio Paradise', () => verifyMatches(radioParadiseXml, radioParadiseExpected));
+    test('supports Radio Paradise',
+        () => verifyMatches(radioParadiseXml, radioParadiseExpected, radioParadiseExpectedState));
 
-    test('supports TuneIn', () => verifyMatches(tuneInXml, tuneInExpected));
+    test('supports TuneIn', () => verifyMatches(tuneInXml, tuneInExpected, tuneInExpectedState));
   });
 }

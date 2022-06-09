@@ -55,7 +55,8 @@ class AttributeConfig {
 }
 
 class ServiceConfig {
-  final AttributeConfig playId;
+  final AttributeConfig queueId;
+  final AttributeConfig queuePosition;
   final AttributeConfig artist;
   final AttributeConfig album;
   final AttributeConfig title;
@@ -63,7 +64,8 @@ class ServiceConfig {
   final AttributeConfig image;
 
   const ServiceConfig({
-    this.playId = const AttributeConfig('pid'),
+    this.queueId = const AttributeConfig('pid'),
+    this.queuePosition = const AttributeConfig('song'),
     this.artist = const AttributeConfig('artist'),
     this.album = const AttributeConfig('album'),
     this.title = const AttributeConfig('name'),

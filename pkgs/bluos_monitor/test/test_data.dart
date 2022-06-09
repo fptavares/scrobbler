@@ -2,12 +2,15 @@ import 'package:scrobbler_bluos_monitor/src/playlist.dart';
 
 const track1Xml = spotifyConnectXml;
 final track1Expected = spotifyConnectExpected;
+final track1ExpectedState = spotifyConnectExpectedState;
 
 const track2Xml = radioParadiseXml;
 final track2Expected = radioParadiseExpected;
+final track2ExpectedState = radioParadiseExpectedState;
 
 const track3Xml = tidalXml;
 final track3Expected = tidalExpected;
+final track3ExpectedState = tidalExpectedState;
 
 const radioParadiseXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -59,14 +62,14 @@ const radioParadiseXml = '''
 ''';
 
 final radioParadiseExpected = BluOSAPITrack(
-  playId: '270',
+  queuePosition: '0',
   artist: 'José González',
   title: 'Stay Alive',
   album: 'The Secret Life Of Walter Mitty (Soundtrack)',
   length: null,
   imageUrl: 'https://img.radioparadise.com/covers/l/B00GG429KS.jpg',
-  state: BluOSTrackState('4a946635b01af97de8ffa7129b0ad5ab', 'stream', 100),
 );
+final radioParadiseExpectedState = BluOSPlayerState('4a946635b01af97de8ffa7129b0ad5ab', 'stream', 100);
 
 const tidalXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -115,14 +118,14 @@ const tidalXml = '''
 ''';
 
 final tidalExpected = BluOSAPITrack(
-  playId: '271',
+  queuePosition: '185',
   artist: 'Elbow',
   title: 'Mercy Street',
   album: 'And I\'ll Scratch Yours',
   length: 339,
   imageUrl: '/Artwork?service=Tidal&songid=Tidal%3A122121655',
-  state: BluOSTrackState('68330da5672aff2cf86a349955ced764', 'play', 164),
 );
+final tidalExpectedState = BluOSPlayerState('68330da5672aff2cf86a349955ced764', 'play', 164);
 
 const tidalRadioXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -171,14 +174,14 @@ const tidalRadioXml = '''
 ''';
 
 final tidalRadioExpected = BluOSAPITrack(
-  playId: '366',
+  queuePosition: '0',
   artist: 'Reel Big Fish',
   title: 'Sell Out',
   album: 'Turn The Radio Off',
   length: 227,
   imageUrl: '/Artwork?service=Tidal&albumid=2994335',
-  state: BluOSTrackState('505a07fd9013c2bd83a7ee7e4c56c89e', 'stream', 212),
 );
+final tidalRadioExpectedState = BluOSPlayerState('505a07fd9013c2bd83a7ee7e4c56c89e', 'stream', 212);
 
 const spotifyConnectXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -227,14 +230,14 @@ const spotifyConnectXml = '''
 ''';
 
 final spotifyConnectExpected = BluOSAPITrack(
-  playId: '369',
+  queuePosition: '0',
   artist: 'Paula Cole',
   title: 'I Don\'t Want to Wait',
   album: 'This Fire',
   length: 320.027,
   imageUrl: 'https://i.scdn.co/image/ab67616d0000b273954491b164ae0c6a4795fcd9',
-  state: BluOSTrackState('3fb2a68d257147306d6a7df8fa893455', 'stream', 263),
 );
+final spotifyConnectExpectedState = BluOSPlayerState('3fb2a68d257147306d6a7df8fa893455', 'stream', 263);
 
 const tuneInXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -277,13 +280,13 @@ const tuneInXml = '''
 ''';
 
 final tuneInExpected = BluOSAPITrack(
-  playId: '366',
+  queuePosition: '0',
   artist: 'James Blake',
   title: 'Retrograde',
   length: 21600,
   imageUrl: 'https://cdn-profiles.tunein.com/s51203/images/logoq.jpg?t=637078683440000000',
-  state: BluOSTrackState('feefbdaceaaf816bd6dfed953705c210', 'stream', 809),
 );
+final tuneInExpectedState = BluOSPlayerState('feefbdaceaaf816bd6dfed953705c210', 'stream', 809);
 
 const qobuzXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -330,14 +333,14 @@ const qobuzXml = '''
 ''';
 
 final qobuzExpected = BluOSAPITrack(
-  playId: '367',
+  queuePosition: '0',
   artist: 'Arvo Pärt',
   title: 'Credo',
   album: 'Arvo Pärt: Passacaglia',
   length: 821,
   imageUrl: '/Artwork?service=Qobuz&songid=Qobuz%3A26865565',
-  state: BluOSTrackState('d05b7e614658609dacb2522988f50381', 'play', 30),
 );
+final qobuzExpectedState = BluOSPlayerState('d05b7e614658609dacb2522988f50381', 'play', 30);
 
 const tidalConnectXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -387,14 +390,14 @@ const tidalConnectXml = '''
 ''';
 
 final tidalConnectExpected = BluOSAPITrack(
-  playId: '369',
+  queuePosition: '0',
   artist: 'Elliott Smith',
   title: 'Between The Bars',
   album: 'Either/Or (Expanded Edition)',
   length: 141,
   imageUrl: 'https://resources.tidal.com/images/ca0b0b28/1a3c/4c5e/b339/247101901f48/1280x1280.jpg',
-  state: BluOSTrackState('613b75801562d1aa3d781e9b634c4e7c', 'stream', 10),
 );
+final tidalConnectExpectedState = BluOSPlayerState('613b75801562d1aa3d781e9b634c4e7c', 'stream', 10);
 
 const localXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -436,15 +439,15 @@ const localXml = '''
 ''';
 
 final localExpected = BluOSAPITrack(
-  playId: '370',
+  queuePosition: '0',
   artist: 'Peter Gabriel',
   title: 'Come Talk to Me',
   album: 'Us',
   length: 426,
   imageUrl:
       '/Artwork?service=LocalMusic&fn=%2Fvar%2Fmnt%2FPeter%20Gabriel%2FUS-reissue-WAV%2F01_Come%20Talk%20To%20Me.flac',
-  state: BluOSTrackState('3d71fa03d9ad59f244fddfbfd737c3cb', 'play', 22),
 );
+final localExpectedState = BluOSPlayerState('3d71fa03d9ad59f244fddfbfd737c3cb', 'play', 22);
 
 const stoppedXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

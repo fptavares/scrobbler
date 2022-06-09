@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:scrobbler_bluos_monitor/src/client.dart';
@@ -12,6 +13,10 @@ import 'test_data.dart';
 
 Future<void> main() async {
   group('BluOS API client', () {
+    setUp(() {
+      BluOSAPITrack.timestampForNewTrack = () => (clock.minutesAgo(4).millisecondsSinceEpoch / 1000).floor();
+    });
+
     test('starts monitoring player', () async {
       final polling = FakePollingResponder(4);
       final client = polling.client;
@@ -26,16 +31,16 @@ Future<void> main() async {
 
       polling.startClient();
 
-      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1, first: true);
       expect(client.isPolling, isTrue);
 
-      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1);
       expect(client.isPolling, isTrue);
 
-      await polling.emitResponseAndValidate(track2Xml, track2Expected, 2);
+      await polling.emitResponseAndValidate(track2Xml, track2Expected, track2ExpectedState, 2);
       expect(client.isPolling, isTrue);
 
-      await polling.emitResponseAndValidate(track3Xml, track3Expected, 3);
+      await polling.emitResponseAndValidate(track3Xml, track3Expected, track3ExpectedState, 3);
       expect(client.isPolling, isTrue);
 
       await polling.close();
@@ -47,15 +52,15 @@ Future<void> main() async {
 
       polling.startClient();
 
-      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
-      await polling.emitResponseAndValidate(track2Xml, track2Expected, 2);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1, first: true);
+      await polling.emitResponseAndValidate(track2Xml, track2Expected, track2ExpectedState, 2);
 
       await client.clear(client.playlist.first.timestamp);
 
       expect(client.playlist.length, equals(1));
       expect(client.playlist.first.title, equals(track2Expected.title));
 
-      await polling.emitResponseAndValidate(track2Xml, track2Expected, 1);
+      await polling.emitResponseAndValidate(track2Xml, track2Expected, track2ExpectedState, 1);
 
       await polling.close();
     });
@@ -66,7 +71,7 @@ Future<void> main() async {
 
       polling.startClient();
 
-      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1, first: true);
 
       await Future.delayed(Duration(seconds: 1)); // make sure there's time for the next poll to start
 
@@ -76,7 +81,7 @@ Future<void> main() async {
       expect(client.playlist.length, equals(1));
 
       // validate that after response is reveived, it's ignored because the client was stopped
-      await polling.emitResponseAndValidate(track2Xml, track1Expected, 1);
+      await polling.emitResponseAndValidate(track2Xml, track1Expected, track1ExpectedState, 1);
 
       expect(client.isPolling, isFalse);
       expect(client.playlist.length, equals(1));
@@ -90,7 +95,7 @@ Future<void> main() async {
 
       polling.startClient(stopWhenPlayerStops: true);
 
-      await polling.emitResponseAndValidate(track1Xml, track1Expected, 1, first: true);
+      await polling.emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1, first: true);
 
       expect(client.isPolling, isTrue);
       expect(client.state!.isPlaying, isTrue);
@@ -142,9 +147,9 @@ class FakePollingResponder {
     client = BluOSAPIMonitor.withNotifier(expectAsync0<void>(() => _notificationStreamer.add(true), count: 3, max: -1));
     client.httpClient = MockClient(expectAsync1<Future<http.Response>, http.Request>((request) async {
       // get expected reponse body from test
-      final response = await _responses.first;
-      // stream status back to test
-      _statusStreamer.add(StatusRequestData(request.url, request.method, client.isLoading, client.state?.etag));
+      final response = await _responseCompleter.future;
+      // set status for testing
+      _status = StatusRequestData(request.url, request.method, client.isLoading, client.state?.etag);
       // using body here to indicate errors to throw
       if (response.body == 'SocketException') {
         throw SocketException('cannot connect');
@@ -158,17 +163,15 @@ class FakePollingResponder {
 
   late final BluOSAPIMonitor client;
 
-  final _statusStreamer = StreamController<StatusRequestData>();
-  final _responseStreamer = StreamController<http.Response>.broadcast();
+  var _responseCompleter = Completer<http.Response>();
+
   final _notificationStreamer = StreamController<bool>.broadcast();
 
-  Stream<http.Response> get _responses => _responseStreamer.stream;
   Stream<bool> get _notifications => _notificationStreamer.stream;
 
-  final _statuses = <StatusRequestData>[];
+  late StatusRequestData _status;
 
   void startClient({bool? stopWhenPlayerStops}) {
-    _statusStreamer.stream.listen(_statuses.add);
     unawaited(client.start('test', 1234, 'Test Player', stopWhenPlayerStops));
   }
 
@@ -185,26 +188,25 @@ class FakePollingResponder {
   }
 
   Future<void> _emitReponse(http.Response response) async {
-    // allow time for the fake HTTP client to received request
-    await Future.delayed(Duration(seconds: 1));
     // inject response XML to fake HTTP client
-    _responseStreamer.add(response);
+    _responseCompleter.complete(response);
     // wait for client to process the response and update state
     await _notifications.first;
+    // reset response completer for next reponse
+    _responseCompleter = Completer<http.Response>();
   }
 
   Future<void> close() async {
     await client.stop();
-    await _responseStreamer.close();
-    await _statusStreamer.close();
     await _notificationStreamer.close();
   }
 
-  Future<void> emitResponseAndValidate(String trackStatusXml, BluOSAPITrack expectedTrack, int expectedPlaylistLength,
+  Future<void> emitResponseAndValidate(
+      String trackStatusXml, BluOSAPITrack expectedTrack, BluOSPlayerState expectedState, int expectedPlaylistLength,
       {bool first = false}) async {
     await emitTrack(trackStatusXml);
 
-    final requestData = _statuses.last;
+    final requestData = _status;
 
     expect(requestData.method, equals('GET'));
     expect(
@@ -220,8 +222,8 @@ class FakePollingResponder {
     expect(client.isLoading, isFalse);
     expect(client.state!.isActive, isTrue);
     expect(client.state!.isPlaying, isTrue);
-    expect(client.state!.playerState, equals(expectedTrack.state.playerState));
-    expect(client.state!.etag, equals(expectedTrack.state.etag));
+    expect(client.state!.playerState, equals(expectedState.playerState));
+    expect(client.state!.etag, equals(expectedState.etag));
     expect(client.playlist.length, equals(expectedPlaylistLength));
     expect(client.playlist.last.title, equals(expectedTrack.title));
     expect(client.playlist.last.artist, equals(expectedTrack.artist));
@@ -236,7 +238,7 @@ class FakePollingResponder {
       expect(client.isPolling, isFalse);
     } else if (noDelay) {
       expect(client.isPolling, isTrue);
-      await emitResponseAndValidate(track1Xml, track1Expected, 1);
+      await emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1);
       expect(client.errorMessage, isNull);
     } else {
       expect(client.isPolling, isTrue);

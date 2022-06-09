@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:xml/xml.dart';
 
 import 'parser.dart';
@@ -12,19 +13,17 @@ class BluOSPlaylistTracker {
   List<BluOSAPITrack> get tracks => _tracks;
   int get length => _tracks.length;
 
-  void addTrack(BluOSAPITrack track) {
+  void updateWith(BluOSAPITrack track) {
     if (track.timestamp <= _lastClearedTimestamp) return; // track should have been cleared already, so ignoring
 
     if (_tracks.isEmpty) {
       _tracks.add(track);
     } else {
       final lastTrack = _tracks.last;
-      if (track == lastTrack) {
-        _tracks.last = track; // replace same track to update state and other data
-      } else {
-        lastTrack.updatePlaybackDurationAfterPlayed();
+      if (track != lastTrack) {
+        lastTrack._fixPlaybackDurationAfterStop();
         if (lastTrack.isScrobbable) {
-          _tracks.add(track);
+          _tracks.add(track); // add new track
         } else {
           _tracks.last = track; // replace previous track because it wasn't scrobbable
         }
@@ -34,7 +33,7 @@ class BluOSPlaylistTracker {
 
   void stop() {
     if (_tracks.isNotEmpty) {
-      _tracks.last.updatePlaybackDurationAfterPlayed();
+      _tracks.last._fixPlaybackDurationAfterStop();
 
       if (!_tracks.last.isScrobbable) {
         _tracks.removeLast();
@@ -67,35 +66,36 @@ abstract class BluOSTrack {
 }
 
 class BluOSAPITrack extends BluOSTrack {
-  final String playId;
+  final String queuePosition;
   final double? length;
-  final BluOSTrackState state;
 
-  final double _thresholdPlayingTime;
+  final int _thresholdPlayingTime;
+  int? _playDuration;
+
+  int get _elapsedDuration => _playDuration ?? (BluOSAPITrack._nowTimestamp() - timestamp);
 
   @override
-  bool get isScrobbable => length != null && length! <= 30 ? false : state.seconds >= _thresholdPlayingTime;
+  bool get isScrobbable => length != null && length! <= 30 ? false : _elapsedDuration >= _thresholdPlayingTime;
 
   BluOSAPITrack({
-    required this.playId,
+    required this.queuePosition,
     required String artist,
     String? album,
     required String title,
     this.length,
     required String? imageUrl,
-    required this.state,
-  })  : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, length / 2),
+  })  : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, length / 2).floor(),
         super(
           artist: artist,
           album: album,
           title: title,
           imageUrl: imageUrl,
-          timestamp: (BluOSAPITrack._nowTimestamp() - state.seconds).floor(),
+          timestamp: BluOSAPITrack.timestampForNewTrack(),
         );
   // threshold = half of duration, no more than 4 minutes, default to 1 minute
   // https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
 
-  factory BluOSAPITrack.fromXml(XmlDocument document, BluOSTrackState state, String authorityForRelativeImages) {
+  factory BluOSAPITrack.fromXml(XmlDocument document, String authorityForRelativeImages) {
     try {
       final parser = BluOSStatusParser.fromDocument(document);
       final service = parser.getOptional(AttributeConfig.serviceConfig);
@@ -106,51 +106,53 @@ class BluOSAPITrack extends BluOSTrack {
         image = 'http://$authorityForRelativeImages$image';
       }
       return BluOSAPITrack(
-        playId: parser.getMandatory(config.playId),
+        queuePosition: parser.getMandatory(config.queuePosition),
         artist: parser.getMandatory(config.artist),
         album: parser.getOptional(config.album),
         title: parser.getMandatory(config.title),
         length: parser.getDoubleOptional(config.length),
         imageUrl: image,
-        state: state,
       );
     } on MissingMandatoryAttributeException catch (e) {
       throw UnknownTrackException(e);
     }
   }
 
-  void updatePlaybackDurationAfterPlayed() {
-    state.seconds = state.isPlaying ? BluOSAPITrack._nowTimestamp() - timestamp : state.seconds;
+  void _fixPlaybackDurationAfterStop() {
+    _playDuration = _elapsedDuration;
   }
 
   @override
   bool operator ==(Object other) => hashCode == other.hashCode;
 
   @override
-  int get hashCode => '$playId$artist$title'.hashCode;
+  int get hashCode => '$queuePosition.$artist.$title'.hashCode;
 
-  static double _nowTimestamp() => DateTime.now().millisecondsSinceEpoch / 1000;
+  /// visible for testing only!
+  static int Function() timestampForNewTrack = _nowTimestamp;
+
+  static int _nowTimestamp() => (clock.now().millisecondsSinceEpoch / 1000).floor();
 }
 
-class BluOSTrackState {
+class BluOSPlayerState {
   final String? etag;
   final String? playerState;
-  double seconds;
+  final double? seconds;
 
-  BluOSTrackState([
+  BluOSPlayerState([
     this.etag,
     this.playerState,
-    this.seconds = 0,
+    this.seconds,
   ]);
 
-  factory BluOSTrackState.fromXml(XmlDocument document) {
+  factory BluOSPlayerState.fromXml(XmlDocument document) {
     try {
       final parser = BluOSStatusParser.fromDocument(document);
 
-      return BluOSTrackState(
+      return BluOSPlayerState(
         parser.getEtag(),
         parser.getOptional(AttributeConfig.stateConfig),
-        parser.getDoubleOptional(AttributeConfig.secondsConfig) ?? 0,
+        parser.getDoubleOptional(AttributeConfig.secondsConfig),
       );
     } on MissingMandatoryAttributeException catch (e) {
       throw UnknownTrackException(e);

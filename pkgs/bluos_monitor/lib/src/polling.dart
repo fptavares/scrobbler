@@ -28,7 +28,7 @@ class LongPollingSession {
 
   static final _log = Logger('LongPollingSession');
 
-  BluOSTrackState state = BluOSTrackState();
+  BluOSPlayerState state = BluOSPlayerState();
 
   bool _isPolling = false;
   Duration _retryDelay = initialRetryDelay;
@@ -119,7 +119,7 @@ class LongPollingSession {
     Future.delayed(delay, () => _recursivePolling());
   }
 
-  Future<BluOSTrackState> _longPollStatusUpdate() async {
+  Future<BluOSPlayerState> _longPollStatusUpdate() async {
     final uriAuthority = '$host:$port';
     final response = await _httpClient
         .get(Uri.http(uriAuthority, '/Status', {'timeout': timeout.toString(), 'etag': state.etag}))
@@ -130,7 +130,7 @@ class LongPollingSession {
     if (response.statusCode == 200) {
       final document = XmlDocument.parse(response.body);
 
-      final state = BluOSTrackState.fromXml(document);
+      final state = BluOSPlayerState.fromXml(document);
 
       // if not polling anymore then we should stop and ignore this update
       if (!_isPolling) {
@@ -141,7 +141,7 @@ class LongPollingSession {
 
       if (state.isActive) {
         try {
-          _playlistTracker.addTrack(BluOSAPITrack.fromXml(document, state, uriAuthority));
+          _playlistTracker.updateWith(BluOSAPITrack.fromXml(document, uriAuthority));
         } on UnknownTrackException catch (e) {
           // when the track cannot be parsed due to missing fields, we still have an etag so just ingore and continue
           if (state.isPlaying) {

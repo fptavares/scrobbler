@@ -20,7 +20,7 @@ void runTests(void Function(String name, Future<void> Function(String host)) tes
     await Future.delayed(Duration(seconds: 3));
 
     final playlistResponse = await get(host, '/playlist', {'name': 'Test Player'});
-    verifyResponse(playlistResponse, count: 2, name: 'Test Player', hasError: true);
+    verifyResponse(playlistResponse, count: 1, name: 'Test Player', hasError: true);
   });
 
   testServer('clears playlist', (host) async {

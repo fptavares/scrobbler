@@ -22,7 +22,6 @@ Future main() async {
 
 final statuses = [
   createStatus(1, 'play'),
-  createStatus(2, 'pause'),
 ].iterator;
 
 // Router instance to handler requests.
@@ -46,6 +45,7 @@ Response createStatus(int pid, String state) {
 	<name>title$pid</name>
 	<pid>$pid</pid>
 	<service>LocalMusic</service>
+  <song>position$pid</song>
 	<state>$state</state>
 	<totlen>10$pid</totlen>
 	<secs>10$pid</secs>

@@ -49,7 +49,7 @@ class BluOSAPIMonitor implements BluOSMonitor {
   @override
   bool get canReload => false;
 
-  BluOSTrackState? get state => _session?.state;
+  BluOSPlayerState? get state => _session?.state;
 
   void Function()? _changeNotifier;
 
