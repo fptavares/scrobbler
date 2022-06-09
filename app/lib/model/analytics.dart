@@ -67,8 +67,8 @@ class ScrobblerAnalytics {
     analytics.setCurrentScreen(screenName: 'search');
   }
 
-  void logScrobbleBluOS() {
-    analytics.logEvent(name: 'bluos_scrobble');
+  void logScrobbleBluOS({required int numberOfTracks}) {
+    analytics.logEvent(name: 'bluos_scrobble', parameters: {'amount': numberOfTracks});
   }
 
   void logStartBluOS(bool isExternal) {
