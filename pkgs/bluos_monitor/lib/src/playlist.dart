@@ -8,20 +8,20 @@ import 'parser.dart';
 class BluOSPlaylistTracker {
   final List<BluOSAPITrack> _tracks = [];
 
-  int _lastClearedTimestamp = 0;
+  int? _lastClearedHashCode;
 
   List<BluOSAPITrack> get tracks => _tracks;
   int get length => _tracks.length;
 
   void updateWith(BluOSAPITrack track) {
-    if (track.timestamp <= _lastClearedTimestamp) return; // track should have been cleared already, so ignoring
+    if (track.hashCode == _lastClearedHashCode) return; // track should have been cleared already, so ignoring
 
     if (_tracks.isEmpty) {
       _tracks.add(track);
     } else {
       final lastTrack = _tracks.last;
       if (track != lastTrack) {
-        lastTrack._fixPlaybackDurationAfterStop();
+        lastTrack._concludePlaybackDurationAfterStop();
         if (lastTrack.isScrobbable) {
           _tracks.add(track); // add new track
         } else {
@@ -33,7 +33,7 @@ class BluOSPlaylistTracker {
 
   void stop() {
     if (_tracks.isNotEmpty) {
-      _tracks.last._fixPlaybackDurationAfterStop();
+      _tracks.last._concludePlaybackDurationAfterStop();
 
       if (!_tracks.last.isScrobbable) {
         _tracks.removeLast();
@@ -42,8 +42,12 @@ class BluOSPlaylistTracker {
   }
 
   void clear(int timestamp) {
+    // save last track hashCode
+    final lastTrackHashCode = _tracks.last.hashCode;
+    // remove tracks
     _tracks.removeWhere((track) => track.timestamp <= timestamp);
-    _lastClearedTimestamp = timestamp;
+    // if all tracks are removed, remember the last track so that it doesn't get added again in the next update
+    _lastClearedHashCode = _tracks.isEmpty ? lastTrackHashCode : null;
   }
 }
 
@@ -69,13 +73,13 @@ class BluOSAPITrack extends BluOSTrack {
   final String queuePosition;
   final double? length;
 
-  final int _thresholdPlayingTime;
-  int? _playDuration;
+  final int _thresholdPlaybackDuration;
+  int? _finalPlaybackDuration;
 
-  int get _elapsedDuration => _playDuration ?? (BluOSAPITrack._nowTimestamp() - timestamp);
+  int get _playbackDuration => _finalPlaybackDuration ?? (BluOSAPITrack._nowTimestamp() - timestamp);
 
   @override
-  bool get isScrobbable => length != null && length! <= 30 ? false : _elapsedDuration >= _thresholdPlayingTime;
+  bool get isScrobbable => length != null && length! <= 30 ? false : _playbackDuration >= _thresholdPlaybackDuration;
 
   BluOSAPITrack({
     required this.queuePosition,
@@ -84,7 +88,7 @@ class BluOSAPITrack extends BluOSTrack {
     required String title,
     this.length,
     required String? imageUrl,
-  })  : _thresholdPlayingTime = (length == null) ? 60 : min(4 * 60, length / 2).floor(),
+  })  : _thresholdPlaybackDuration = (length == null) ? 60 : min(4 * 60, length / 2).floor(),
         super(
           artist: artist,
           album: album,
@@ -118,8 +122,8 @@ class BluOSAPITrack extends BluOSTrack {
     }
   }
 
-  void _fixPlaybackDurationAfterStop() {
-    _playDuration = _elapsedDuration;
+  void _concludePlaybackDurationAfterStop() {
+    _finalPlaybackDuration = _playbackDuration;
   }
 
   @override
