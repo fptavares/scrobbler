@@ -14,11 +14,13 @@ import 'test_data.dart';
 Future<void> main() async {
   group('BluOS API client', () {
     setUp(() {
+      // timestamp for tracks will be 4 min in the past
+      // 4 min play time guarantees that tracks will be scrobbable, and hence added to playlist
       BluOSAPITrack.timestampForNewTrack = () => (clock.minutesAgo(4).millisecondsSinceEpoch / 1000).floor();
     });
 
     test('starts monitoring player', () async {
-      final polling = FakePollingResponder(4);
+      final polling = FakePollingResponder();
       final client = polling.client;
 
       expect(client.canReload, isFalse);
@@ -47,26 +49,34 @@ Future<void> main() async {
     });
 
     test('allows clearing the playlist', () async {
-      final polling = FakePollingResponder(3);
+      final polling = FakePollingResponder();
       final client = polling.client;
 
       polling.startClient();
 
       await polling.emitResponseAndValidate(track1Xml, track1Expected, track1ExpectedState, 1, first: true);
       await polling.emitResponseAndValidate(track2Xml, track2Expected, track2ExpectedState, 2);
+      await polling.emitResponseAndValidate(track3Xml, track3Expected, track3ExpectedState, 3);
 
-      await client.clear(client.playlist.first.timestamp);
+      await client.clear(client.playlist[1].timestamp);
 
       expect(client.playlist.length, equals(1));
-      expect(client.playlist.first.title, equals(track2Expected.title));
+      expect(client.playlist.single.title, equals(track3Expected.title));
 
-      await polling.emitResponseAndValidate(track2Xml, track2Expected, track2ExpectedState, 1);
+      await client.clear(client.playlist.single.timestamp);
+
+      expect(client.playlist, isEmpty);
+
+      // should remember the last track cleared so that it's not added again in the next status update
+      await polling.emitResponseAndValidate(track3Xml, track3Expected, track3ExpectedState, 0);
+
+      expect(client.playlist, isEmpty);
 
       await polling.close();
     });
 
     test('allows stopping', () async {
-      final polling = FakePollingResponder(2);
+      final polling = FakePollingResponder();
       final client = polling.client;
 
       polling.startClient();
@@ -90,7 +100,7 @@ Future<void> main() async {
     });
 
     test('supports stopping automatically when player stops', () async {
-      final polling = FakePollingResponder(2);
+      final polling = FakePollingResponder();
       final client = polling.client;
 
       polling.startClient(stopWhenPlayerStops: true);
@@ -111,7 +121,7 @@ Future<void> main() async {
 
     Future<void> testError(
         {int? statusCode, String? badResponse, bool shouldStop = false, bool noDelay = false}) async {
-      final polling = FakePollingResponder(noDelay ? 2 : 1);
+      final polling = FakePollingResponder();
       final client = polling.client;
 
       expect(client.errorMessage, isNull);
@@ -143,7 +153,7 @@ Future<void> main() async {
 }
 
 class FakePollingResponder {
-  FakePollingResponder(int count) {
+  FakePollingResponder() {
     client = BluOSAPIMonitor.withNotifier(expectAsync0<void>(() => _notificationStreamer.add(true), count: 3, max: -1));
     client.httpClient = MockClient(expectAsync1<Future<http.Response>, http.Request>((request) async {
       // get expected reponse body from test
@@ -158,17 +168,14 @@ class FakePollingResponder {
       }
 
       return response;
-    }, count: count));
+    }, max: -1));
   }
 
   late final BluOSAPIMonitor client;
 
   var _responseCompleter = Completer<http.Response>();
-
   final _notificationStreamer = StreamController<bool>.broadcast();
-
   Stream<bool> get _notifications => _notificationStreamer.stream;
-
   late StatusRequestData _status;
 
   void startClient({bool? stopWhenPlayerStops}) {
@@ -225,9 +232,11 @@ class FakePollingResponder {
     expect(client.state!.playerState, equals(expectedState.playerState));
     expect(client.state!.etag, equals(expectedState.etag));
     expect(client.playlist.length, equals(expectedPlaylistLength));
-    expect(client.playlist.last.title, equals(expectedTrack.title));
-    expect(client.playlist.last.artist, equals(expectedTrack.artist));
-    expect(client.playlist.last.album, equals(expectedTrack.album));
+    if (expectedPlaylistLength > 0) {
+      expect(client.playlist.last.title, equals(expectedTrack.title));
+      expect(client.playlist.last.artist, equals(expectedTrack.artist));
+      expect(client.playlist.last.album, equals(expectedTrack.album));
+    }
   }
 
   Future<void> validateErrorHandling({required bool shouldStop, required bool noDelay}) async {
