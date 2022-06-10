@@ -58,13 +58,27 @@ class BluOSMonitorControl extends StatefulWidget {
   static const noPlayerFoundErrorMessage = 'No BluOS players were found in your network.';
 }
 
-class BluOSMonitorControlState extends State<BluOSMonitorControl> {
+class BluOSMonitorControlState extends State<BluOSMonitorControl> with SingleTickerProviderStateMixin {
   static final Logger _log = Logger('BluosPlaylistEditor');
 
   final Map<int, bool> _includeMask = {};
   BluOSPlayer? _selectedPlayer;
   List<BluOSPlayer>? _availablePlayers;
   bool _isScanningPlayers = false;
+
+  late AnimationController _refreshrotationController;
+
+  @override
+  void initState() {
+    _refreshrotationController = AnimationController(duration: const Duration(seconds: 3), vsync: this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _refreshrotationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +91,14 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
         final toScrobbleCount = _getTracksToScrobble(playlist).length;
         final toClearCount = _getTracksToClear(playlist).length;
 
+        if (!bluos.canReload && bluos.isPolling) {
+          if (!_refreshrotationController.isAnimating) {
+            _refreshrotationController.repeat();
+          }
+        } else {
+          _refreshrotationController.reset();
+        }
+
         return Scaffold(
           appBar: AppBar(
             leading: const CloseButton(),
@@ -84,11 +106,14 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 ? FittedBox(fit: BoxFit.fitWidth, child: Text('Listening on ${bluos.playerName ?? 'BluOS device'}'))
                 : const Image(image: AssetImage('assets/bluos_small.png'), height: 45),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: 'Refresh',
-                onPressed:
-                    bluos.canReload ? () => handleFutureError(bluos.refresh(), _log, trace: 'bluos_refresh') : null,
+              RotationTransition(
+                turns: Tween(begin: 0.0, end: 1.0).animate(_refreshrotationController),
+                child: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: bluos.canReload ? 'Refresh' : null,
+                  onPressed:
+                      bluos.canReload ? () => handleFutureError(bluos.refresh(), _log, trace: 'bluos_refresh') : null,
+                ),
               )
             ],
           ),
@@ -218,7 +243,7 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
               ),
-              onPressed: bluos.isLoading ? null : () => handleFutureError(bluos.stop(), _log, trace: 'bluos_stop'),
+              onPressed: bluos.isLoading ? null : () => _handleStop(bluos),
             )
           : TextButton.icon(
               icon: const Icon(Icons.start, size: 20),
@@ -246,6 +271,10 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> {
                 : const Text('Submit'),
       ),
     );
+  }
+
+  Future<void> _handleStop(BluOS bluos) async {
+    await handleFutureError(bluos.stop(), _log, trace: 'bluos_stop');
   }
 
   Future<void> _handleStart(BuildContext context, BluOS bluos, BluOSPlayer player) async {
