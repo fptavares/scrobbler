@@ -23,7 +23,7 @@ class LongPollingSession {
   final http.Client _httpClient;
 
   static const int timeout = 100;
-  static const Duration initialRetryDelay = Duration(seconds: 30);
+  static const Duration initialRetryDelay = Duration(seconds: 15);
   static const Duration maxRetryDelay = Duration(minutes: 2);
 
   static final _log = Logger('LongPollingSession');
@@ -90,9 +90,12 @@ class LongPollingSession {
     } on TimeoutException catch (e, st) {
       _pushErrorMessage('Connection to $host timed out.');
       _log.info('Timeout error: ${e.toString()}', e, st);
-    } on SocketException catch (e, st) {
+    } on http.ClientException catch (e, st) {
+      _pushErrorMessage('The connection to the player was interrupted.');
+      _log.warning('Client error: ${e.toString()}', e, st);
+    } on SocketException catch (e) {
       _pushErrorMessage('Could not connect to $host.');
-      _log.info('Connection error: ${e.toString()}', e, st);
+      _log.info('Connection error: ${e.toString()}');
       delayedRetry = true;
     } catch (e, st) {
       _pushErrorMessage('Polling error: ${e.toString()}.');

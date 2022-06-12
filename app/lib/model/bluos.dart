@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -146,7 +147,8 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
     _notifyListeners();
 
     try {
-      final response = await httpClient.get(Uri.http(monitorAddress, path, queryParameters));
+      final response =
+          await httpClient.get(Uri.http(monitorAddress, path, queryParameters)).timeout(const Duration(seconds: 10));
 
       final status = json.decode(response.body) as Map<String, dynamic>;
 
@@ -156,8 +158,10 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
       _errorMessage = status['errorMessage'] as String?;
 
       _playlist = (status['playlist'] as List<dynamic>).map((track) => BluOSMonitorTrack.fromJson(track)).toList();
-    } on SocketException catch (error) {
-      throw UIException('Could not connect to $monitorAddress.', error);
+    } on SocketException {
+      throw UIException('Could not connect to $monitorAddress.');
+    } on TimeoutException {
+      throw UIException('Connection to $monitorAddress timed out.');
     } catch (error) {
       throw UIException('Failed to process response from $monitorAddress.', error);
     } finally {
