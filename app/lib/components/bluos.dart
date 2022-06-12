@@ -175,14 +175,15 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> with SingleTic
               cells: <DataCell>[
                 DataCell(Text('${track.artist} - ${track.title}')),
                 DataCell((track.imageUrl != null)
-                    ? Tooltip(
-                        message: track.album,
-                        child: CachedNetworkImage(
-                          imageUrl: track.imageUrl!,
-                          height: 35,
-                          width: 35,
-                          imageBuilder: (context, image) => AlbumImage(image: image),
-                        ))
+                    ? CachedNetworkImage(
+                        imageUrl: track.imageUrl!,
+                        height: 35,
+                        width: 35,
+                        imageBuilder: (context, image) => Tooltip(
+                          message: track.album ?? '',
+                          child: AlbumImage(image: image),
+                        ),
+                      )
                     : Container())
               ],
               selected: _isIncluded(track),
