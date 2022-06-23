@@ -14,7 +14,7 @@ import 'package:scrobbler/components/playlist.dart';
 import 'package:scrobbler/model/playlist.dart';
 
 import '../mocks/cache_mocks.dart';
-import '../discogs_test_albums.dart';
+import '../discogs_test_data.dart';
 
 Future<void> main() async {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -5,7 +5,7 @@ import 'package:scrobbler/model/playlist.dart';
 import 'package:test/test.dart';
 
 import '../mocks/model_mocks.dart';
-import '../discogs_test_albums.dart';
+import '../discogs_test_data.dart';
 
 void main() {
   group('Playlist', () {

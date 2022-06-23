@@ -12,7 +12,7 @@ import 'package:scrobbler/model/playlist.dart';
 
 import '../mocks/firebase_mocks.dart';
 import '../mocks/model_mocks.dart';
-import '../discogs_test_albums.dart';
+import '../discogs_test_data.dart';
 
 void main() {
   group('Search page', () {

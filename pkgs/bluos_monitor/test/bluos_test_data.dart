@@ -57,7 +57,7 @@ const radioParadiseXml = '''
 	<title2>Stay Alive</title2>
 	<title3>José González • The Secret Life Of Walter Mitty (Soundtrack)</title3>
 	<volume>100</volume>
-	<secs>100</secs>
+	<secs>3421</secs>
 </status>
 ''';
 
@@ -68,8 +68,9 @@ final radioParadiseExpected = BluOSAPITrack(
   album: 'The Secret Life Of Walter Mitty (Soundtrack)',
   length: null,
   imageUrl: 'https://img.radioparadise.com/covers/l/B00GG429KS.jpg',
+  initialPlaybackDuration: 3421,
 );
-final radioParadiseExpectedState = BluOSPlayerState('4a946635b01af97de8ffa7129b0ad5ab', 'stream', 100);
+final radioParadiseExpectedState = BluOSPlayerState('4a946635b01af97de8ffa7129b0ad5ab', 'stream', 3421);
 
 const tidalXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -113,7 +114,7 @@ const tidalXml = '''
 	<totlen>339</totlen>
 	<trackstationid>Tidal:radio:track/122121655</trackstationid>
 	<volume>100</volume>
-	<secs>164</secs>
+	<secs>0</secs>
 </status>
 ''';
 
@@ -124,8 +125,9 @@ final tidalExpected = BluOSAPITrack(
   album: 'And I\'ll Scratch Yours',
   length: 339,
   imageUrl: '/Artwork?service=Tidal&songid=Tidal%3A122121655',
+  initialPlaybackDuration: 0,
 );
-final tidalExpectedState = BluOSPlayerState('68330da5672aff2cf86a349955ced764', 'play', 164);
+final tidalExpectedState = BluOSPlayerState('68330da5672aff2cf86a349955ced764', 'play', 0);
 
 const tidalRadioXml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

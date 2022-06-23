@@ -16,7 +16,7 @@ import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'fake_collection.dart';
+import 'fake_collection_test_data.dart';
 
 void main() {
   late final SharedPreferences prefs;
