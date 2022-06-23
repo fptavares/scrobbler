@@ -88,18 +88,21 @@ class BluOSAPITrack extends BluOSTrack {
     required String title,
     this.length,
     required String? imageUrl,
+    double? initialPlaybackDuration,
   })  : _thresholdPlaybackDuration = (length == null) ? 60 : min(4 * 60, length / 2).floor(),
         super(
           artist: artist,
           album: album,
           title: title,
           imageUrl: imageUrl,
-          timestamp: BluOSAPITrack.timestampForNewTrack(),
+          timestamp: (initialPlaybackDuration != null && length != null && initialPlaybackDuration <= length)
+              ? BluOSAPITrack.timestampForNewTrack() - initialPlaybackDuration.floor()
+              : BluOSAPITrack.timestampForNewTrack(),
         );
   // threshold = half of duration, no more than 4 minutes, default to 1 minute
   // https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
 
-  factory BluOSAPITrack.fromXml(XmlDocument document, String authorityForRelativeImages) {
+  factory BluOSAPITrack.fromXml(XmlDocument document, BluOSPlayerState state, String authorityForRelativeImages) {
     try {
       final parser = BluOSStatusParser.fromDocument(document);
       final service = parser.getOptional(AttributeConfig.serviceConfig);
@@ -116,6 +119,7 @@ class BluOSAPITrack extends BluOSTrack {
         title: parser.getMandatory(config.title),
         length: parser.getDoubleOptional(config.length),
         imageUrl: image,
+        initialPlaybackDuration: state.seconds,
       );
     } on MissingMandatoryAttributeException catch (e) {
       throw UnknownTrackException(e);

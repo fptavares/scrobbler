@@ -3,17 +3,18 @@ import 'package:scrobbler_bluos_monitor/src/playlist.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
-import 'test_data.dart';
+import 'bluos_test_data.dart';
 
 void main() {
   group('BluOS playlist', () {
-    BluOSAPITrack createTrack(int pid, double length) => BluOSAPITrack(
+    BluOSAPITrack createTrack(int pid, double length, {double? initialPlaybackDuration}) => BluOSAPITrack(
           queuePosition: 'position$pid',
           artist: 'artist$pid',
           album: 'album$pid',
           title: 'title$pid',
           imageUrl: 'image$pid',
           length: length,
+          initialPlaybackDuration: initialPlaybackDuration,
         );
 
     test('ensures that tracks meet the requirements to be scrobbled', () {
@@ -39,18 +40,30 @@ void main() {
         async.elapse(Duration(minutes: 2));
         expect(longTrack.isScrobbable, isTrue);
 
-        // tracks listened to less than 50% of length are not kept in the playlist
-        final notScrobbableTrack = createTrack(2, 240);
-        expect(notScrobbableTrack.isScrobbable, isFalse);
+        // if initial playback duration is longer than the length, it should be ignored (happens is radios)
+        final invalidPlaybackDurationTrack = createTrack(2, 180, initialPlaybackDuration: 181);
+        expect(invalidPlaybackDurationTrack.isScrobbable, isFalse);
+
+        playlist.updateWith(invalidPlaybackDurationTrack);
+        expect(playlist.length, equals(2));
+        expect(playlist.tracks.last, equals(invalidPlaybackDurationTrack));
 
         async.elapse(Duration(minutes: 1));
+        expect(invalidPlaybackDurationTrack.isScrobbable, isFalse);
+
+        // tracks listened to less than 50% of length are not kept in the playlist
+        final notScrobbableTrack = createTrack(3, 240);
         expect(notScrobbableTrack.isScrobbable, isFalse);
 
         playlist.updateWith(notScrobbableTrack);
         expect(playlist.length, equals(2));
         expect(playlist.tracks.last, equals(notScrobbableTrack));
 
-        final scrobbableTrack = createTrack(3, 120);
+        async.elapse(Duration(minutes: 1));
+        expect(notScrobbableTrack.isScrobbable, isFalse);
+
+        // valid track should be kept and previous ones should have been removed
+        final scrobbableTrack = createTrack(4, 120);
         expect(scrobbableTrack.isScrobbable, isFalse);
 
         playlist.updateWith(scrobbableTrack);
@@ -60,12 +73,20 @@ void main() {
         async.elapse(Duration(minutes: 1));
         expect(scrobbableTrack.isScrobbable, isTrue);
 
+        // tracks picked up half way through have their current playback duration taken into account
+        final halfwayTrack = createTrack(5, 90, initialPlaybackDuration: 45);
+        expect(halfwayTrack.isScrobbable, isTrue);
+
+        playlist.updateWith(halfwayTrack);
+        expect(playlist.length, equals(3));
+        expect(playlist.tracks.last, equals(halfwayTrack));
+
         // tracks need to be longer than 30 seconds
-        final tooShortTrack = createTrack(4, 30);
+        final tooShortTrack = createTrack(6, 30);
         expect(tooShortTrack.isScrobbable, isFalse);
 
         playlist.updateWith(tooShortTrack);
-        expect(playlist.length, equals(3));
+        expect(playlist.length, equals(4));
         expect(playlist.tracks.last, equals(tooShortTrack));
 
         async.elapse(Duration(seconds: 30));
@@ -73,15 +94,15 @@ void main() {
 
         // last track is removed if not scrobbable when stopping
         playlist.stop();
-        expect(playlist.length, equals(2));
-        expect(playlist.tracks, equals([longTrack, scrobbableTrack]));
+        expect(playlist.length, equals(3));
+        expect(playlist.tracks, equals([longTrack, scrobbableTrack, halfwayTrack]));
       });
     });
 
     void verifyMatches(String trackXml, BluOSAPITrack expectedTrack, BluOSPlayerState expectedState) {
       final document = XmlDocument.parse(trackXml);
       final state = BluOSPlayerState.fromXml(document);
-      final track = BluOSAPITrack.fromXml(document, '');
+      final track = BluOSAPITrack.fromXml(document, state, '');
 
       expect(expectedTrack.artist, equals(track.artist));
       expect(expectedTrack.album, equals(track.album));

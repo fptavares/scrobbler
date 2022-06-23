@@ -144,14 +144,14 @@ class LongPollingSession {
 
       if (state.isActive) {
         try {
-          _playlistTracker.updateWith(BluOSAPITrack.fromXml(document, uriAuthority));
+          _playlistTracker.updateWith(BluOSAPITrack.fromXml(document, state, uriAuthority));
         } on UnknownTrackException catch (e) {
           // when the track cannot be parsed due to missing fields, we still have an etag so just ingore and continue
           if (state.isPlaying) {
             _pushErrorMessage('Could not get information about track, so it was ignored.');
             _log.warning('Could not parse attribute ${e.failedAttribute}, ignoring track');
           }
-          _log.fine('BluOS API parsing failed: could not get value for ${e.failedAttribute}');
+          _log.info('BluOS API parsing failed: could not get value for ${e.failedAttribute}');
         }
       }
 
