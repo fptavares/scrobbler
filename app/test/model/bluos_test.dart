@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
@@ -206,6 +207,25 @@ Future<void> main() async {
       when(httpClientMock.get(any, headers: anyNamed('headers'))).thenThrow(Error());
       await expectLater(bluos.stop(), throwsA(isA<UIException>()));
       verify(httpClientMock.get(any, headers: anyNamed('headers')));
+    });
+
+    test('implements HTTP timeout', () {
+      FakeAsync().run((async) {
+        final bluos = BluOS();
+        bluos.updateMonitorAddress('monitor:1234');
+
+        final mockClient = bluos.externalMonitorClientInstance!.httpClient = mocks.createMockHttpClient();
+        // create response that never completes
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer((_) => Completer<http.Response>().future);
+
+        // expect TimeoutException is caught and a UIException is thrown instead
+        expect(bluos.start('playerHost', 9876), throwsA(isA<UIException>()));
+
+        // advance time to trigger timeout
+        async.elapse(BluOSExternalMonitorClient.httpClientTimeout);
+
+        verify(mockClient.get(any, headers: anyNamed('headers')));
+      });
     });
   });
 }

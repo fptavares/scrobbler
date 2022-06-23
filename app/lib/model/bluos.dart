@@ -100,6 +100,8 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
 
   @visibleForTesting
   http.Client httpClient = http.Client();
+  @visibleForTesting
+  static const httpClientTimeout = Duration(seconds: 10);
 
   final String monitorAddress;
 
@@ -147,8 +149,7 @@ class BluOSExternalMonitorClient implements BluOSMonitor {
     _notifyListeners();
 
     try {
-      final response =
-          await httpClient.get(Uri.http(monitorAddress, path, queryParameters)).timeout(const Duration(seconds: 10));
+      final response = await httpClient.get(Uri.http(monitorAddress, path, queryParameters)).timeout(httpClientTimeout);
 
       final status = json.decode(response.body) as Map<String, dynamic>;
 
