@@ -9,7 +9,7 @@ import 'package:scrobbler_bluos_monitor/src/playlist.dart';
 import 'package:scrobbler_bluos_monitor/src/polling.dart';
 import 'package:test/test.dart';
 
-import 'test_data.dart';
+import 'bluos_test_data.dart';
 
 Future<void> main() async {
   group('BluOS API client', () {
@@ -146,6 +146,7 @@ Future<void> main() async {
         testError(statusCode: 403, shouldStop: true),
         testError(statusCode: 500),
         testError(badResponse: 'TimeoutException', noDelay: true),
+        testError(badResponse: 'ClientException', noDelay: true),
         testError(badResponse: 'SocketException'),
       ]);
     });
@@ -165,6 +166,8 @@ class FakePollingResponder {
         throw SocketException('cannot connect');
       } else if (response.body == 'TimeoutException') {
         throw TimeoutException('timed out');
+      } else if (response.body == 'ClientException') {
+        throw http.ClientException('client failure');
       }
 
       return response;
