@@ -155,8 +155,8 @@ class Scrobbler {
             ? 'Last.fm authentication failed, please try re-entering your password.'
             : 'Failed to scrobble to Last.fm ($errorCode)!');
       }
-    } on SocketException catch (e) {
-      throw UIException('Failed to communicate to Last.fm. Please try again later.', e);
+    } on SocketException {
+      throw UIException('Failed to communicate to Last.fm. Please try again later.');
     } on FormatException catch (e, stackTrace) {
       _log.severe('Failed to parse the Last.fm response: ${response!.body}', e, stackTrace);
 

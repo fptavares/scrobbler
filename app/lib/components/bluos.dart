@@ -336,8 +336,8 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> with SingleTic
       if (tracksWereScrobbled) {
         unawaited(ReviewRequester.instance.tryToAskForAppReview());
       }
-    } on Exception catch (e, stackTrace) {
-      displayAndLogError(_log, e, stackTrace);
+    } catch (e, stackTrace) {
+      displayAndLogError(_log, e, stackTrace, 'There was an error while trying to submit the tracks to Last.fm.');
     }
   }
 
