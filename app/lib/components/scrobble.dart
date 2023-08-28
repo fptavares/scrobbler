@@ -116,9 +116,9 @@ class ScrobblePlaylistEditorState extends State<ScrobblePlaylistEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final positionStyle = Theme.of(context).textTheme.bodyText2;
-    final titleStyle = Theme.of(context).textTheme.bodyText1;
-    final excludedTitleStyle = Theme.of(context).textTheme.bodyText1!.copyWith(decoration: TextDecoration.lineThrough);
+    final positionStyle = Theme.of(context).textTheme.bodyMedium;
+    final titleStyle = Theme.of(context).textTheme.bodyLarge;
+    final excludedTitleStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(decoration: TextDecoration.lineThrough);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

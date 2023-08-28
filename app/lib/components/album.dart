@@ -147,7 +147,7 @@ class DefaultAlbumImage extends StatelessWidget {
                     child: Center(
                       child: Text(
                         album.artist,
-                        style: Theme.of(context).textTheme.headline6,
+                        style: Theme.of(context).textTheme.titleLarge,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                       ),
@@ -158,7 +158,7 @@ class DefaultAlbumImage extends StatelessWidget {
                     child: Center(
                       child: Text(
                         album.title,
-                        style: Theme.of(context).textTheme.subtitle1,
+                        style: Theme.of(context).textTheme.titleMedium,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                       ),

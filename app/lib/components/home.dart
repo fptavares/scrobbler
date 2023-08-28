@@ -53,10 +53,10 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ),
-        floatingActionButton: Column(
+        floatingActionButton: const Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: const [
+          children: [
             BluosFloatingButton(),
             ScrobbleFloatingButton(),
           ],
@@ -114,8 +114,7 @@ class HomeAppBar extends StatelessWidget {
           StretchMode.fadeTitle,
         ],
         title: GestureDetector(
-          onTap: () => PrimaryScrollController.of(context)!
-              .animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut)
+          onTap: () => PrimaryScrollController.of(context).animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut)
               .then((_) => analytics.logTapLogo()),
           child: SafeArea(
             key: const Key('logo'),
@@ -131,14 +130,14 @@ class HomeAppBar extends StatelessWidget {
             ),
           ),
         ),
-        background: Align(
+        background: const Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Expanded(
                   flex: 1,
                   child: Text('scrobbler.',

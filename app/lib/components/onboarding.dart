@@ -138,7 +138,7 @@ class WelcomePage extends StatelessWidget {
               onPressed: onPressed,
               child: Text(
                 'Get started',
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ),

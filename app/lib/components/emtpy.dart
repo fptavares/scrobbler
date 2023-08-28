@@ -36,7 +36,7 @@ class EmptyState extends StatelessWidget {
             if (headline != null)
               Text(
                 headline!,
-                style: theme.textTheme.headline4!.copyWith(
+                style: theme.textTheme.headlineMedium!.copyWith(
                   color: theme.colorScheme.secondary,
                   fontWeight: FontWeight.w500,
                 ),
@@ -45,7 +45,7 @@ class EmptyState extends StatelessWidget {
             if (subhead != null)
               Text(subhead!,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.subtitle1!.copyWith(color: Colors.black54)),
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.black54)),
           ],
         ),
       ),
