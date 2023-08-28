@@ -137,7 +137,7 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
                                 validator: (value) =>
                                     _validateAddress(value) ? null : AccountsForm.bluosInvalidAddressMessage,
                                 decoration: const InputDecoration(
-                                  labelText: 'BluOS monitor address',
+                                  labelText: 'BluOS monitor address (optional)',
                                   helperText: 'Leave empty if not using an external server to monitor BluOS players',
                                   helperMaxLines: 3,
                                   hintText: '[Hostname/IP]:[Port]',
@@ -206,7 +206,9 @@ class AccountsMyCustomFormState extends State<AccountsForm> {
         displaySuccess(AccountsForm.saveSuccessMessage);
       }
 
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
