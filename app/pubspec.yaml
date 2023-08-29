@@ -54,7 +54,6 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mockito:
-  #screenshots:
   test:
 
 flutter_launcher_icons:

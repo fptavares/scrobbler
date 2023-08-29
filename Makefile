@@ -19,7 +19,7 @@ run:
 	cd app && flutter run --release $(if $(DEVICE),-d "$(DEVICE)")
 
 icons:
-	cd app && flutter pub run flutter_launcher_icons:main
+	cd app && dart run flutter_launcher_icons
 
 ipa:
 	cd app && flutter build ipa --release
@@ -30,7 +30,7 @@ ios:
 appStoreRelease:
 	cd app/ios && fastlane release
 
-testflight: ipa
+testflight:
 	cd app/ios && fastlane beta
 
 android:
@@ -58,9 +58,12 @@ container:
 	docker build -t scrobbler-bluos-monitor -f pkgs/bluos_monitor_server/Dockerfile .
 
 screenshots:
-	cd app && screenshots \
-	&& cd ios/fastlane/screenshots/en-US \
-	&& fastlane frameit
+	cd app \
+	&& dart tool/screenshots.dart \
+	&& ( cd ios/fastlane/screenshots && fastlane frameit ) \
+	&& ( cd android/fastlane/metadata/android && fastlane frameit )
+	
+
 
 mocks:
 	cd app && flutter pub run build_runner build --delete-conflicting-outputs
