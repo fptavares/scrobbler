@@ -34,7 +34,7 @@ runTests () {
     # run tests with coverage
     if grep flutter pubspec.yaml > /dev/null; then
       echo -e "\nAnalyzing flutter code in $1"
-      flutter format --line-length=120 . || error=true
+      dart format --line-length=120 . || error=true
       flutter analyze || error=true
       echo -e "\nRunning flutter tests in $1"
       flutter test --coverage || error=true
