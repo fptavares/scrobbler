@@ -383,7 +383,8 @@ Future<void> showAboutBluOSMonitor(BuildContext context, Settings settings) asyn
                 style: Theme.of(context).textTheme.bodyMedium,
                 text:
                     'Unfortunately, the app by itself can only monitor what\'s being played on another device while the app is open.\n\n'
-                    'To monitor tracks played even if the app is closed, you need to run a separate server that will monitor the BluOS player independently of the app.\n\n'
+                    'So you\'ll need to keep the app open for it to receive updates from the BluOS player.\n\n'
+                    'To monitor tracks played even if the app is closed, you can optionally run a separate server that will monitor the BluOS player independently of the app.\n\n'
                     'For more information, and instructions on how to install this, please go to ',
               ),
               TextSpan(
