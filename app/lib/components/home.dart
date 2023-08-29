@@ -114,16 +114,19 @@ class HomeAppBar extends StatelessWidget {
           StretchMode.fadeTitle,
         ],
         title: GestureDetector(
-          onTap: () => PrimaryScrollController.of(context).animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut)
+          onTap: () => PrimaryScrollController.of(context)
+              .animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut)
               .then((_) => analytics.logTapLogo()),
           child: SafeArea(
             key: const Key('logo'),
             child: Consumer<LoadingStatus>(
               builder: (_, status, __) => SvgPicture.asset(
                 'assets/logo.svg',
-                color: status == LoadingStatus.loading
-                    ? Theme.of(context).colorScheme.secondary.withAlpha(128)
-                    : Theme.of(context).colorScheme.secondary,
+                colorFilter: ColorFilter.mode(
+                    status == LoadingStatus.loading
+                        ? Theme.of(context).colorScheme.secondary.withAlpha(128)
+                        : Theme.of(context).colorScheme.secondary,
+                    BlendMode.srcIn),
                 width: 38,
                 excludeFromSemantics: true,
               ),

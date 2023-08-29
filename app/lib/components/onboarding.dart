@@ -101,7 +101,7 @@ class WelcomePage extends StatelessWidget {
                       flex: 4,
                       child: SvgPicture.asset(
                         'assets/logo.svg',
-                        color: Colors.amber,
+                        colorFilter: const ColorFilter.mode(Colors.amber, BlendMode.srcIn),
                         height: 150,
                       ),
                     ),
