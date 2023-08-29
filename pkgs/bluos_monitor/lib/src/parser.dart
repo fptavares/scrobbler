@@ -23,9 +23,9 @@ class BluOSStatusParser {
   }
 
   String? getOptional(AttributeConfig attribute) {
-    String? value = status.getElement(attribute.key)?.text.trim();
+    String? value = status.getElement(attribute.key)?.innerText.trim();
     if (value == null && attribute.alternativeKey != null) {
-      value = status.getElement(attribute.alternativeKey!)?.text.trim();
+      value = status.getElement(attribute.alternativeKey!)?.innerText.trim();
     }
     if (attribute.regex != null && value != null) {
       value = attribute.regex!.firstMatch(value)?.group(1);
