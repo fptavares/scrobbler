@@ -189,14 +189,21 @@ void main() {
 
       verify(bluos.lookupBluOSPlayers());
 
-      for (final player in players) {
-        expect(find.widgetWithText(DropdownMenuItem<BluOSPlayer>, player.name), findsOneWidget);
-      }
+      await tester.pumpAndSettle();
+
+      // first player is selected by default
+      expect(find.widgetWithText(DropdownMenuItem<BluOSPlayer>, players.first.name), findsOneWidget);
 
       expect(find.text('Scan for players'), findsNothing);
 
       await tester.tap(find.byType(DropdownButton<BluOSPlayer>));
+      await tester.pump();
       await tester.pumpAndSettle();
+
+      // all player options are displayed in the expanded dropdown
+      for (final player in players) {
+        expect(find.text(player.name).hitTestable(), findsOneWidget);
+      }
 
       final lastPlayer = players.last;
 
