@@ -36,6 +36,7 @@ class EmptyState extends StatelessWidget {
             if (headline != null)
               Text(
                 headline!,
+                textAlign: TextAlign.center,
                 style: theme.textTheme.headlineMedium!.copyWith(
                   color: theme.colorScheme.secondary,
                   fontWeight: FontWeight.w500,
@@ -43,9 +44,11 @@ class EmptyState extends StatelessWidget {
               ),
             if (subhead != null) const Flexible(flex: 1, child: SizedBox(height: 8.0)),
             if (subhead != null)
-              Text(subhead!,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.black54)),
+              Text(
+                subhead!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.black54),
+              ),
           ],
         ),
       ),
