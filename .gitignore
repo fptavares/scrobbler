@@ -54,3 +54,10 @@ firebase_options.dart
 .idea/
 .vscode/
 *.iml
+
+# fastlane app signing
+api-key.json
+*.cer
+*.certSigningRequest
+*.p12
+*.mobileprovision
