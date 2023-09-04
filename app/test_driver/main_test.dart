@@ -9,8 +9,8 @@ Future<void> main() async {
   // Setup emulators package
   final emu = await Emulators.build();
   final screenshotHelper = emu.screenshotHelper(
-    androidPath: 'android/fastlane/metadata/android/en-US/images/phoneScreenshots',
-    iosPath: 'ios/fastlane/screenshots/en-US',
+    androidPath: Environment.getString('androidPath') ?? '',
+    iosPath: Environment.getString('iosPath') ?? '',
   );
 
   setUpAll(() async {

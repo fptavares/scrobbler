@@ -16,21 +16,11 @@ import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'driver_commads.dart';
 import 'fake_collection_test_data.dart';
 
 Future<void> main() async {
   // This line enables the extension.
-  enableFlutterDriverExtension(handler: (command) {
-    var result = '';
-    switch (command) {
-      case getPlatformCommand:
-        result = Platform.operatingSystem;
-        break;
-    }
-
-    return Future.value(result);
-  });
+  enableFlutterDriverExtension();
 
   WidgetsApp.debugAllowBannerOverride = false; // remove debug banner
 
