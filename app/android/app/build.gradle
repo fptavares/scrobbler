@@ -22,10 +22,8 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-//apply plugin: 'com.google.gms.google-services'
-
 android {
-    namespace "io.github.fptavares.app"
+    namespace "io.github.fptavares.scrobbler"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
