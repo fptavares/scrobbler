@@ -12,7 +12,7 @@ import '../components/error.dart';
 
 class BluOS extends ChangeNotifier {
   static final _log = Logger('BluOS');
-  static const mdnsName = '_musc._tcp.local';
+  static const mdnsName = '_musc._tcp';
 
   BluOS({BluOSAPIMonitor? apiMonitor}) {
     _client = apiMonitorInstance = apiMonitor ?? BluOSAPIMonitor.withNotifier(notifyListeners);
@@ -76,14 +76,18 @@ class BluOS extends ChangeNotifier {
     final players = <BluOSPlayer>[];
     final client = MDnsClient();
 
+    _log.info('Starting mDNS scan...');
     await client.start();
     await for (final ptr in client.lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(mdnsName))) {
+      _log.info('Found Server Pointer (PTR): ${ptr.name} (${ptr.domainName})');
       await for (final srv in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(ptr.domainName))) {
+        _log.info('Found Service (SRV): ${srv.name} (${srv.target}:${srv.port})');
         players
             .add(BluOSPlayer(ptr.domainName.substring(0, ptr.domainName.indexOf('.$mdnsName')), srv.target, srv.port));
       }
     }
     client.stop();
+    _log.info('Finished mDNS scan');
 
     return players;
   }
