@@ -296,3 +296,235 @@ const jsonForRelease = r'''{
 
 const jsonForReleaseWithSubtracks =
     r'{"styles": ["Impressionist"], "series": [], "labels": [{"name": "La Voix De Son Ma\u00eetre", "entity_type": "1", "catno": "2C 069-10239", "resource_url": "https://api.discogs.com/labels/63488", "id": 63488, "entity_type_name": "Label"}, {"name": "La Voix De Son Ma\u00eetre", "entity_type": "1", "catno": "2C 069-10.239", "resource_url": "https://api.discogs.com/labels/63488", "id": 63488, "entity_type_name": "Label"}], "year": 0, "community": {"status": "Accepted", "rating": {"count": 9, "average": 4.11}, "have": 199, "contributors": [{"username": "pyratek", "resource_url": "https://api.discogs.com/users/pyratek"}, {"username": "Villars", "resource_url": "https://api.discogs.com/users/Villars"}, {"username": "Ktrump5", "resource_url": "https://api.discogs.com/users/Ktrump5"}, {"username": "IbLeo", "resource_url": "https://api.discogs.com/users/IbLeo"}, {"username": "grave_auch", "resource_url": "https://api.discogs.com/users/grave_auch"}, {"username": "jeroenpeys", "resource_url": "https://api.discogs.com/users/jeroenpeys"}, {"username": "9kqzxu3", "resource_url": "https://api.discogs.com/users/9kqzxu3"}, {"username": "vivaldi55", "resource_url": "https://api.discogs.com/users/vivaldi55"}, {"username": "alfredpinetree", "resource_url": "https://api.discogs.com/users/alfredpinetree"}], "want": 5, "submitter": {"username": "pyratek", "resource_url": "https://api.discogs.com/users/pyratek"}, "data_quality": "Needs Vote"}, "artists": [{"join": "\u2013", "name": "Maurice Ravel", "anv": "Ravel", "tracks": "", "role": "", "resource_url": "https://api.discogs.com/artists/216140", "id": 216140}, {"join": ",", "name": "Charles Munch", "anv": "", "tracks": "", "role": "", "resource_url": "https://api.discogs.com/artists/406273", "id": 406273}, {"join": "", "name": "Orchestre De Paris", "anv": "", "tracks": "", "role": "", "resource_url": "https://api.discogs.com/artists/744724", "id": 744724}], "images": [{"uri": "", "height": 592, "width": 600, "resource_url": "", "type": "primary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 573, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 496, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}, {"uri": "", "height": 450, "width": 600, "resource_url": "", "type": "secondary", "uri150": ""}], "format_quantity": 1, "id": 1287017, "artists_sort": "Maurice Ravel \u2013 Charles Munch, Orchestre De Paris", "genres": ["Classical"], "thumb": "", "num_for_sale": 22, "title": "Bolero, Rapsodie Espagnole, Pavane Pour Une Infante D\u00e9funte, Daphnis Et Chlo\u00e9, Suite N\u00b0 2", "date_changed": "2019-06-28T15:45:00-07:00", "master_id": 420813, "lowest_price": 3.26, "status": "Accepted", "estimated_weight": 230, "master_url": "https://api.discogs.com/masters/420813", "date_added": "2009-02-24T00:13:59-08:00", "tracklist": [{"duration": "17:05", "position": "A1", "type_": "track", "title": "Bol\u00e9ro"}, {"duration": "6:43", "position": "A2", "type_": "track", "title": "Pavane Pour Une Infante D\u00e9funte"}, {"duration": "15:31", "position": "", "type_": "index", "sub_tracks": [{"duration": "4:56", "position": "A3", "type_": "track", "title": "Pr\u00e9lude \u00c0 La Nuit"}, {"duration": "2:01", "position": "B1", "type_": "track", "title": "Malague\u00f1a"}, {"duration": "2:49", "position": "B2", "type_": "track", "title": "Haba\u00f1era"}, {"duration": "6:25", "position": "B3", "type_": "track", "title": "Feria"}], "title": "Rapsodie Espagnole"}, {"duration": "18:05", "position": "", "type_": "index", "sub_tracks": [{"duration": "", "position": "B4.1", "type_": "track", "title": "Lever Du Jour"}, {"duration": "", "position": "B4.2", "type_": "track", "title": "Pantomime"}, {"duration": "", "position": "B4.3", "type_": "track", "title": "Danse G\u00e9n\u00e9rale"}], "title": "Daphnis Et Chlo\u00e9 - Ballet En Un Acte - Fragments Symphoniques (Deuxi\u00e8me S\u00e9rie)"}], "extraartists": [{"join": "", "name": "Maurice Ravel", "anv": "", "tracks": "", "role": "Composed By", "resource_url": "https://api.discogs.com/artists/216140", "id": 216140}, {"join": "", "name": "Charles Munch", "anv": "", "tracks": "", "role": "Conductor", "resource_url": "https://api.discogs.com/artists/406273", "id": 406273}, {"join": "", "name": "Pierre Hi\u00e9gel", "anv": "", "tracks": "", "role": "Liner Notes [French only about Munch]", "resource_url": "https://api.discogs.com/artists/547872", "id": 547872}, {"join": "", "name": "Marcel Schneider (2)", "anv": "", "tracks": "", "role": "Liner Notes [French only about Ravel]", "resource_url": "https://api.discogs.com/artists/1849384", "id": 1849384}, {"join": "", "name": "Orchestre De Paris", "anv": "", "tracks": "", "role": "Orchestra", "resource_url": "https://api.discogs.com/artists/744724", "id": 744724}, {"join": "", "name": "J.-F. Guitton", "anv": "", "tracks": "", "role": "Photography By", "resource_url": "https://api.discogs.com/artists/2251209", "id": 2251209}], "country": "France", "notes": "\u2117 1969 Path\u00e9 Marconi EMI\nMade in France\nSt\u00e9r\u00e9o enregistrement d\u2019origine St\u00e9r\u00e9o\n\u00c9ditions Durand.\n\nFrame red\nComes in a gatefold sleeve.\n", "identifiers": [{"type": "Matrix / Runout", "description": "Center Label A", "value": "C 069-10.239 A"}, {"type": "Matrix / Runout", "description": "Center Label B", "value": "C 069-10.239 B"}, {"type": "Matrix / Runout", "description": "Engraved Side A", "value": "10 239 A 21 F M6 328696 4"}, {"type": "Matrix / Runout", "description": "Engraved Side B ", "value": "10239 B 21 H  M6 329173 4"}, {"type": "Price Code", "value": "PM 371"}, {"type": "Rights Society", "value": "SACEM,SDRM,SACD, SGDL"}], "companies": [{"name": "EMI", "entity_type": "4", "catno": "", "resource_url": "https://api.discogs.com/labels/26126", "id": 26126, "entity_type_name": "Record Company"}, {"name": "Path\u00e9 Marconi EMI", "entity_type": "16", "catno": "", "resource_url": "https://api.discogs.com/labels/27145", "id": 27145, "entity_type_name": "Made By"}, {"name": "Path\u00e9 Marconi EMI", "entity_type": "13", "catno": "", "resource_url": "https://api.discogs.com/labels/27145", "id": 27145, "entity_type_name": "Phonographic Copyright (p)"}, {"name": "Offset France", "entity_type": "19", "catno": "", "resource_url": "https://api.discogs.com/labels/272630", "id": 272630, "entity_type_name": "Printed By"}, {"name": "\u00c9ditions Durand", "entity_type": "21", "catno": "", "resource_url": "https://api.discogs.com/labels/434683", "id": 434683, "entity_type_name": "Published By"}, {"name": "\u00c9ditions Max Eschig", "entity_type": "21", "catno": "", "resource_url": "https://api.discogs.com/labels/323233", "id": 323233, "entity_type_name": "Published By"}, {"name": "Path\u00e9 Marconi EMI, Chatou", "entity_type": "17", "catno": "328696", "resource_url": "https://api.discogs.com/labels/407953", "id": 407953, "entity_type_name": "Pressed By"}, {"name": "Path\u00e9 Marconi EMI, Chatou", "entity_type": "17", "catno": "329173", "resource_url": "https://api.discogs.com/labels/407953", "id": 407953, "entity_type_name": "Pressed By"}], "uri": "https://www.discogs.com/Ravel-Charles-Munch-Orchestre-De-Paris-Bolero-Rapsodie-Espagnole-Pavane-Pour-Une-Infante-D%C3%A9funte-Da/release/1287017", "formats": [{"descriptions": ["LP", "Reissue", "Stereo"], "name": "Vinyl", "qty": "1"}], "resource_url": "https://api.discogs.com/releases/1287017", "data_quality": "Needs Vote"}';
+
+const jsonForReleaseWithTwoArtists = r'''
+{
+   "id":6895819,
+   "status":"Accepted",
+   "year":2015,
+   "resource_url":"https://api.discogs.com/releases/6895819",
+   "uri":"https://www.discogs.com/release/6895819-Former-Ghosts-Funeral-Advantage-Split",
+   "artists":[
+      {
+         "name":"Former Ghosts",
+         "anv":"",
+         "join":",",
+         "role":"",
+         "tracks":"",
+         "id":1617253,
+         "resource_url":"https://api.discogs.com/artists/1617253"
+      },
+      {
+         "name":"Funeral Advantage",
+         "anv":"",
+         "join":"",
+         "role":"",
+         "tracks":"",
+         "id":3165217,
+         "resource_url":"https://api.discogs.com/artists/3165217"
+      }
+   ],
+   "artists_sort":"Former Ghosts, Funeral Advantage",
+   "labels":[
+      {
+         "name":"The Native Sound",
+         "catno":"NATIVE 011",
+         "entity_type":"1",
+         "entity_type_name":"Label",
+         "id":573035,
+         "resource_url":"https://api.discogs.com/labels/573035"
+      }
+   ],
+   "series":[
+      
+   ],
+   "companies":[
+      
+   ],
+   "formats":[
+      {
+         "name":"Vinyl",
+         "qty":"1",
+         "text":"Translucent Red",
+         "descriptions":[
+            "7\"",
+            "33 \u2153 RPM",
+            "EP",
+            "Limited Edition"
+         ]
+      }
+   ],
+   "data_quality":"Needs Vote",
+   "community":{
+      "have":34,
+      "want":38,
+      "rating":{
+         "count":1,
+         "average":5.0
+      },
+      "submitter":{
+         "username":"Citizenihilist",
+         "resource_url":"https://api.discogs.com/users/Citizenihilist"
+      },
+      "contributors":[
+         {
+            "username":"Citizenihilist",
+            "resource_url":"https://api.discogs.com/users/Citizenihilist"
+         },
+         {
+            "username":"45RPMenjoyer",
+            "resource_url":"https://api.discogs.com/users/45RPMenjoyer"
+         }
+      ],
+      "data_quality":"Needs Vote",
+      "status":"Accepted"
+   },
+   "format_quantity":1,
+   "date_added":"2015-04-13T19:35:06-07:00",
+   "date_changed":"2015-07-04T18:41:50-07:00",
+   "num_for_sale":0,
+   "lowest_price":null,
+   "master_id":856468,
+   "master_url":"https://api.discogs.com/masters/856468",
+   "title":"Split",
+   "released":"2015-04-14",
+   "notes":"Pressing history:\r\n100 \u2013 Translucent Red (THIS)\r\n200 \u2013 Black",
+   "released_formatted":"14 Apr 2015",
+   "identifiers":[
+      
+   ],
+   "videos":[
+      {
+         "uri":"https://www.youtube.com/watch?v=2G2seXAC6pA",
+         "title":"Funeral Advantage \u2013 Wedding (Audio)",
+         "description":"Download Former Ghosts/ Funeral Advantage's Split EP on iTunes: https://itun.es/us/uE6a6  \n\nPick up Former Ghosts/ Funeral Advantage's Split EP on limited edition vinyl @ http://thenativesound.limitedrun.com/products/540546-former-ghosts-funeral-advantage",
+         "duration":222,
+         "embed":true
+      },
+      {
+         "uri":"https://www.youtube.com/watch?v=Y6XMpFrhemg",
+         "title":"I Know Him",
+         "description":"Provided to YouTube by Ingrooves\n\nI Know Him \u00b7 Funeral Advantage\n\nSplit with Former Ghosts, Funeral Advantage\n\n\u2117 2015 The Native Sound\n\nReleased on: 2015-04-14\n\nWriter: Funeral Advantage\n\nAuto-generated by YouTube.",
+         "duration":165,
+         "embed":true
+      },
+      {
+         "uri":"https://www.youtube.com/watch?v=NXxEi1XUoiI",
+         "title":"Last Hour's Bow (feat. Yasmine Kittles)",
+         "description":"Provided to YouTube by Ingrooves\n\nLast Hour's Bow (feat. Yasmine Kittles) \u00b7 Former Ghosts\n\nSplit with Former Ghosts, Funeral Advantage\n\n\u2117 2015 The Native Sound\n\nReleased on: 2015-04-14\n\nWriter: Former Ghosts\n\nAuto-generated by YouTube.",
+         "duration":190,
+         "embed":true
+      },
+      {
+         "uri":"https://www.youtube.com/watch?v=YtFL5zMcPTs",
+         "title":"Wedding",
+         "description":"Provided to YouTube by Ingrooves\n\nWedding \u00b7 Funeral Advantage\n\nSplit with Former Ghosts, Funeral Advantage\n\n\u2117 2015 The Native Sound\n\nReleased on: 2015-04-14\n\nWriter: Funeral Advantage\n\nAuto-generated by YouTube.",
+         "duration":222,
+         "embed":true
+      }
+   ],
+   "genres":[
+      "Rock",
+      "Pop"
+   ],
+   "styles":[
+      "Shoegaze",
+      "Indie Pop",
+      "Post-Punk"
+   ],
+   "tracklist":[
+      {
+         "position":"A1",
+         "type_":"track",
+         "artists":[
+            {
+               "name":"Former Ghosts",
+               "anv":"",
+               "join":"",
+               "role":"",
+               "tracks":"",
+               "id":1617253,
+               "resource_url":"https://api.discogs.com/artists/1617253"
+            }
+         ],
+         "title":"Last Hour's Bow",
+         "duration":""
+      },
+      {
+         "position":"A2",
+         "type_":"track",
+         "artists":[
+            {
+               "name":"Former Ghosts",
+               "anv":"",
+               "join":"",
+               "role":"",
+               "tracks":"",
+               "id":1617253,
+               "resource_url":"https://api.discogs.com/artists/1617253"
+            }
+         ],
+         "title":"Past Selves",
+         "duration":""
+      },
+      {
+         "position":"B1",
+         "type_":"track",
+         "artists":[
+            {
+               "name":"Funeral Advantage",
+               "anv":"",
+               "join":"",
+               "role":"",
+               "tracks":"",
+               "id":3165217,
+               "resource_url":"https://api.discogs.com/artists/3165217"
+            }
+         ],
+         "title":"Wedding",
+         "duration":""
+      },
+      {
+         "position":"B2",
+         "type_":"track",
+         "artists":[
+            {
+               "name":"Funeral Advantage",
+               "anv":"",
+               "join":"",
+               "role":"",
+               "tracks":"",
+               "id":3165217,
+               "resource_url":"https://api.discogs.com/artists/3165217"
+            }
+         ],
+         "title":"I Know Him",
+         "duration":""
+      }
+   ],
+   "extraartists":[
+      
+   ],
+   "images":[
+      {
+         "type":"primary",
+         "uri":"",
+         "resource_url":"",
+         "uri150":"",
+         "width":480,
+         "height":480
+      },
+      {
+         "type":"secondary",
+         "uri":"",
+         "resource_url":"",
+         "uri150":"",
+         "width":600,
+         "height":600
+      }
+   ],
+   "thumb":"",
+   "estimated_weight":60,
+   "blocked_from_sale":false
+}
+''';

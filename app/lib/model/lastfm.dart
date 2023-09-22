@@ -199,11 +199,7 @@ class ScrobbleQueue {
   int timestamp;
 
   void add(AlbumTrack track, AlbumDetails album) {
-    final splitDuration =
-        ((track.duration?.isNotEmpty ?? false) ? track.duration?.split(':').map<int>(int.parse) : <int>[1, 0])!;
-    final durationInSeconds = splitDuration.reduce((v, e) => v * 60 + e);
-
-    timestamp -= durationInSeconds;
+    timestamp -= track.duration ?? 60;
 
     addScrobble(
       artist: track.artist ?? album.artist,

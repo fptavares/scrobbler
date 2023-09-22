@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:scrobbler/components/error.dart';
+import 'package:scrobbler/model/discogs.dart';
 import 'package:scrobbler/model/lastfm.dart';
 
 import '../bluos_test_data.dart';
@@ -11,6 +12,13 @@ import '../discogs_test_data.dart';
 
 String _createScrobbleResponse(int accepted, int ignored) =>
     '{"scrobbles":{"@attr":{"accepted":$accepted,"ignored":$ignored},"scrobble":[${List.generate(accepted, (_) => '{}').join(',')}]}}';
+
+void checkTrackFields(Request request, int index, AlbumDetails album, AlbumTrack track) {
+  expect(request.bodyFields['track[$index]'], equals(track.title));
+  expect(request.bodyFields['artist[$index]'], equals(track.artist ?? album.artist));
+  expect(request.bodyFields['album[$index]'], equals(album.title));
+  expect(int.parse(request.bodyFields['timestamp[$index]']!), isPositive);
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -108,7 +116,8 @@ void main() {
       scrobbler.updateSessionKey('test-session-key');
 
       // list of albums to scrobble
-      final albums = [testAlbumDetails1];
+      final album = testAlbumDetails1;
+      final albums = [album];
 
       // expected timestamp for the most recent track submitted
       final now = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
@@ -121,21 +130,32 @@ void main() {
         expect(request.url.toString(), equals('https://ws.audioscrobbler.com/2.0/'));
         final regexp = RegExp(r'^track\[[1-4]?[0-9]\]$');
         final trackKeys = request.bodyFields.keys.where(regexp.hasMatch);
-        final tracks = trackKeys.length;
+        final numberOfTracks = trackKeys.length;
+        expect(numberOfTracks, equals(4));
+        expect(request.bodyFields.length, equals(4 * 4 + 5)); // 4 * 4 fields + method, api_key, sk, api_sig, format
 
+        // check that tracks are correctly ordered and numbered sequentially starting from 0
         var index = 0;
         for (var key in trackKeys) {
-          expect(key, 'track[${index++}]');
+          expect(key, equals('track[${index++}]'));
         }
+
+        expect(request.bodyFields['method'], equals('track.scrobble'));
+
+        // check that track fields are correctly set
+        checkTrackFields(request, 0, album, album.tracks[2].subTracks![1]);
+        checkTrackFields(request, 1, album, album.tracks[2].subTracks![0]);
+        checkTrackFields(request, 2, album, album.tracks[1]);
+        checkTrackFields(request, 3, album, album.tracks[0]);
 
         // expect first timestamp to be close to the expected end time
         // 2 second delta to account for the test running on a slower platform
         expect(int.parse(request.bodyFields['timestamp[0]']!), closeTo(endTime, 2));
         // expect last timestamp to be close to the expected start time
         // 2 second delta to account for the test running on a slower platform
-        expect(int.parse(request.bodyFields['timestamp[${tracks - 1}]']!), closeTo(startTime, 2));
+        expect(int.parse(request.bodyFields['timestamp[${numberOfTracks - 1}]']!), closeTo(startTime, 2));
 
-        return Response(_createScrobbleResponse(tracks, 0), 200);
+        return Response(_createScrobbleResponse(numberOfTracks, 0), 200);
       }, count: 1));
 
       // scrobble

@@ -40,7 +40,7 @@ class CollectionAlbum implements Album {
     return CollectionAlbum(
       id: json['instance_id'] as int,
       releaseId: json['id'] as int,
-      artist: _oneNameForArtists(info['artists'] as List<dynamic>?),
+      artist: _oneNameForArtists(info['artists'] as List<dynamic>),
       title: info['title'] as String,
       formats: (info['formats'] as List<dynamic>?)?.map((format) => AlbumFormat.fromJson(format)).toList() ?? [],
       year: info['year'] as int,
@@ -123,7 +123,7 @@ class AlbumDetails implements Album {
   factory AlbumDetails.fromJson(Map<String, dynamic> json) {
     return AlbumDetails(
       releaseId: json['id'] as int,
-      artist: _oneNameForArtists(json['artists'] as List<dynamic>?),
+      artist: _oneNameForArtists(json['artists'] as List<dynamic>),
       title: json['title'] as String,
       thumbUrl: json['thumb'] as String?,
       tracks: (json['tracklist'] as List<dynamic>)
@@ -154,11 +154,18 @@ class AlbumTrack {
   });
 
   factory AlbumTrack.fromJson(Map<String, dynamic> json) {
+    List<dynamic>? artists = json['artists'] as List<dynamic>?; // optional for tracks
+    // parse duration
+    String? durationString = json['duration'] as String?;
+    final splitDuration =
+        (durationString != null && durationString.isNotEmpty) ? durationString.split(':').map<int>(int.parse) : null;
+    final durationInSeconds = splitDuration?.reduce((v, e) => v * 60 + e);
+
     return AlbumTrack(
       title: json['title'] as String,
       position: json['position'] as String?,
-      duration: json['duration'] as String?,
-      artist: _oneNameForArtists(json['artists'] as List<dynamic>?),
+      duration: durationInSeconds,
+      artist: (artists == null || artists.isEmpty) ? null : _oneNameForArtists(artists),
       subTracks:
           (json['sub_tracks'] as List<dynamic>?)?.map<AlbumTrack>((subTrack) => AlbumTrack.fromJson(subTrack)).toList(),
     );
@@ -166,7 +173,7 @@ class AlbumTrack {
 
   final String title;
   final String? position;
-  final String? duration;
+  final int? duration;
   final String? artist;
   final List<AlbumTrack>? subTracks;
 }
@@ -451,11 +458,8 @@ class _Progress {
   }
 }
 
-String _oneNameForArtists(List<dynamic>? artists) {
-  if (artists?.isEmpty ?? true) {
-    return '(unknown)';
-  }
-  return (artists![0]['name'] as String).replaceAllMapped(
+String _oneNameForArtists(List<dynamic> artists) {
+  return (artists[0]['name'] as String).replaceAllMapped(
     RegExp(r'^(.+) \([0-9]+\)$'),
     (m) => m[1]!,
   );

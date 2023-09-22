@@ -32,10 +32,12 @@ Future<void> main() async {
     final collectionFile = createMockFile(() => pages.removeAt(0));
     final albumFile = createMockFile(() => jsonForRelease);
     final albumWithSubtracksFile = createMockFile(() => jsonForReleaseWithSubtracks);
+    final albumWithTwoArtists = createMockFile(() => jsonForReleaseWithTwoArtists);
 
     cache = createMockCacheManager({
       equals('https://api.discogs.com/releases/249504'): (_) => Future<File>.value(albumFile),
       equals('https://api.discogs.com/releases/1287017'): (_) => Future<File>.value(albumWithSubtracksFile),
+      equals('https://api.discogs.com/releases/6895819'): (_) => Future<File>.value(albumWithTwoArtists),
       contains('/collection/folders/0/releases'): (_) {
         expect(collection.isLoading, isTrue);
         expect(collection.isNotLoading, isFalse);
@@ -289,11 +291,39 @@ Future<void> main() async {
       expect(album.title, equals('Never Gonna Give You Up'));
       expect(album.tracks.length, equals(2));
       expect(album.tracks[0].position, equals('A'));
+      expect(album.tracks[0].artist, isNull);
       expect(album.tracks[0].title, equals('Never Gonna Give You Up'));
-      expect(album.tracks[0].duration, equals('3:32'));
+      expect(album.tracks[0].duration, equals(3 * 60 + 32)); // '3:32'
       expect(album.tracks[1].position, equals('B'));
+      expect(album.tracks[1].artist, isNull);
       expect(album.tracks[1].title, equals('Never Gonna Give You Up (Instrumental)'));
-      expect(album.tracks[1].duration, equals('3:30'));
+      expect(album.tracks[1].duration, equals(3 * 60 + 30)); // '3:30'
+      verifyNoMoreCacheOperations();
+    });
+
+    test('loads album details with multiple artists', () async {
+      final album = await collection.loadAlbumDetails(6895819);
+      verifyAlbumRequest(6895819);
+      expect(album.releaseId, equals(6895819));
+      expect(album.artist, equals('Former Ghosts')); // first one picked
+      expect(album.title, equals('Split'));
+      expect(album.tracks.length, equals(4));
+      expect(album.tracks[0].position, equals('A1'));
+      expect(album.tracks[0].artist, equals('Former Ghosts'));
+      expect(album.tracks[0].title, equals('Last Hour\'s Bow'));
+      expect(album.tracks[0].duration, isNull);
+      expect(album.tracks[1].position, equals('A2'));
+      expect(album.tracks[1].artist, equals('Former Ghosts'));
+      expect(album.tracks[1].title, equals('Past Selves'));
+      expect(album.tracks[1].duration, isNull);
+      expect(album.tracks[2].position, equals('B1'));
+      expect(album.tracks[2].artist, equals('Funeral Advantage'));
+      expect(album.tracks[2].title, equals('Wedding'));
+      expect(album.tracks[2].duration, isNull);
+      expect(album.tracks[3].position, equals('B2'));
+      expect(album.tracks[3].artist, equals('Funeral Advantage'));
+      expect(album.tracks[3].title, equals('I Know Him'));
+      expect(album.tracks[3].duration, isNull);
       verifyNoMoreCacheOperations();
     });
 
@@ -306,7 +336,7 @@ Future<void> main() async {
       final track3sub = album.tracks[2].subTracks!;
       expect(track3sub.length, 4);
       expect(track3sub[3].title, 'Feria');
-      expect(track3sub[3].duration, equals('6:25'));
+      expect(track3sub[3].duration, equals(6 * 60 + 25)); // '6:25'
       expect(track3sub[3].position, equals('B3'));
 
       expect(album.tracks[3].subTracks!.length, 3);

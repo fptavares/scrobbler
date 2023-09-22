@@ -40,7 +40,7 @@ final AlbumDetails testAlbumDetails1 = AlbumDetails(
   thumbUrl:
       'https://api-img.discogs.com/kAXVhuZuh_uat5NNr50zMjN7lho=/fit-in/300x300/filters:strip_icc():format(jpeg):mode_rgb()/discogs-images/R-249504-1334592212.jpeg.jpg',
   tracks: [
-    AlbumTrack(title: 'Airbag', duration: '4:44'),
+    AlbumTrack(title: 'Airbag', duration: 4 * 60 + 44), // 4:44
     AlbumTrack(title: 'Paranoid Android', position: 'A2'),
     AlbumTrack(title: 'Subterranean Homesick Alien', subTracks: [
       AlbumTrack(title: 'Exit Music (For A Film)'),
