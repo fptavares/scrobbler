@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bonsoir/bonsoir.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
-import 'package:multicast_dns/multicast_dns.dart';
 import 'package:scrobbler_bluos_monitor/scrobbler_bluos_monitor.dart';
 
 import '../components/error.dart';
@@ -74,20 +74,43 @@ class BluOS extends ChangeNotifier {
 
   Future<List<BluOSPlayer>> lookupBluOSPlayers() async {
     final players = <BluOSPlayer>[];
-    final client = MDnsClient();
+    final discovery = BonsoirDiscovery(type: mdnsName);
+    await discovery.ready;
 
-    _log.info('Starting mDNS scan...');
-    await client.start();
-    await for (final ptr in client.lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(mdnsName))) {
-      _log.info('Found Server Pointer (PTR): ${ptr.name} (${ptr.domainName})');
-      await for (final srv in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(ptr.domainName))) {
-        _log.info('Found Service (SRV): ${srv.name} (${srv.target}:${srv.port})');
-        players
-            .add(BluOSPlayer(ptr.domainName.substring(0, ptr.domainName.indexOf('.$mdnsName')), srv.target, srv.port));
+    final subscription = discovery.eventStream?.listen((event) {
+      // `eventStream` is not null as the discovery instance is "ready" !
+      if (event.type == BonsoirDiscoveryEventType.discoveryServiceFound) {
+        _log.fine('Service found: ${event.service?.toJson()}');
+        //event.service!.resolve(discovery.serviceResolver);
+      } else if (event.type == BonsoirDiscoveryEventType.discoveryServiceResolved) {
+        _log.fine('Service resolved: ${event.service?.toJson()}');
+        final service = event.service as ResolvedBonsoirService?;
+        final serviceIp = service?.ip;
+        if (service != null && serviceIp != null) {
+          players.add(BluOSPlayer(service.name, serviceIp, service.port));
+        }
+      } else if (event.type == BonsoirDiscoveryEventType.discoveryServiceLost) {
+        _log.fine('Service lost: ${event.service?.toJson()}');
       }
+    });
+
+    // Start discovery having listened to discovery events
+    _log.info('Starting BluOS device discovery...');
+    await discovery.start();
+    // wait 5 seconds
+    await Future.delayed(const Duration(seconds: 5));
+    // if no player found, wait another 5 seconds
+    if (players.isEmpty) {
+      _log.info('No players found, trying for another 5 seconds...');
+      await Future.delayed(const Duration(seconds: 5));
     }
-    client.stop();
-    _log.info('Finished mDNS scan');
+
+    // Stop the discovery
+    _log.info('Stopping BluOS device discovery');
+    await subscription?.cancel();
+    await discovery.stop();
+
+    _log.info('Found ${players.length} BluOS devices');
 
     return players;
   }
