@@ -297,6 +297,9 @@ class BluOSMonitorControlState extends State<BluOSMonitorControl> with SingleTic
       _isScanningPlayers = true;
     });
     final players = await handleFutureError(bluos.lookupBluOSPlayers(), _log, trace: 'bluos_discovery');
+
+    if (!mounted) return;
+
     setState(() {
       _isScanningPlayers = false;
       _availablePlayers = players;
