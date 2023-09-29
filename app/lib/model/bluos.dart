@@ -78,12 +78,13 @@ class BluOS extends ChangeNotifier {
     await discovery.ready;
 
     final subscription = discovery.eventStream?.listen((event) {
-      // `eventStream` is not null as the discovery instance is "ready" !
+      // eventStream is not null as the discovery instance is ready
       if (event.type == BonsoirDiscoveryEventType.discoveryServiceFound) {
         _log.fine('Service found: ${event.service?.toJson()}');
-        //event.service!.resolve(discovery.serviceResolver);
+        // only needed in 3.0 -> event.service!.resolve(discovery.serviceResolver);
       } else if (event.type == BonsoirDiscoveryEventType.discoveryServiceResolved) {
         _log.fine('Service resolved: ${event.service?.toJson()}');
+
         final service = event.service as ResolvedBonsoirService?;
         final serviceIp = service?.ip;
         if (service != null && serviceIp != null) {
@@ -101,7 +102,7 @@ class BluOS extends ChangeNotifier {
     await Future.delayed(const Duration(seconds: 5));
     // if no player found, wait another 5 seconds
     if (players.isEmpty) {
-      _log.info('No players found, trying for another 5 seconds...');
+      _log.info('No players found yet, trying for another 5 seconds...');
       await Future.delayed(const Duration(seconds: 5));
     }
 
