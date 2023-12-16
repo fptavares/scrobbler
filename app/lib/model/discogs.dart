@@ -407,7 +407,11 @@ class Collection extends ChangeNotifier {
       throw UIException('Could not connect to Discogs. Please check your internet connection and try again later.', e);
     } on HttpExceptionWithStatus catch (e) {
       // If that response was not OK, throw an error.
-      if (e.statusCode == 404) {
+      if (e.statusCode == 401) {
+        throw UIException('''
+Unfortunatelly your collection is not public, so the app can't access it.\n
+To use this app, please go to discogs.com and change your collection to public.''');
+      } else if (e.statusCode == 404) {
         throw UIException('Oops! Couldn\'t find what you\'re looking for on Discogs (404 error).', e);
       } else if (e.statusCode >= 400) {
         throw UIException('The Discogs service is currently unavailable (${e.statusCode}). Please try again later.', e);

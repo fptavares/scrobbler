@@ -384,10 +384,17 @@ Future<void> main() async {
       await verifyThrows<UIException>(() => collection.loadAlbumDetails(249504));
     });
 
-    test('throws a different UI exception on 404 not found', () async {
+    test('throws a different UI exception on 404 not found and 401 unauthorized', () async {
       setExceptionForMock(const HttpExceptionWithStatus(404, ''));
 
       final exception404 = await verifyThrows<UIException>(() => collection.updateUsername(username));
+      expect(collection.isLoading, isFalse);
+      expect(collection.hasLoadingError, isTrue);
+      expect(collection.errorMessage, isNotNull);
+
+      setExceptionForMock(const HttpExceptionWithStatus(401, ''));
+
+      final exception401 = await verifyThrows<UIException>(() => collection.updateUsername(username));
       expect(collection.isLoading, isFalse);
       expect(collection.hasLoadingError, isTrue);
       expect(collection.errorMessage, isNotNull);
@@ -397,6 +404,8 @@ Future<void> main() async {
       final exception500 = await verifyThrows<UIException>(() => collection.reload());
 
       expect(exception404.message, isNot(equals(exception500.message)));
+      expect(exception401.message, isNot(equals(exception500.message)));
+      expect(exception404.message, isNot(equals(exception401.message)));
     });
 
     test('throws UI exception on network error', () async {
